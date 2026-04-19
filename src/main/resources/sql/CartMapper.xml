@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.vt.cms.model.repository.CartRepository">
+    <resultMap id="CartItemResultMap" type="com.vt.cms.model.entity.Cart">
+        <id column="id" property="id" jdbcType="OTHER"/>
+        <result column="user_id" property="userId" jdbcType="VARCHAR"/>
+
+    </resultMap>
+
+    <insert id="insertCart" parameterType="com.vt.cms.model.entity.Cart"
+            useGeneratedKeys="true"
+            keyProperty="id"
+            keyColumn="id">
+        INSERT INTO cart (user_id)
+        VALUES (#{userId})
+    </insert>
+
+
+    <select id="finByUserId">
+        SELECT *
+        from cart
+        where user_id = (#{userId})
+    </select>
+
+</mapper>
