@@ -40,6 +40,7 @@
         FROM cart_item
         where cart_id = #{cartId}
     </select>
+
     <update id="updateCartItem">
         UPDATE cart_item
         SET quantity      = #{quantity},

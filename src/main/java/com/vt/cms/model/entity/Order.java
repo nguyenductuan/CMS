@@ -4,7 +4,7 @@ import lombok.Data;
 
 @Data
 public class Order {
-    private Long id;
+    private Integer id;
     private Double total;
 
 }

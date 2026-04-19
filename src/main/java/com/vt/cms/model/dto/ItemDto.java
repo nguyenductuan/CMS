@@ -6,10 +6,10 @@ import lombok.Data;
 @Data
 public class ItemDto {
     @JsonProperty("product_id")
-    private String productId;
+    private int productId;
     @JsonProperty("product_name")
     private String productName;
-    private Double price;
+    private int price;
     private int quantity;
     private int stock;
 

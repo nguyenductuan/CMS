@@ -9,6 +9,6 @@ public class CartItem {
     private int productId;
     private Integer quantity;
     private String productName;
-    private Double productPrice;
+    private int productPrice;
 //    private Cart cart;
 }

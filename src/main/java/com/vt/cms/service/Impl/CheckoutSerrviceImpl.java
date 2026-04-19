@@ -67,8 +67,8 @@ public class CheckoutSerrviceImpl implements CheckoutService {
 
             shippingDTOList.add(dto);
         }
-// 5. Chọn shipping mặc định (ví dụ: cái đầu tiên)
-        int shippingFee = shippingDTOList.isEmpty() ? 0 : shippingDTOList.get(0).getFinalFee();
+        // 5. Chọn shipping mặc định (ví dụ: cái đầu tiên)
+        int shippingFee = shippingDTOList.isEmpty() ? 0 : shippingDTOList.get(0).getOriginalFee();
         // 6. Tổng tiền = tiền đơn hàng + phí ship
         double total = totalPrice + shippingFee;
         // build response

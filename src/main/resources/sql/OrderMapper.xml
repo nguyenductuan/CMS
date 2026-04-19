@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.vt.cms.model.repository.OrderRepository">
+    <resultMap id="OrderResultMap" type="com.vt.cms.model.entity.Order">
+        <id column="id" property="id" jdbcType="OTHER"/>
+        <result column="total" property="total" jdbcType="OTHER"/>
+
+    </resultMap>
+
+    <insert id="insertorder" parameterType="com.vt.cms.model.entity.Order"
+            useGeneratedKeys="true"
+            keyProperty="id">
+        INSERT INTO orders (total)
+        VALUES (#{total})
+    </insert>
+
+</mapper>

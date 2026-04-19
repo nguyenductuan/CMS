@@ -10,9 +10,15 @@
     </resultMap>
 
     <select id="getShipping" resultMap="ShippingResultMap">
-        SELECT * FROM shipping
+        SELECT *
+        FROM shipping
     </select>
-
+    
+    <select id="detailShipping" resultMap="ShippingResultMap">
+        SELECT *
+        FROM shipping
+        where service_code = #{servicecode}
+    </select>
 
 
 </mapper>
