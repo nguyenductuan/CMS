@@ -30,23 +30,8 @@ public class CheckoutSerrviceImpl implements CheckoutService {
         double totalPrice = 0;
         //       1. Xử lý từng imtem trong request
         for (ItemRequest itemRequest : request.getItems()) {
+            Product product = productRepository.detailProduct(itemRequest.getProductId());
 
-//            // 1. Lấy danh sách productId
-//            List<Long> ids = request.getItems().stream()
-//                    .map(ItemRequest::getProductId)
-//                    .toList();
-//
-//            // 2. Query DB 1 lần
-//            List<Product> products = productMapper.findByIds(ids);
-//
-//            Map<Long, Product> productMap = products.stream()
-//                    .collect(Collectors.toMap(Product::getId, p -> p));
-//            2. Lấy ra thông tin Product t DB, fake thông tin DB
-            Product product = new Product();
-            product.setId("1");
-            product.setName("Ti vi");
-            product.setPrice(1000000.00);
-            product.setStock(100);
 //            2.1. Check khi thông tin product không tồn tại
             if (product == null) {
                 throw new RuntimeException("Sản phẩm không tồn tại");
@@ -54,9 +39,7 @@ public class CheckoutSerrviceImpl implements CheckoutService {
 //                    2.2. Check tồn kho
             if (itemRequest.getQuantity() > product.getStock()) {
                 throw new RuntimeException("Sản phẩm hết hàng");
-
             }
-
             // mapping sang DTO
             ItemDto itemDTO = new ItemDto();
             itemDTO.setProductId(product.getId());
@@ -64,14 +47,12 @@ public class CheckoutSerrviceImpl implements CheckoutService {
             itemDTO.setPrice(product.getPrice());
             itemDTO.setQuantity(itemRequest.getQuantity());
             itemDTO.setStock(product.getStock());
-
             // tính tổng tiền đơn hàng  totalPrice
             double subtotal = product.getPrice() * itemRequest.getQuantity();
             totalPrice += subtotal;
 
             itemDtos.add(itemDTO);
         }
-
         //  lấy shipping methods
         List<Shipping> shippingList = shippingService.getShipping();
 
@@ -83,15 +64,6 @@ public class CheckoutSerrviceImpl implements CheckoutService {
             dto.setName(s.getServicename());
             dto.setEstimatedDelivery("2-3 ngày");
             dto.setOriginalFee(s.getFee());
-
-//            // free ship nếu >= 100k
-//            if (totalPrice >= 100000) {
-//                dto.setFinalFee(0);
-//                dto.setFreeShippingApplied(true);
-//            } else {
-//                dto.setFinalFee(s.getFee());
-//                dto.setFreeShippingApplied(false);
-//            }
 
             shippingDTOList.add(dto);
         }

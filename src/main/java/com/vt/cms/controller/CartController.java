@@ -1,6 +1,7 @@
 package com.vt.cms.controller;
 
 import com.vt.cms.model.dto.AddCartRequest;
+import com.vt.cms.model.dto.DeleteRequest;
 import com.vt.cms.model.entity.CartItem;
 import com.vt.cms.model.resp.APIRessponse;
 import com.vt.cms.model.resp.BaseResponse;
@@ -42,13 +43,12 @@ public class CartController {
     }
 
     //    Xóa sp trong cart
-    @DeleteMapping("delete/{userid}/{productid}")
-    public ResponseEntity<APIRessponse> DeleteProductAndCart(int id, int userId) {
-        cartService.deleteproductAndCart(id, userId);
+    @DeleteMapping("delete")
+    public ResponseEntity<APIRessponse> DeleteProductAndCart(@RequestBody DeleteRequest request) {
+        cartService.deleteproductAndCart(request);
+
         return ResponseEntity.ok(
-                new APIRessponse(200, "Xóa sản phẩm khỏi giỏ hàng thành công")
+                new APIRessponse(200, "Xóa sản phẩm không giỏ hàng thành công")
         );
     }
-//    Update số lượng sp trong giỏ hàng
-    
 }

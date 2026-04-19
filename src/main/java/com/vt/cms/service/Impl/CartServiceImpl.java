@@ -2,6 +2,7 @@ package com.vt.cms.service.Impl;
 
 import com.vt.cms.mapper.Modelmapper;
 import com.vt.cms.model.dto.AddCartRequest;
+import com.vt.cms.model.dto.DeleteRequest;
 import com.vt.cms.model.entity.Cart;
 import com.vt.cms.model.entity.CartItem;
 import com.vt.cms.model.entity.Product;
@@ -35,14 +36,19 @@ public class CartServiceImpl implements CartService {
         return cartItemRepository.finByCartId(cart.getId());
     }
 
-    public void deleteproductAndCart(int productId, int userId) {
-        List<CartItem> cartItems = getcart(userId);
-
+    public int deleteproductAndCart(DeleteRequest request) {
+        List<CartItem> cartItems = getcart(request.getUserid());
+        int count = 0;
         for (CartItem cartItem : cartItems) {
-            if (cartItem.getProductId() == productId) {
-                cartItemRepository.deleteproductCart(productId, cartItem.getCartId());
+            if (request.getProductids() != null &&
+                    request.getProductids().contains(cartItem.getProductId())) {
+                cartItemRepository.deleteproductCart(
+                        request.getProductids(),
+                        cartItem.getCartId());
             }
+            count++;
         }
+        return count;
     }
 
     public int CountCartById(int userId) {
@@ -82,6 +88,7 @@ public class CartServiceImpl implements CartService {
             exitcartItem.setQuantity(exitcartItem.getQuantity() + request.getQuantity());
             cartItemRepository.updateCartItem(exitcartItem);
         }
+//       Trừ stock của sản phẩm
 
     }
 }

@@ -47,10 +47,12 @@
             product_price = #{productPrice}
         WHERE id = #{id}
     </update>
-    <delete id="deleteproductCart" parameterType="int">
-        DELETE
-        FROM cart_item
-        WHERE product_id = #{productId}
-          and cart_id = #{cartId}
+    <delete id="deleteproductCart">
+        DELETE FROM cart_item
+        WHERE cart_id = #{cartId}
+        AND product_id IN
+        <foreach item="id" collection="productIds" open="(" separator="," close=")">
+            #{id}
+        </foreach>
     </delete>
 </mapper>

@@ -1,6 +1,7 @@
 package com.vt.cms.service;
 
 import com.vt.cms.model.dto.AddCartRequest;
+import com.vt.cms.model.dto.DeleteRequest;
 import com.vt.cms.model.entity.CartItem;
 
 import java.util.List;
@@ -12,5 +13,5 @@ public interface CartService {
 
     int CountCartById(int userId);
 
-    void deleteproductAndCart(int productId, int userId);
+    int deleteproductAndCart(DeleteRequest request);
 }

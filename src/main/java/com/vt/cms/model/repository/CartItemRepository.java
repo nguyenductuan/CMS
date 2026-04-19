@@ -15,5 +15,5 @@ public interface CartItemRepository {
 
     List<CartItem> finByCartId(int cartId);
 
-    int deleteproductCart(int productId, int cartId);
+    int deleteproductCart(List<Integer> productIds, Integer cartId);
 }
