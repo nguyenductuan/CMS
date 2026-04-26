@@ -7,5 +7,7 @@ public interface OrderService {
     void createOrder(OrderRequest request);
 
     Order getdetailorder(int id);
-    
+
+    void cancelOrder(int orderId);
+
 }

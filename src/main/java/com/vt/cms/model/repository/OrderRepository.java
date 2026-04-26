@@ -10,4 +10,6 @@ public interface OrderRepository {
     Order getdetailById(int id);
 
     void save(Order order);
+
+    void cancelOrder(Order order);
 }

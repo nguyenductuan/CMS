@@ -16,6 +16,8 @@ import com.vt.cms.service.OrderService;
 import org.mapstruct.factory.Mappers;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
+
 @Service
 
 public class OrderServiceImpl implements OrderService {
@@ -39,6 +41,14 @@ public class OrderServiceImpl implements OrderService {
     public Order getdetailorder(int id) {
         return modelMapper.convertOrder(orderRepository.getdetailById(id));
 
+    }
+
+    @Override
+    public void cancelOrder(int orderId) {
+        Order order = orderRepository.getdetailById(orderId);
+        order.setStatus(OrderStatus.CANCELLED);
+        order.setCancelAt(LocalDateTime.now());
+        orderRepository.cancelOrder(order);
     }
 
 

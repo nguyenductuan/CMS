@@ -7,6 +7,7 @@
         <result column="total" property="total" jdbcType="OTHER"/>
         <result column="status" property="status" jdbcType="OTHER"/>
         <result column="deliveredAt" property="deliveredAt" jdbcType="OTHER"/>
+        <result column="cancelAt" property="cancelAt" jdbcType="OTHER"/>
     </resultMap>
 
     <insert id="insertorder" parameterType="com.vt.cms.model.entity.Order"
@@ -26,7 +27,12 @@
         UPDATE orders
         SET status      = #{status},
             deliveredAt = #{deliveredAt}
-
+        WHERE id = #{id}
+    </update>
+    <update id="cancelOrder">
+        UPDATE orders
+        SET status   = #{status},
+            cancelAt = #{cancelAt}
         WHERE id = #{id}
     </update>
 </mapper>

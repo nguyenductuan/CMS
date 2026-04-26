@@ -14,6 +14,7 @@ public class Order {
     private OrderStatus paymentStatus;
     private LocalDateTime createdAt;
     private LocalDateTime deliveredAt;
+    private LocalDateTime cancelAt;
     @Enumerated(EnumType.STRING)
     private OrderStatus status;
 

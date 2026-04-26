@@ -23,6 +23,12 @@ public class OrderController {
         return ResponseEntity.ok(new APIRessponse(200, "Order Created"));
     }
 
+    @PostMapping("cancelorder/{orderId}")
+    public ResponseEntity<APIRessponse> cancelorder(@PathVariable Integer orderId) {
+        orderService.cancelOrder(orderId);
+        return ResponseEntity.ok(new APIRessponse(200, "Hủy đơn hàng thành công"));
+    }
+
     @GetMapping("/order/{id}")
     public BaseResponse<Order> order(@PathVariable int id) {
         return BaseResponse.of(orderService.getdetailorder(id));
@@ -32,10 +38,9 @@ public class OrderController {
     //3. Viết job cập nhật trạng thái đn hàng sau 1 ngày(viết bảng còfig thời gian này)
     //4. Viết API thêm mới sản phẩm
     //5. Cập nhật kho khi thanh toán than công
-    //6. Cộng lại kho khi hủy ơn hàng
+    //6. Cộng lại kho khi hủy đơn hàng
     //Viêt chức năng đánh giá sản phẩm
     //Viết chức năng like, coment
     //Viết API hành trình đơn hàng
-    //Viết API
 
 }
