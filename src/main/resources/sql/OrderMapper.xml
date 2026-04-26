@@ -11,8 +11,20 @@
     <insert id="insertorder" parameterType="com.vt.cms.model.entity.Order"
             useGeneratedKeys="true"
             keyProperty="id">
-        INSERT INTO orders (total)
-        VALUES (#{total})
+        INSERT INTO orders (total, status)
+        VALUES (#{total}, #{status})
     </insert>
 
+    <select id="getdetailById">
+        SELECT *
+        from orders
+        where id = (#{id})
+    </select>
+
+    <update id="save">
+        UPDATE orders
+        SET status = #{status}
+
+        WHERE id = #{id}
+    </update>
 </mapper>

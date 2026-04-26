@@ -1,9 +1,6 @@
 package com.vt.cms.mapper;
 
-import com.vt.cms.model.entity.Cart;
-import com.vt.cms.model.entity.Product;
-import com.vt.cms.model.entity.Shipping;
-import com.vt.cms.model.entity.User;
+import com.vt.cms.model.entity.*;
 import com.vt.cms.model.resp.CartResponse;
 import com.vt.cms.model.resp.ProductResponse;
 import com.vt.cms.model.resp.ShippingResponse;
@@ -26,5 +23,7 @@ public interface Modelmapper {
     ProductResponse convertProduct(Product product);
 
     ShippingResponse convertShippingId(Shipping shipping);
+
+    Order convertOrder(Order order);
 
 }

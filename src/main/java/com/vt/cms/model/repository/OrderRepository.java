@@ -6,4 +6,8 @@ import org.apache.ibatis.annotations.Mapper;
 @Mapper
 public interface OrderRepository {
     int insertorder(Order order);
+
+    Order getdetailById(int id);
+
+    void save(Order order);
 }

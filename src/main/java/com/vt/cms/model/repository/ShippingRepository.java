@@ -10,4 +10,6 @@ public interface ShippingRepository {
     Shipping detailShipping(String id);
 
     List<Shipping> getShipping();
+
+
 }

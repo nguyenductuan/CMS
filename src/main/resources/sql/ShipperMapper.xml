@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.vt.cms.model.repository.ShiperRepository">
+    <resultMap id="ShipperResultMap" type="com.vt.cms.model.entity.Shipper">
+        <id column="id" property="id" jdbcType="OTHER"/>
+        <result column="name" property="name" jdbcType="VARCHAR"/>
+        <result column="status" property="status" jdbcType="OTHER"/>
+    </resultMap>
+
+    <select id="getlistShipper" resultMap="ShipperResultMap">
+        SELECT *
+        FROM shippers
+        where status = 'AVAILABLE' limit 1;
+    </select>
+
+    <insert id="saveshiper" parameterType="com.vt.cms.model.entity.Shipper"
+            useGeneratedKeys="true"
+            keyProperty="id">
+        INSERT INTO shippers (name, status)
+        VALUES (#{name}, #{status})
+    </insert>
+
+
+</mapper>

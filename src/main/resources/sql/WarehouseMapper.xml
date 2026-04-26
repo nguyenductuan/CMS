@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.vt.cms.model.repository.WarehouseRepository">
+    <resultMap id="OrderResultMap" type="com.vt.cms.model.entity.Warehouse">
+        <id column="id" property="id" jdbcType="OTHER"/>
+        <result column="warehousecode" property="warehousecode" jdbcType="OTHER"/>
+        <result column="warehousename" property="warehousename" jdbcType="OTHER"/>
+
+    </resultMap>
+
+    <select id="getlistwahouse">
+        SELECT *
+        from warehouse
+    </select>
+</mapper>

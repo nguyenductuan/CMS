@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.vt.cms.model.repository.ShipmentRepository">
+    <resultMap id="ShipmentResultMap" type="com.vt.cms.model.entity.Shipment">
+        <id column="id" property="id" jdbcType="OTHER"/>
+        <result column="orderId" property="orderId" jdbcType="OTHER"/>
+        <result column="trackingcode" property="trackingCode" jdbcType="VARCHAR"/>
+        <result column="shipper_id" property="shipperId" jdbcType="OTHER"/>
+        <result column="status" property="status" jdbcType="VARCHAR"/>
+        <result column="estimatedDeliveryTime" property="estimatedDeliveryTime" jdbcType="OTHER"/>
+        <result column="created_at" property="createdAt" jdbcType="OTHER"/>
+        <result column="warehouse_name" property="warehouseName" jdbcType="OTHER"/>
+    </resultMap>
+
+
+    <insert id="saveshipment" parameterType="com.vt.cms.model.entity.Shipment"
+            useGeneratedKeys="true"
+            keyProperty="id">
+        INSERT INTO shipment (orderId, trackingcode, status, warehouse_name, shipper_id)
+        VALUES (#{orderId}, #{trackingCode}, #{status}, #{warehouseName}, #{shipperId})
+    </insert>
+
+
+    <select id="getShipmentByTrackingcode" resultMap="ShipmentResultMap">
+        SELECT *
+        FROM shipment
+        where trackingcode = #{trackingCode};
+    </select>
+</mapper>

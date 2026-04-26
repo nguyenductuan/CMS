@@ -7,6 +7,7 @@ import com.vt.cms.model.entity.Order;
 import com.vt.cms.model.entity.OrderItem;
 import com.vt.cms.model.entity.Product;
 import com.vt.cms.model.entity.Shipping;
+import com.vt.cms.model.enums.OrderStatus;
 import com.vt.cms.model.repository.OrderItemRepository;
 import com.vt.cms.model.repository.OrderRepository;
 import com.vt.cms.model.repository.ProductRepository;
@@ -35,6 +36,12 @@ public class OrderServiceImpl implements OrderService {
 
     }
 
+    public Order getdetailorder(int id) {
+        return modelMapper.convertOrder(orderRepository.getdetailById(id));
+
+    }
+
+
     @Override
     public void createOrder(OrderRequest request) {
 //        1. Tính tiền
@@ -55,6 +62,7 @@ public class OrderServiceImpl implements OrderService {
 //        2. Tạo order
         Order order = new Order();
         order.setTotal(total);
+        order.setStatus(OrderStatus.PENDING);
         orderRepository.insertorder(order);
         var orderid = order.getId();
         for (OrderItemRequest orderItemRequest : request.getOrderItems()) {
