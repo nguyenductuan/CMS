@@ -82,7 +82,18 @@ public class DeliveryServiceImpl implements DeliveryService {
 
     @Override
     public void shipeperdelivery(int orderid) {
+        //Không cập nhật trạng thái đơn hàng cần user bấm xác nhận
+        System.out.println("Shipper delivered but waiting user confirm");
+    }
 
+    @Override
+    public Order confirmReceived(int orderid) {
+        //Set status DELIVERED, set thời gian nhận hàng
+        Order order = orderRepository.getdetailById(orderid);
+        order.setStatus(OrderStatus.DELIVERED);
+        order.setDeliveredAt(LocalDateTime.now());
+        orderRepository.save(order);
+        return order;
     }
 
     //hàm sinh mã vâ đơn

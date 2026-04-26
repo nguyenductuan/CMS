@@ -17,8 +17,10 @@
     <insert id="saveshipment" parameterType="com.vt.cms.model.entity.Shipment"
             useGeneratedKeys="true"
             keyProperty="id">
-        INSERT INTO shipment (orderId, trackingcode, status, warehouse_name, shipper_id)
-        VALUES (#{orderId}, #{trackingCode}, #{status}, #{warehouseName}, #{shipperId})
+        INSERT INTO shipment (orderId, trackingcode, status, warehouse_name, shipper_id, created_at,
+                              estimatedDeliveryTime)
+        VALUES (#{orderId}, #{trackingCode}, #{status}, #{warehouseName}, #{shipperId}, #{createdAt},
+                #{estimatedDeliveryTime})
     </insert>
 
 

@@ -1,10 +1,7 @@
 package com.vt.cms.controller;
 
 import com.vt.cms.service.DeliveryService;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping
@@ -28,8 +25,8 @@ public class DeliveryController {
     }
 
     //4. Shipper giao xong
-    @PostMapping("shipper_done/{orderid}")
-    public void shipperDone(@PathVariable Integer orderid) {
+    @PostMapping("shipper_done")
+    public void shipperDone(@RequestParam Integer orderid) {
         deliveryService.shipeperdelivery(orderid);
     }
 }
