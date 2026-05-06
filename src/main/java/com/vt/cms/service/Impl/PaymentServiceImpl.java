@@ -1,9 +1,8 @@
 package com.vt.cms.service.Impl;
 
 import com.vt.cms.model.dto.PaymentRequest;
-import com.vt.cms.model.entity.Order;
-import com.vt.cms.model.enums.OrderStatus;
 import com.vt.cms.model.repository.OrderRepository;
+import com.vt.cms.model.resp.OrderResponse;
 import com.vt.cms.service.OrderService;
 import com.vt.cms.service.PaymentService;
 import org.springframework.stereotype.Service;
@@ -22,18 +21,18 @@ public class PaymentServiceImpl implements PaymentService {
     @Override
     public void ProcessPayment(PaymentRequest paymentRequest) {
         //1. Lấy ra trạng thái của order
-        Order order = orderService.getdetailorder(paymentRequest.getOrderId());
+        OrderResponse order = orderService.getdetailorder(paymentRequest.getOrderId());
         if (order == null) {
             throw new RuntimeException("Không tìm thấy order");
         }
         if (paymentRequest.getResult().equals("success")) {
-            order.setStatus(OrderStatus.CONFIRMED);
-            order.setPaymentStatus(OrderStatus.WAITING_FOR_DELIVERY);
-            orderRepository.save(order);
+            //order.setStatus(OrderStatus.CONFIRMED);
+//            order.setPaymentStatus(OrderStatus.WAITING_FOR_DELIVERY);
+//            orderRepository.save(order);
 
         } else {
-            order.setStatus(OrderStatus.FAILED);
-            orderRepository.save(order);
+            //order.setStatus(OrderStatus.FAILED);
+//            orderRepository.save(order);
         }
 
 

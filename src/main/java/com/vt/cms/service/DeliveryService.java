@@ -1,7 +1,7 @@
 package com.vt.cms.service;
 
-import com.vt.cms.model.entity.Order;
 import com.vt.cms.model.entity.Shipment;
+import com.vt.cms.model.resp.OrderResponse;
 
 public interface DeliveryService {
     Shipment prepare(Integer orderid, Integer warehousecode);
@@ -10,5 +10,5 @@ public interface DeliveryService {
 
     void shipeperdelivery(int orderid);
 
-    Order confirmReceived(int orderid);
+    OrderResponse confirmReceived(int orderid);
 }

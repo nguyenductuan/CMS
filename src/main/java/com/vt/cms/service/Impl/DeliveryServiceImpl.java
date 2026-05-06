@@ -6,6 +6,7 @@ import com.vt.cms.model.entity.Shipper;
 import com.vt.cms.model.entity.Warehouse;
 import com.vt.cms.model.enums.OrderStatus;
 import com.vt.cms.model.repository.*;
+import com.vt.cms.model.resp.OrderResponse;
 import com.vt.cms.service.DeliveryService;
 import org.springframework.stereotype.Service;
 
@@ -18,16 +19,19 @@ public class DeliveryServiceImpl implements DeliveryService {
     OrderRepository orderRepository;
     ShippingRepository shippingRepository;
     ShipmentRepository shipmentRepository;
+    OrderStatusHistoryRepository orderstatusHistory;
     ShiperRepository shiperRepository;
 
     public DeliveryServiceImpl(WarehouseRepository warehouseRepository,
                                OrderRepository orderRepository,
                                ShippingRepository shippingRepository,
+                               OrderStatusHistoryRepository orderstatusHistory,
                                ShipmentRepository shipmentRepository,
                                ShiperRepository shiperRepository) {
         this.warehouseRepository = warehouseRepository;
         this.orderRepository = orderRepository;
         this.shippingRepository = shippingRepository;
+        this.orderstatusHistory = orderstatusHistory;
         this.shipmentRepository = shipmentRepository;
         this.shiperRepository = shiperRepository;
     }
@@ -46,16 +50,22 @@ public class DeliveryServiceImpl implements DeliveryService {
         shipment.setOrderId(orderid);
         shipment.setWarehouseName(warehouse1.getWarehouseName());
         shipment.setTrackingCode(genTracking());
-        shipment.setStatus("READY");
+        shipment.setStatus("WAIT_SHIPPING");
         shipment.setCreatedAt(LocalDateTime.now());
         //Lưu shipment
         shipmentRepository.saveshipment(shipment);
         //Lưu order
-        Order order = orderRepository.getdetailById(orderid);
-        order.setStatus(OrderStatus.PREPARING);
+
+        Order order1 = new Order();
+        order1.setId(orderid);
+        order1.setStatus(OrderStatus.PREPARING);
         //Lưu order
-        orderRepository.save(order);
-        return shipment;//response trả ra thông tin trackingcode
+        orderRepository.save(order1);
+
+        // Gán thông tin vào bảng statushistory
+        OrderResponse order = orderRepository.getorderbyid(orderid);
+        orderstatusHistory.insertorderByStatus(orderid, order.getOrderStatus());
+        return shipment;
     }
 
     @Override
@@ -66,17 +76,16 @@ public class DeliveryServiceImpl implements DeliveryService {
         //order set status thành DELIVERING
         Shipper shipper = shiperRepository.getlistShipper();
         Shipment shipment = shipmentRepository.getShipmentByTrackingcode(trackingcode);
-
         shipment.setShipperId(shipper.getId());
-        shipment.setEstimatedDeliveryTime(getEstimatedDeliveryTime());// lỗi không lấy được thời gian giao dự kiến
+        shipment.setEstimatedDeliveryTime(getEstimatedDeliveryTime());
         shipment.setStatus("DELIVERING");
         shipper.setStatus("BUSY");
         shipmentRepository.saveshipment(shipment);
         shiperRepository.saveshiper(shipper);
 
-        Order order = orderRepository.getdetailById(shipment.getOrderId());
-        order.setStatus(OrderStatus.SHIPPING);
-        orderRepository.save(order);
+        //OrderResponse order = orderRepository.getdetailById(shipment.getOrderId());
+        //order.setStatus(OrderStatus.SHIPPING);
+        // orderRepository.save(order);
         return shipment;
     }
 
@@ -87,12 +96,13 @@ public class DeliveryServiceImpl implements DeliveryService {
     }
 
     @Override
-    public Order confirmReceived(int orderid) {
+    public OrderResponse confirmReceived(int orderid) {
         //Set status DELIVERED, set thời gian nhận hàng
-        Order order = orderRepository.getdetailById(orderid);
-        order.setStatus(OrderStatus.DELIVERED);
-        order.setDeliveredAt(LocalDateTime.now());
-        orderRepository.save(order);
+        OrderResponse order = orderRepository.getorderbyid(orderid);
+        //OrderResponse order = orderRepository.getdetailById(orderid);
+        // order.setStatus(OrderStatus.DELIVERED);
+        // order.setDeliveredAt(LocalDateTime.now());
+//       / orderRepository.save(order);
         return order;
     }
 
@@ -101,7 +111,7 @@ public class DeliveryServiceImpl implements DeliveryService {
         return "VTP" + System.currentTimeMillis();
     }
 
-    //Hàm tính thời gian giao d kiến
+    //Hàm tính thời gian giao dự kiến
     public LocalDateTime getEstimatedDeliveryTime() {
         return LocalDateTime.now().plusDays(2);
     }

@@ -16,4 +16,8 @@
         where id = #{id}
     </select>
 
+    <select id="listproduct" resultMap="ProductResultMap">
+        SELECT *
+        FROM product
+    </select>
 </mapper>

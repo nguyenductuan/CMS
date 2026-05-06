@@ -1,6 +1,8 @@
 package com.vt.cms.controller;
 
+import com.vt.cms.model.resp.APIRessponse;
 import com.vt.cms.service.DeliveryService;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -14,8 +16,11 @@ public class DeliveryController {
 
     //1. Gán kho hàng -> cập nhật trạng thái thành Đã chuẩn bị hàng
     @PostMapping("prepare/{orderid}")
-    public void prepare(@PathVariable Integer orderid, Integer warehousecode) {
+    public ResponseEntity<APIRessponse> prepare(@PathVariable Integer orderid, Integer warehousecode) {
         deliveryService.prepare(orderid, warehousecode);
+        return ResponseEntity.ok(
+                new APIRessponse(200, "Thành công")
+        );
     }
 
     //2.  Asgin cho shipper

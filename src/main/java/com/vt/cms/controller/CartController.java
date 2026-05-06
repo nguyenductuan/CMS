@@ -32,7 +32,6 @@ public class CartController {
     //    Lấy danh sách item trong cart
     @GetMapping("list/{userId}")
     public BaseResponse<List<CartItem>> ListcartController(@PathVariable("userId") int userId) {
-
         return BaseResponse.of(cartService.getcart(userId));
     }
 

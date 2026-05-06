@@ -6,6 +6,7 @@ import jakarta.persistence.Enumerated;
 import lombok.Data;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Data
 public class Order {
@@ -17,5 +18,6 @@ public class Order {
     private LocalDateTime cancelAt;
     @Enumerated(EnumType.STRING)
     private OrderStatus status;
+    private List<OrderItem> orderItems;
 
 }

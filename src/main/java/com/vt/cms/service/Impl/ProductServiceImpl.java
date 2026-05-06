@@ -9,6 +9,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.mapstruct.factory.Mappers;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 @Service
 @RequiredArgsConstructor
 @Slf4j
@@ -24,5 +26,10 @@ public class ProductServiceImpl implements ProductService {
                 (productRepository.detailProduct(id)
                 )
         );
+    }
+
+    @Override
+    public List<ProductResponse> listproduct() {
+        return productRepository.listproduct();
     }
 }
