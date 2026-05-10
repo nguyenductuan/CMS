@@ -9,13 +9,16 @@
         <result column="deliveredAt" property="deliveredAt" jdbcType="OTHER"/>
         <result column="cancelAt" property="cancelAt" jdbcType="OTHER"/>
         <result column="created_at" property="createdAt" jdbcType="OTHER"/>
+        <result column="expected_delivery" property="expectedDelivery" jdbcType="OTHER"/>
+
+
     </resultMap>
 
     <insert id="insertorder" parameterType="com.vt.cms.model.entity.Order"
             useGeneratedKeys="true"
             keyProperty="id">
-        INSERT INTO orders (total, status, created_at)
-        VALUES (#{total}, #{status}, #{createdAt})
+        INSERT INTO orders (total, status, created_at, expected_delivery)
+        VALUES (#{total}, #{status}, #{createdAt}, #{expectedDelivery})
     </insert>
 
     <select id="getdetailById"
@@ -44,10 +47,11 @@
     </update>
 
     <select id="getorderbyid" resultType="com.vt.cms.model.resp.OrderResponse">
-        SELECT id         as orderid,
-               total      as total,
-               created_at as ordercreated,
-               status     as orderStatus
+        SELECT id                as orderid,
+               status            as orderStatus,
+               total             as total,
+               created_at        as ordercreated,
+               expected_delivery as expectedDelivery
         FROM orders
         WHERE id = #{orderId}
     </select>

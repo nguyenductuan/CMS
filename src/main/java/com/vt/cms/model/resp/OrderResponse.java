@@ -13,5 +13,6 @@ public class OrderResponse {
     private OrderStatus OrderStatus;
     private LocalDateTime ordercreated;
     private LocalDateTime deliveredAt;
+    private LocalDateTime expected_delivery;
     private List<OrderItemResponse> orderItems;
 }

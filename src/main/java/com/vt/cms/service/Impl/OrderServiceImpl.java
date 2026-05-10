@@ -92,8 +92,9 @@ public class OrderServiceImpl implements OrderService {
 //       2. Tạo order
         Order order = new Order();
         order.setTotal(total);
-        order.setStatus(OrderStatus.PENDING);
+        order.setStatus(OrderStatus.WAIT_PAYMENT);
         order.setCreatedAt(LocalDateTime.now());
+        order.setExpectedDelivery(getEstimatedDeliveryTime());
         orderRepository.insertorder(order);
         var orderid = order.getId();
         // Insert thêm bản ghi vào OrderHistory
@@ -103,5 +104,9 @@ public class OrderServiceImpl implements OrderService {
             o.setOrderId(orderid);
             orderItemRepository.insertorderCartItem(o);
         }
+    }
+
+    public LocalDateTime getEstimatedDeliveryTime() {
+        return LocalDateTime.now().plusDays(2);
     }
 }

@@ -1,7 +1,7 @@
 package com.vt.cms.model.enums;
 
 public enum OrderStatus {
-    PENDING("PENDING", "Chờ xác nhận"),
+    WAIT_PAYMENT("WAIT_PAYMENT", "Chờ thanh toán"),
     CONFIRMED("CONFIRMED", "Đã thanh toán"),
     WAITING_FOR_DELIVERY(" WAITING_FOR_DELIVERY", "Chờ chuẩn bị lấy hàng"),
     PREPARING(" PREPARING", "Đã chuẩn bị hàng"),

@@ -19,5 +19,6 @@ public class Order {
     @Enumerated(EnumType.STRING)
     private OrderStatus status;
     private List<OrderItem> orderItems;
+    private LocalDateTime expectedDelivery;
 
 }
