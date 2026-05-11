@@ -6,5 +6,5 @@ import org.apache.ibatis.annotations.Mapper;
 
 @Mapper
 public interface OrderStatusHistoryRepository {
-    int insertorderByStatus(Integer orderId, OrderStatus status);
+    int insertorderByStatus(Integer orderId, OrderStatus status, String title);
 }

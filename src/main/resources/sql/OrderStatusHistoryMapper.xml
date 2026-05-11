@@ -5,11 +5,12 @@
         <id column="id" property="id" jdbcType="OTHER"/>
         <result column="order_id" property="orderId" jdbcType="OTHER"/>
         <result column="status" property="status" jdbcType="OTHER"/>
+        <result column="title" property="title" jdbcType="OTHER"/>
 
     </resultMap>
     <insert id="insertorderByStatus" parameterType="com.vt.cms.model.entity.OrderstatusHistory"
     >
-        INSERT INTO order_history (order_id, status)
-        VALUES (#{orderId}, #{status})
+        INSERT INTO order_history (order_id, status, title)
+        VALUES (#{orderId}, #{status}, #{title})
     </insert>
 </mapper>

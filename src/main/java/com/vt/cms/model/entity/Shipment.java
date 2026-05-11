@@ -14,6 +14,7 @@ public class Shipment {
     private String trackingCode; // mã vận đơn
     private LocalDateTime createdAt;
     private Integer shipperId;
+    private String title;
     private LocalDateTime estimatedDeliveryTime; //thời gian giao dự kiến trả từ API vận chuyển
     private LocalDateTime shippedAt;//Thời điểm đơn hàng bắt đầu được giao (Kho → Shipper nhận hàng → bắt đầu đi giao)
     private LocalDateTime deliveredAt;//Thời điểm đơn hàng giao thành công (user nhận hàng) (Shipper giao → User bấm "Đã nhận hàng")

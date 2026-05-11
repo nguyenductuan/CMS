@@ -52,6 +52,8 @@ public class DeliveryServiceImpl implements DeliveryService {
         shipment.setTrackingCode(genTracking());
         shipment.setStatus("WAIT_SHIPPING");
         shipment.setCreatedAt(LocalDateTime.now());
+
+        // shipment.setEstimatedDeliveryTime(getEstimatedDeliveryTime());
         //Lưu shipment
         shipmentRepository.saveshipment(shipment);
         //Lưu order
@@ -64,7 +66,9 @@ public class DeliveryServiceImpl implements DeliveryService {
 
         // Gán thông tin vào bảng statushistory
         OrderResponse order = orderRepository.getorderbyid(orderid);
-        orderstatusHistory.insertorderByStatus(orderid, order.getOrderStatus());
+        String title = "Chẩn bị hàng";
+
+        orderstatusHistory.insertorderByStatus(orderid, order.getOrderStatus(), title);
         return shipment;
     }
 
@@ -78,20 +82,30 @@ public class DeliveryServiceImpl implements DeliveryService {
         Shipment shipment = shipmentRepository.getShipmentByTrackingcode(trackingcode);
         shipment.setShipperId(shipper.getId());
         shipment.setEstimatedDeliveryTime(getEstimatedDeliveryTime());
-        shipment.setStatus("DELIVERING");
+        shipment.setStatus("SHIPPING");
         shipper.setStatus("BUSY");
         shipmentRepository.saveshipment(shipment);
         shiperRepository.saveshiper(shipper);
 
-        //OrderResponse order = orderRepository.getdetailById(shipment.getOrderId());
-        //order.setStatus(OrderStatus.SHIPPING);
-        // orderRepository.save(order);
+
+        Order order2 = new Order();
+        order2.setId(shipment.getOrderId());
+        order2.setStatus(OrderStatus.SHIPPING);
+        //Lưu order
+        orderRepository.save(order2);
+
+        // Gán thông tin vào bảng statushistory
+        OrderResponse order = orderRepository.getorderbyid(shipment.getOrderId());
+        String title = "Giao hàng cho shipper";
+        orderstatusHistory.insertorderByStatus(shipment.getOrderId(), order.getOrderStatus(), title);
         return shipment;
+
     }
 
     @Override
     public void shipeperdelivery(int orderid) {
         //Không cập nhật trạng thái đơn hàng cần user bấm xác nhận
+        // cập nhật trag thái thêm 1 substatus
         System.out.println("Shipper delivered but waiting user confirm");
     }
 
@@ -99,15 +113,19 @@ public class DeliveryServiceImpl implements DeliveryService {
     public OrderResponse confirmReceived(int orderid) {
         //Set status DELIVERED, set thời gian nhận hàng
         OrderResponse order = orderRepository.getorderbyid(orderid);
-        //OrderResponse order = orderRepository.getdetailById(orderid);
-        // order.setStatus(OrderStatus.DELIVERED);
-        // order.setDeliveredAt(LocalDateTime.now());
-//       / orderRepository.save(order);
+        
+        Order order3 = new Order();
+        order3.setId(orderid);
+        order3.setStatus(OrderStatus.DELIVERED);
+        order3.setDeliveredAt(LocalDateTime.now());
+
+        orderRepository.save(order3);
         return order;
     }
 
     //hàm sinh mã vâ đơn
     public String genTracking() {
+
         return "VTP" + System.currentTimeMillis();
     }
 

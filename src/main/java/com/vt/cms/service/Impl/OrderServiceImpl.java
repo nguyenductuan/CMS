@@ -97,8 +97,9 @@ public class OrderServiceImpl implements OrderService {
         order.setExpectedDelivery(getEstimatedDeliveryTime());
         orderRepository.insertorder(order);
         var orderid = order.getId();
+        String title = "Tạo mới đơn hàng";
         // Insert thêm bản ghi vào OrderHistory
-        orderStatusHistoryRepository.insertorderByStatus(orderid, order.getStatus());
+        orderStatusHistoryRepository.insertorderByStatus(orderid, order.getStatus(), title);
 
         for (OrderItem o : items) {
             o.setOrderId(orderid);
