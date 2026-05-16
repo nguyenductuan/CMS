@@ -8,6 +8,7 @@
         <result column="status" property="status" jdbcType="OTHER"/>
         <result column="deliveredAt" property="deliveredAt" jdbcType="OTHER"/>
         <result column="cancelAt" property="cancelAt" jdbcType="OTHER"/>
+        <result column="notecancel" property="notecancel" jdbcType="OTHER"/>
         <result column="created_at" property="createdAt" jdbcType="OTHER"/>
         <result column="expected_delivery" property="expectedDelivery" jdbcType="OTHER"/>
 
@@ -32,6 +33,11 @@
         where orders.id = (#{id})
     </select>
 
+    <select id="countorder" resultType="long">
+        SELECT COUNT(orders.id)
+        FROM `orders`
+        WHERE 1
+    </select>
 
     <update id="save">
         UPDATE orders
@@ -41,28 +47,29 @@
     </update>
     <update id="cancelOrder">
         UPDATE orders
-        SET status   = #{status},
-            cancelAt = #{cancelAt}
+        SET status     = #{status},
+            notecancel = #{ notecancel},
+            cancelAt   = #{cancelAt}
         WHERE id = #{id}
     </update>
 
     <select id="getorderbyid" resultType="com.vt.cms.model.resp.OrderResponse">
-        SELECT id                as orderid,
-               status            as orderStatus,
-               total             as total,
-               created_at        as ordercreated,
-               expected_delivery as expectedDelivery
+        SELECT id               as orderid,
+               status           as orderStatus,
+               total            as total,
+               created_at       as ordercreated,
+               expecteddelivery as expecteddelivery
         FROM orders
         WHERE id = #{orderId}
     </select>
 
     <!-- Query 2: Items -->
     <select id="getItemsByOrderId" resultType="com.vt.cms.model.resp.OrderItemResponse">
-        SELECT oi.product_id            as productId,
-               p.name                   as productName,
-               oi.price                 as price,
-               oi.quantity,
-               (oi.price * oi.quantity) as totalPrice
+        SELECT oi.product_id as productId,
+               p.name        as productName,
+               oi.price      as price,
+               oi.quantity
+
         FROM order_item oi
                  LEFT JOIN product p ON oi.product_id = p.id
         WHERE oi.order_id = #{orderId}
@@ -70,10 +77,12 @@
 
 
     <select id="getOrder" resultType="com.vt.cms.model.resp.OrderResponse">
-        SELECT id         as orderid,
-               total      as total,
-               created_at as ordercreated,
-               status     as orderStatus
-        FROM orders
+        SELECT id               as order_Id,
+               total            as total,
+               created_at       as ordercreated,
+               status           as orderStatus,
+               expecteddelivery as expecteddelivery
+        FROM orders LIMIT #{pageSize}
+        OFFSET #{offset}
     </select>
 </mapper>

@@ -2,16 +2,21 @@ package com.vt.cms.service.Impl;
 
 import com.vt.cms.model.dto.OrderItemRequest;
 import com.vt.cms.model.dto.OrderRequest;
+import com.vt.cms.model.dto.OrdersRequest;
+import com.vt.cms.model.dto.page.PageInfo;
+import com.vt.cms.model.dto.page.PagingResponse;
 import com.vt.cms.model.entity.Order;
 import com.vt.cms.model.entity.OrderItem;
 import com.vt.cms.model.entity.Product;
 import com.vt.cms.model.entity.Shipping;
 import com.vt.cms.model.enums.OrderStatus;
 import com.vt.cms.model.repository.*;
+import com.vt.cms.model.resp.BaseResponse;
 import com.vt.cms.model.resp.OrderItemResponse;
 import com.vt.cms.model.resp.OrderResponse;
 import com.vt.cms.service.OrderService;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestClient;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -20,13 +25,14 @@ import java.util.List;
 @Service
 
 public class OrderServiceImpl implements OrderService {
-    final private OrderRepository orderRepository;
-    final private ProductRepository productRepository;
-    final private OrderItemRepository orderItemRepository;
-    final private ShippingRepository shippingRepository;
-    final private OrderStatusHistoryRepository orderStatusHistoryRepository;
+    private ProductRepository productRepository;
+    private OrderItemRepository orderItemRepository;
+    private ShippingRepository shippingRepository;
+    private OrderStatusHistoryRepository orderStatusHistoryRepository;
+    private OrderRepository orderRepository;
 
-    public OrderServiceImpl(OrderRepository orderRepository, OrderStatusHistoryRepository orderStatusHistoryRepository, ProductRepository productRepository, OrderItemRepository orderItemRepository, ShippingRepository shippingRepository) {
+
+    public OrderServiceImpl(OrderRepository orderRepository, OrderStatusHistoryRepository orderStatusHistoryRepository, ProductRepository productRepository, OrderItemRepository orderItemRepository, ShippingRepository shippingRepository, RestClient.Builder builder) {
         this.orderRepository = orderRepository;
         this.productRepository = productRepository;
         this.orderItemRepository = orderItemRepository;
@@ -50,21 +56,48 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
-    public void cancelOrder(int orderId) {
-        //OrderResponse order = orderRepository.getItemsByOrderId(orderId);
-        //  order.setStatus(OrderStatus.CANCELLED);
-        //order.setCancelAt(LocalDateTime.now());
-        //  orderRepository.cancelOrder(order);
+    public void cancelOrder(int orderId, String notecancel) {
+        Order order = new Order();
+        order.setId(orderId);
+        order.setStatus(OrderStatus.CANCELLED);
+        order.setNotecancel(notecancel);
+        order.setCancelledAt(LocalDateTime.now());
+        orderRepository.cancelOrder(order);
     }
 
+
     @Override
-    public List<OrderResponse> getorderlist() {
-        List<OrderResponse> order = orderRepository.getOrder();
+    public BaseResponse<PagingResponse<List<OrderResponse>>> getorderlist(OrdersRequest request) {
+        List<OrderResponse> order = orderRepository.getOrder(request);
         for (OrderResponse o : order) {
             List<OrderItemResponse> items1 = orderRepository.getItemsByOrderId(o.getOrderid());
             o.setOrderItems(items1);
         }
-        return order;
+        long totalCount = orderRepository.countorder();
+        long totalpage = totalCount / (request.getPageSize());
+
+
+        // page info
+        PageInfo pageInfo = new PageInfo();
+        pageInfo.setPageNo(request.getPageNo());
+        pageInfo.setPageSize(request.getPageSize());
+        pageInfo.setTotalCount(totalCount);
+        pageInfo.setTotalPage(totalpage);
+
+        // paging response
+        PagingResponse<List<OrderResponse>> pagingResponse = new PagingResponse<>();
+
+        pagingResponse.setPageInfo(pageInfo);
+        pagingResponse.setData(order);
+
+        // base response
+        BaseResponse<PagingResponse<List<OrderResponse>>> response = new BaseResponse<>();
+
+        response.setMessage("Successful!");
+        response.setData(pagingResponse);
+
+        return response;
+
     }
 
     @Override
@@ -94,7 +127,7 @@ public class OrderServiceImpl implements OrderService {
         order.setTotal(total);
         order.setStatus(OrderStatus.WAIT_PAYMENT);
         order.setCreatedAt(LocalDateTime.now());
-        order.setExpectedDelivery(getEstimatedDeliveryTime());
+        order.setExpectedDelivery(LocalDateTime.now().plusDays(2));
         orderRepository.insertorder(order);
         var orderid = order.getId();
         String title = "Tạo mới đơn hàng";

@@ -16,6 +16,8 @@ public class Order {
     private LocalDateTime createdAt;
     private LocalDateTime deliveredAt;
     private LocalDateTime cancelAt;
+    private LocalDateTime cancelledAt;
+    private String notecancel;
     @Enumerated(EnumType.STRING)
     private OrderStatus status;
     private List<OrderItem> orderItems;

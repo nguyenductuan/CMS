@@ -8,5 +8,4 @@ public class OrderItemResponse {
     private Integer quantity;
     private String productName;
     private Integer price;
-    private Integer totalPrice;
 }

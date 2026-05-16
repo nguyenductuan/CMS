@@ -11,12 +11,12 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class BaseResponse<T> {
-
+    private String message;
     private T data;
 
 
-    public static <T> BaseResponse<T> of(T data) {
-
-        return new BaseResponse<>(data);
-    }
+//    public static <T> BaseResponse<T> of(T data) {
+//
+//        return new BaseResponse<>(data);
+//    }
 }

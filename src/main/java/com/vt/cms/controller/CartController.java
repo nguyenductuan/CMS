@@ -2,14 +2,10 @@ package com.vt.cms.controller;
 
 import com.vt.cms.model.dto.AddCartRequest;
 import com.vt.cms.model.dto.DeleteRequest;
-import com.vt.cms.model.entity.CartItem;
 import com.vt.cms.model.resp.APIRessponse;
-import com.vt.cms.model.resp.BaseResponse;
 import com.vt.cms.service.CartService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 @RequestMapping
 @RestController
@@ -31,14 +27,15 @@ public class CartController {
 
     //    Lấy danh sách item trong cart
     @GetMapping("list/{userId}")
-    public BaseResponse<List<CartItem>> ListcartController(@PathVariable("userId") int userId) {
-        return BaseResponse.of(cartService.getcart(userId));
+    public void ListcartController(@PathVariable("userId") int userId) {
+        cartService.getcart(userId);
+
     }
 
     //    Lâý tổng số lợng sản phẩm trong Cart
     @GetMapping("count/{userId}")
-    public BaseResponse<Integer> Countcart(@PathVariable("userId") int userId) {
-        return BaseResponse.of(cartService.CountCartById(userId));
+    public void Countcart(@PathVariable("userId") int userId) {
+        cartService.CountCartById(userId);
     }
 
     //    Xóa sp trong cart

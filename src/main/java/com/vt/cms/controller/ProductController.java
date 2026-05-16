@@ -1,15 +1,11 @@
 package com.vt.cms.controller;
 
-import com.vt.cms.model.resp.BaseResponse;
-import com.vt.cms.model.resp.ProductResponse;
 import com.vt.cms.service.ProductService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-
-import java.util.List;
 
 @RestController
 @RequestMapping
@@ -23,12 +19,14 @@ public class ProductController {
     }
 
     @GetMapping("listproduct")
-    public BaseResponse<List<ProductResponse>> listProduct() {
-        return BaseResponse.of(productService.listproduct());
+    public void listProduct() {
+        productService.listproduct();
+
     }
 
     @GetMapping("detail/{id}")
-    public BaseResponse<ProductResponse> detail(@PathVariable int id) {
-        return BaseResponse.of(productService.detail(id));
+    public void detail(@PathVariable int id) {
+        productService.detail(id);
+
     }
 }
