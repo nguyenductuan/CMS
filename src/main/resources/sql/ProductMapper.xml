@@ -7,10 +7,13 @@
         <result column="name" property="name" jdbcType="VARCHAR"/>
         <result column="price" property="price" jdbcType="OTHER"/>
         <result column="stock" property="stock" jdbcType="OTHER"/>
+        <result column="description" property="description" jdbcType="OTHER"/>
+        <result column="image" property="image" jdbcType="OTHER"/>
+        <result column="status" property="status" jdbcType="OTHER"/>
+        <result column="created_at" property="createdAt" jdbcType="OTHER"/>
     </resultMap>
 
-
-    <select id="detailProduct" resultMap="ProductResultMap">
+    <select id="detailProduct">
         SELECT *
         FROM product
         where id = #{id}
@@ -18,6 +21,17 @@
 
     <select id="listproduct" resultMap="ProductResultMap">
         SELECT *
+        FROM product LIMIT #{pageSize}
+        OFFSET #{offset}
+    </select>
+    <select id="countproduct">
+        SELECT COUNT(id)
         FROM product
     </select>
+    <insert id="insertproduct" parameterType="com.vt.cms.model.entity.Product"
+            useGeneratedKeys="true"
+            keyProperty="id">
+        INSERT INTO product (name, price, stock, description, image, created_at, status)
+        VALUES (#{name}, #{price}, #{stock}, #{description}, #{image}, #{createdAt}, #{status})
+    </insert>
 </mapper>

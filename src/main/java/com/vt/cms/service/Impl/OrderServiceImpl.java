@@ -7,13 +7,13 @@ import com.vt.cms.model.dto.page.PageInfo;
 import com.vt.cms.model.dto.page.PagingResponse;
 import com.vt.cms.model.entity.Order;
 import com.vt.cms.model.entity.OrderItem;
-import com.vt.cms.model.entity.Product;
 import com.vt.cms.model.entity.Shipping;
 import com.vt.cms.model.enums.OrderStatus;
 import com.vt.cms.model.repository.*;
 import com.vt.cms.model.resp.BaseResponse;
 import com.vt.cms.model.resp.OrderItemResponse;
 import com.vt.cms.model.resp.OrderResponse;
+import com.vt.cms.model.resp.ProductResponse;
 import com.vt.cms.service.OrderService;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClient;
@@ -61,7 +61,7 @@ public class OrderServiceImpl implements OrderService {
         order.setId(orderId);
         order.setStatus(OrderStatus.CANCELLED);
         order.setNotecancel(notecancel);
-        order.setCancelledAt(LocalDateTime.now());
+        order.setCancelAt(LocalDateTime.now());
         orderRepository.cancelOrder(order);
     }
 
@@ -108,7 +108,7 @@ public class OrderServiceImpl implements OrderService {
         double totalPrice = 0;
         List<OrderItem> items = new ArrayList<>();
         for (OrderItemRequest orderItemRequest : request.getOrderItems()) {
-            Product product = productRepository.detailProduct(orderItemRequest.getProductId());
+            ProductResponse product = productRepository.detailProduct(orderItemRequest.getProductId());
             subtotal = product.getPrice() * orderItemRequest.getQuantity();
             OrderItem orderItem = new OrderItem();
             orderItem.setProductId(orderItemRequest.getProductId());

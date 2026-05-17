@@ -2,9 +2,7 @@ package com.vt.cms.controller;
 
 import com.vt.cms.model.entity.Warehouse;
 import com.vt.cms.service.WarehouseService;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -21,5 +19,21 @@ public class WarehouseController {
     public List<Warehouse> getWarehouse() {
         return warehouseService.listqwarehouse();
 
+    }
+
+    @GetMapping("warehouise/{id}")
+    public void getWarehouse(@PathVariable String id) {
+    }
+
+    @PostMapping("addwarehouse")
+    public void addWarehouse(@RequestBody Warehouse warehouse) {
+    }
+
+    @PostMapping("deletewarehouse")
+    public void deleteWarehouse(@RequestBody Warehouse warehouse) {
+    }
+
+    @PostMapping("statuswarehouse")
+    public void statusWarehouse(@RequestBody Warehouse warehouse) {
     }
 }

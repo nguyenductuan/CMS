@@ -42,13 +42,14 @@
     <update id="save">
         UPDATE orders
         SET status      = #{status},
+            substatus   = #{substatus},
             deliveredAt = #{deliveredAt}
         WHERE id = #{id}
     </update>
     <update id="cancelOrder">
         UPDATE orders
         SET status     = #{status},
-            notecancel = #{ notecancel},
+            notecancel = #{notecancel},
             cancelAt   = #{cancelAt}
         WHERE id = #{id}
     </update>
@@ -58,6 +59,8 @@
                status           as orderStatus,
                total            as total,
                created_at       as ordercreated,
+               notecancel       as notecancel,
+               cancelAt         as cancelAt,
                expecteddelivery as expecteddelivery
         FROM orders
         WHERE id = #{orderId}

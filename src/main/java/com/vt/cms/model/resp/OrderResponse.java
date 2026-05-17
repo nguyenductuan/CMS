@@ -13,7 +13,8 @@ public class OrderResponse {
     private OrderStatus OrderStatus;
     private LocalDateTime ordercreated;
     private LocalDateTime deliveredAt;
-    
+    private String notecancel;
+    private LocalDateTime cancelAt;
     private LocalDateTime expecteddelivery;
     private List<OrderItemResponse> orderItems;
 }

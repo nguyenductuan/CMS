@@ -32,6 +32,12 @@ public class DeliveryController {
     //4. Shipper giao xong
     @PostMapping("shipper_done")
     public void shipperDone(@RequestParam Integer orderid) {
+
         deliveryService.shipeperdelivery(orderid);
+    }
+
+    @PostMapping("/confirm")
+    public void userconfirm(int orderid) {
+        deliveryService.confirmReceived(orderid);
     }
 }

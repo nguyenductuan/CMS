@@ -52,8 +52,8 @@ public class DeliveryServiceImpl implements DeliveryService {
         shipment.setTrackingCode(genTracking());
         shipment.setStatus("WAIT_SHIPPING");
         shipment.setCreatedAt(LocalDateTime.now());
-
-        // shipment.setEstimatedDeliveryTime(getEstimatedDeliveryTime());
+        OrderResponse order = orderRepository.getorderbyid(orderid);
+        shipment.setEstimatedDeliveryTime(order.getExpecteddelivery());
         //Lưu shipment
         shipmentRepository.saveshipment(shipment);
         //Lưu order
@@ -65,10 +65,10 @@ public class DeliveryServiceImpl implements DeliveryService {
         orderRepository.save(order1);
 
         // Gán thông tin vào bảng statushistory
-        OrderResponse order = orderRepository.getorderbyid(orderid);
+        OrderResponse order2 = orderRepository.getorderbyid(orderid);
         String title = "Chẩn bị hàng";
 
-        orderstatusHistory.insertorderByStatus(orderid, order.getOrderStatus(), title);
+        orderstatusHistory.insertorderByStatus(orderid, order2.getOrderStatus(), title);
         return shipment;
     }
 
@@ -104,26 +104,33 @@ public class DeliveryServiceImpl implements DeliveryService {
 
     @Override
     public void shipeperdelivery(int orderid) {
-        //Không cập nhật trạng thái đơn hàng cần user bấm xác nhận
-        // cập nhật trag thái thêm 1 substatus
-        System.out.println("Shipper delivered but waiting user confirm");
+        Order order1 = new Order();
+        order1.setId(orderid);
+        order1.setSubstatus(OrderStatus.SHIPPING);
+        order1.setStatus(OrderStatus.DELIVERED);
+        orderRepository.save(order1);
+        OrderResponse orderResponse = orderRepository.getorderbyid(orderid);
+        String title = "Shipper giao hàng cho khách hàng";
+        orderstatusHistory.insertorderByStatus(orderid, orderResponse.getOrderStatus(), title);
     }
 
     @Override
     public OrderResponse confirmReceived(int orderid) {
         //Set status DELIVERED, set thời gian nhận hàng
         OrderResponse order = orderRepository.getorderbyid(orderid);
-        
         Order order3 = new Order();
         order3.setId(orderid);
         order3.setStatus(OrderStatus.DELIVERED);
+        order3.setSubstatus(OrderStatus.DELIVERED);
         order3.setDeliveredAt(LocalDateTime.now());
-
         orderRepository.save(order3);
+        OrderResponse orderResponse = orderRepository.getorderbyid(orderid);
+        String title = "Khách hàng đã nhận hàng";
+        orderstatusHistory.insertorderByStatus(orderid, orderResponse.getOrderStatus(), title);
         return order;
     }
 
-    //hàm sinh mã vâ đơn
+    //Hàm sinh mã vâ đơn
     public String genTracking() {
 
         return "VTP" + System.currentTimeMillis();
@@ -131,6 +138,6 @@ public class DeliveryServiceImpl implements DeliveryService {
 
     //Hàm tính thời gian giao dự kiến
     public LocalDateTime getEstimatedDeliveryTime() {
-        return LocalDateTime.now().plusDays(2);
+        return LocalDateTime.now().plusDays(2); // check lại không nhận hàm này khi lấy thời gian ở trên
     }
 }

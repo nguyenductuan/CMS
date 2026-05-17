@@ -22,7 +22,8 @@ public class OrderController {
     }
 
     @GetMapping("order-list")
-    public BaseResponse<PagingResponse<List<OrderResponse>>> orderlist(@ModelAttribute OrdersRequest request) {
+    public BaseResponse<PagingResponse<List<OrderResponse>>> orderlist(
+            @ModelAttribute OrdersRequest request) {
         return orderService.getorderlist(request);
     }
 
@@ -43,7 +44,8 @@ public class OrderController {
     public OrderResponse order(@PathVariable long id) {
         return orderService.getdetailorder(id);
     }
-    //    @GetMapping("/order/{customerId}")
+
+//    @GetMapping("/order/{customerId}")
 //    public OrderResponse order(@PathVariable Integer customerId) {
 //        return orderService.getlistorder();
 //    }

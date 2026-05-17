@@ -6,6 +6,9 @@ import lombok.Data;
 
 @Data
 public class ProductResponse {
+    @Schema(description = "Id sản phẩm")
+    @JsonProperty("id")
+    private Integer id;
     @Schema(description = "Tên sản phẩm")
     @JsonProperty("name")
     private String name;

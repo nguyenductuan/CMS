@@ -47,5 +47,4 @@ public class CartController {
                 new APIRessponse(200, "Xóa sản phẩm không giỏ hàng thành công")
         );
     }
-    //Update product to cart
 }

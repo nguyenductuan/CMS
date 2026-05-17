@@ -1,9 +1,9 @@
 package com.vt.cms.service.Impl;
 
 import com.vt.cms.model.dto.*;
-import com.vt.cms.model.entity.Product;
 import com.vt.cms.model.entity.Shipping;
 import com.vt.cms.model.repository.ProductRepository;
+import com.vt.cms.model.resp.ProductResponse;
 import com.vt.cms.service.CheckoutService;
 import com.vt.cms.service.ShippingService;
 import org.springframework.stereotype.Service;
@@ -30,7 +30,7 @@ public class CheckoutSerrviceImpl implements CheckoutService {
         double totalPrice = 0;
         //       1. Xử lý từng imtem trong request
         for (ItemRequest itemRequest : request.getItems()) {
-            Product product = productRepository.detailProduct(itemRequest.getProductId());
+            ProductResponse product = productRepository.detailProduct(itemRequest.getProductId());
 
 //            2.1. Check khi thông tin product không tồn tại
             if (product == null) {
