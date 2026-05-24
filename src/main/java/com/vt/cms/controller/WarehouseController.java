@@ -19,10 +19,9 @@ public class WarehouseController {
     @GetMapping("/warehouse")
     public List<Warehouse> getWarehouse() {
         return warehouseService.listqwarehouse();
-
     }
 
-    @GetMapping("warehouise/{id}")
+    @GetMapping("warehouse/{id}")
     public WarehouseResponse getWarehouse(@PathVariable Integer id) {
         return warehouseService.getdetail(id);
     }

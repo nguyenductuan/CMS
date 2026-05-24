@@ -18,9 +18,11 @@ public class Warehouse {
     private Integer province_name;
     private Integer province_id;
     private String street;
-    private String address_detail;
+    // private String address_detail;
     private Integer ward_code;
     private String ward_name;
     private Integer ward_id;
     private boolean is_deleted;
+    private boolean address_is_default;
+
 }

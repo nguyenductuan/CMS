@@ -26,6 +26,7 @@ public class WarehouseServiceImpl implements WarehouseService {
         Warehouse warehouse = warehouseRepository.getdetail(id);
         WarehouseResponse response = new WarehouseResponse();
         response.setId(warehouse.getId());
+        response.setAddress_default(warehouse.isAddress_is_default());
         response.setWarehouse_code(warehouse.getWarehouse_code());
         response.setWarehouse_name(warehouse.getWarehouse_name());
         return response;

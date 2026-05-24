@@ -15,5 +15,9 @@ public class WarehouseResponse {
     @Schema(description = "Tên kho")
     @JsonProperty("warehouse_name")
     private String warehouse_name;
- 
+    @Schema(description = "Giá trị mặc định")
+    @JsonProperty("is_address_default")
+    private Boolean address_default;
+
+
 }

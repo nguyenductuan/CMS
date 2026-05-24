@@ -6,6 +6,7 @@
         <id column="id" property="id" jdbcType="OTHER"/>
         <result column="warehouse_code" property="warehouse_code" jdbcType="OTHER"/>
         <result column="warehouse_name" property="warehouse_name" jdbcType="OTHER"/>
+        <result column="is_address_default" property="is_address_default" jdbcType="OTHER"/>
 
     </resultMap>
 
