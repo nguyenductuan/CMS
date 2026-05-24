@@ -8,4 +8,6 @@ import java.util.List;
 @Mapper
 public interface WarehouseRepository {
     List<Warehouse> getlistwahouse();
+
+    Warehouse getdetail(Integer id);
 }

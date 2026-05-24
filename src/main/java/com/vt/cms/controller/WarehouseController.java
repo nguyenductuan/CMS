@@ -1,6 +1,7 @@
 package com.vt.cms.controller;
 
 import com.vt.cms.model.entity.Warehouse;
+import com.vt.cms.model.resp.WarehouseResponse;
 import com.vt.cms.service.WarehouseService;
 import org.springframework.web.bind.annotation.*;
 
@@ -22,7 +23,8 @@ public class WarehouseController {
     }
 
     @GetMapping("warehouise/{id}")
-    public void getWarehouse(@PathVariable String id) {
+    public WarehouseResponse getWarehouse(@PathVariable Integer id) {
+        return warehouseService.getdetail(id);
     }
 
     @PostMapping("addwarehouse")

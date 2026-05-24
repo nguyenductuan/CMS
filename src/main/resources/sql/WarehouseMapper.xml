@@ -2,15 +2,21 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.vt.cms.model.repository.WarehouseRepository">
-    <resultMap id="OrderResultMap" type="com.vt.cms.model.entity.Warehouse">
+    <resultMap id="WarehouseResultMap" type="com.vt.cms.model.entity.Warehouse">
         <id column="id" property="id" jdbcType="OTHER"/>
-        <result column="warehousecode" property="warehousecode" jdbcType="OTHER"/>
-        <result column="warehousename" property="warehousename" jdbcType="OTHER"/>
+        <result column="warehouse_code" property="warehouse_code" jdbcType="OTHER"/>
+        <result column="warehouse_name" property="warehouse_name" jdbcType="OTHER"/>
 
     </resultMap>
 
     <select id="getlistwahouse">
         SELECT *
         from warehouse
+    </select>
+
+    <select id="getdetail" resultMap="WarehouseResultMap">
+        SELECT *
+        from warehouse
+        where id = #{id}
     </select>
 </mapper>

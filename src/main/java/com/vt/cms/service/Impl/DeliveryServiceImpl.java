@@ -42,13 +42,13 @@ public class DeliveryServiceImpl implements DeliveryService {
         //1. Tìm kho theo id kho
         Warehouse warehouse1 = warehouse
                 .stream()
-                .filter(w -> w.getWarehousecode().equals(warehousecode))
+                .filter(w -> w.getWarehouse_code().equals(warehousecode))
                 .findFirst()
                 .orElseThrow();
         //2. Tạo shipperment gán orderid và washercode
         Shipment shipment = new Shipment();
         shipment.setOrderId(orderid);
-        shipment.setWarehouseName(warehouse1.getWarehouseName());
+        shipment.setWarehouseName(warehouse1.getWarehouse_name());
         shipment.setTrackingCode(genTracking());
         shipment.setStatus("WAIT_SHIPPING");
         shipment.setCreatedAt(LocalDateTime.now());

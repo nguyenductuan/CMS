@@ -58,7 +58,7 @@ public class ProductServiceImpl implements ProductService {
         product1.setCreatedAt(LocalDateTime.now());
         product1.setImage("https://down-vn.img.susercontent.com/file/sg-11134201-822zi-mibaop7aot8g88.webp");
 
-        productRepository.upload(product1, id);
+        //productRepository.upload(product1, id);
 
     }
 
