@@ -1,11 +1,13 @@
 package com.vt.cms.service.Impl;
 
+import com.vt.cms.model.dto.WarehouseRequest;
 import com.vt.cms.model.entity.Warehouse;
 import com.vt.cms.model.repository.WarehouseRepository;
 import com.vt.cms.model.resp.WarehouseResponse;
 import com.vt.cms.service.WarehouseService;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
@@ -30,5 +32,11 @@ public class WarehouseServiceImpl implements WarehouseService {
         response.setWarehouse_code(warehouse.getWarehouse_code());
         response.setWarehouse_name(warehouse.getWarehouse_name());
         return response;
+    }
+
+    @Override
+    public void addwarehouse(WarehouseRequest warehouse) {
+        var creaAt = LocalDateTime.now();
+        warehouseRepository.add(warehouse, creaAt);
     }
 }

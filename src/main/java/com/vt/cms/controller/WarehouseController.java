@@ -1,5 +1,6 @@
 package com.vt.cms.controller;
 
+import com.vt.cms.model.dto.WarehouseRequest;
 import com.vt.cms.model.entity.Warehouse;
 import com.vt.cms.model.resp.WarehouseResponse;
 import com.vt.cms.service.WarehouseService;
@@ -27,7 +28,9 @@ public class WarehouseController {
     }
 
     @PostMapping("addwarehouse")
-    public void addWarehouse(@RequestBody Warehouse warehouse) {
+    public void addWarehouse(@RequestBody WarehouseRequest warehouse) {
+        warehouseService.addwarehouse(warehouse);
+
     }
 
     @PostMapping("deletewarehouse")
@@ -35,6 +38,7 @@ public class WarehouseController {
     }
 
     @PostMapping("statuswarehouse")
-    public void statusWarehouse(@RequestBody Warehouse warehouse) {
+    public void statusWarehouse(@RequestBody Integer id) {
+
     }
 }
