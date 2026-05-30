@@ -18,4 +18,6 @@ public class ProductResponse {
     @Schema(description = "Số lượng tồn kho")
     @JsonProperty("stock")
     private Integer stock;
+
+
 }

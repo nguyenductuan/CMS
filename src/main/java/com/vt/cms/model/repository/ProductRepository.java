@@ -5,6 +5,7 @@ import com.vt.cms.model.entity.Product;
 import com.vt.cms.model.resp.ProductResponse;
 import org.apache.ibatis.annotations.Mapper;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Mapper
@@ -16,4 +17,10 @@ public interface ProductRepository {
     int countproduct();
 
     int insertproduct(Product product);
+
+    void upload(Product product, Integer id);
+
+    void editstatusproduct(Integer id, String status, LocalDateTime updatedAt);
+
+    void deleteproduct(Integer id);
 }

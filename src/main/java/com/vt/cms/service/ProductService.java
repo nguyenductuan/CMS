@@ -16,4 +16,9 @@ public interface ProductService {
     void editproduct(Integer id, ProductRequest productRequest);
 
     BaseResponse<PagingResponse<List<ProductResponse>>> listproduct(OrdersRequest request);
+
+    void editstatusproduct(Integer id, String status);
+
+    void deleteproduct(Integer id);
+
 }

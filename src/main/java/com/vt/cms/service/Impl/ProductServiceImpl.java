@@ -34,6 +34,7 @@ public class ProductServiceImpl implements ProductService {
         product.setStock(productRequest.getStock());
         product.setDescription(productRequest.getProductDescription());
         product.setStatus("WAITING APPROVED");
+        product.setIs_delete("false");
         product.setPrice(productRequest.getProductPrice());
         product.setCreatedAt(LocalDateTime.now());
         product.setImage("https://down-vn.img.susercontent.com/file/sg-11134201-822zi-mibaop7aot8g88.webp");
@@ -42,24 +43,23 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     public ProductResponse detail(Integer id) {
-        ProductResponse product = productRepository.detailProduct(id);
-        return product;
-
+        return productRepository.detailProduct(id);
     }
 
     @Override
     public void editproduct(Integer id, ProductRequest productRequest) {
+        ProductResponse product = productRepository.detailProduct(id);
+        if (product == null) {
+            throw new RuntimeException("Không tìm thâý sản phẩm"); // cần response trả về 200
+        }
         Product product1 = new Product();
         product1.setName(productRequest.getProductName());
         product1.setStock(productRequest.getStock());
         product1.setDescription(productRequest.getProductDescription());
-        product1.setStatus("WAITING APPROVED");
         product1.setPrice(productRequest.getProductPrice());
-        product1.setCreatedAt(LocalDateTime.now());
-        product1.setImage("https://down-vn.img.susercontent.com/file/sg-11134201-822zi-mibaop7aot8g88.webp");
-
-        //productRepository.upload(product1, id);
-
+        product1.setUpdatedAt(LocalDateTime.now());
+        product1.setImage(productRequest.getProductimage());
+        productRepository.upload(product1, id);
     }
 
     @Override
@@ -89,6 +89,17 @@ public class ProductServiceImpl implements ProductService {
         response.setData(pagingResponse);
 
         return response;
+    }
+
+    @Override
+    public void editstatusproduct(Integer id, String status) {
+        var update = LocalDateTime.now();
+        productRepository.editstatusproduct(id, status, update);
+    }
+
+    @Override
+    public void deleteproduct(Integer id) {
+        productRepository.deleteproduct(id);
     }
 
 }

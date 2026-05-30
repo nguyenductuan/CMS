@@ -11,6 +11,8 @@
         <result column="image" property="image" jdbcType="OTHER"/>
         <result column="status" property="status" jdbcType="OTHER"/>
         <result column="created_at" property="createdAt" jdbcType="OTHER"/>
+        <result column="updated_at" property="updatedAt" jdbcType="OTHER"/>
+        <result column="is_delete" property="isDelete" jdbcType="OTHER"/>
     </resultMap>
 
     <select id="detailProduct">
@@ -31,7 +33,34 @@
     <insert id="insertproduct" parameterType="com.vt.cms.model.entity.Product"
             useGeneratedKeys="true"
             keyProperty="id">
-        INSERT INTO product (name, price, stock, description, image, created_at, status)
-        VALUES (#{name}, #{price}, #{stock}, #{description}, #{image}, #{createdAt}, #{status})
+        INSERT INTO product (name, price, stock, description, image, created_at, status, is_delete)
+        VALUES (#{name}, #{price}, #{stock}, #{description}, #{image}, #{createdAt}, #{status}, #{is_Delete})
     </insert>
+
+    <update id="upload" parameterType="com.vt.cms.model.entity.Product">
+        UPDATE product
+        SET name        = #{product.name},
+            price       = #{product.price},
+            stock       = #{product.stock},
+            description = #{product.description},
+            image       = #{product.image},
+            updated_at  = #{product.updatedAt}
+        WHERE id = #{id}
+
+    </update>
+
+    <update id="editstatusproduct" parameterType="com.vt.cms.model.entity.Product">
+        UPDATE product
+        SET status     = #{status},
+            updated_at = #{updatedAt}
+        WHERE id = #{id}
+    </update>
+
+    <update id="deleteproduct" parameterType="com.vt.cms.model.entity.Product">
+        UPDATE product
+        SET is_delete = 'true'
+        WHERE id = #{id}
+    </update>
+
+
 </mapper>

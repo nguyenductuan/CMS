@@ -43,11 +43,13 @@ public class ProductController {
         productService.editproduct(id, productRequest);
     }
 
-    @DeleteMapping("deleteproduct")
-    public void deleteproduct() {
+    @DeleteMapping("deleteproduct/{id}")
+    public void deleteproduct(@PathVariable Integer id) {
+        productService.deleteproduct(id);
     }
 
-    @PutMapping("editstatus")
-    public void editstatus() {
+    @PutMapping("editstatus/{id}")
+    public void editstatus(@PathVariable Integer id, String status) {
+        productService.editstatusproduct(id, status);
     }
 }

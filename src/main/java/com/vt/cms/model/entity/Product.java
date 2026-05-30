@@ -13,5 +13,7 @@ public class Product {
     private String description;
     private String image;
     private LocalDateTime createdAt;
+    private LocalDateTime updatedAt;
     private String status;
+    private String is_delete;
 }
