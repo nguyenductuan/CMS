@@ -19,5 +19,9 @@ public class PaymentController {
     @PostMapping("/paymentorder")
     public void payment(@RequestBody PaymentRequest paymentRequest) {
         paymentService.ProcessPayment(paymentRequest);
+        // Hàm thanh toán
+        // 1. Thanh toán thánh công -> cập nhật thông tin order vào bảng order với trạng thái Thnha toán thành công
+        //                          -> cập nhật vào hàm writeLogOrder (gồm thông tin thời gian thanh toán đơn hàng thành công, người tác động( viết thêm 1 hàm actionlog lấy thông tin người tác động)
+        // 2. Đơn chờ thanh toán cũng cập nhật như đơn thanh toán thành công
     }
 }
