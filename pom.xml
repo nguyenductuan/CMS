@@ -32,6 +32,8 @@
         <protobuf.version>3.25.3</protobuf.version>
         <grpc.version>1.61.0</grpc.version>
         <org.mapstruct.version>1.5.5.Final</org.mapstruct.version>
+        <!-- added lombok.version to avoid undefined property -->
+        <lombok.version>1.18.26</lombok.version>
     </properties>
     <dependencyManagement>
         <dependencies>
@@ -184,11 +186,14 @@
             <artifactId>httpclient5</artifactId>
             <version>5.5.1</version>
         </dependency>
+
+        <!-- Use single mapstruct dependency and property for version -->
         <dependency>
             <groupId>org.mapstruct</groupId>
             <artifactId>mapstruct</artifactId>
-            <version>1.5.5.Final</version>
+            <version>${org.mapstruct.version}</version>
         </dependency>
+
         <dependency>
             <groupId>org.springdoc</groupId>
             <artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
@@ -250,11 +255,6 @@
         </dependency>
 
         <dependency>
-            <groupId>org.mapstruct</groupId>
-            <artifactId>mapstruct</artifactId>
-            <version>1.5.5.Final</version>
-        </dependency>
-        <dependency>
             <groupId>io.swagger.core.v3</groupId>
             <artifactId>swagger-annotations-jakarta</artifactId>
             <version>2.2.28</version>
@@ -305,54 +305,8 @@
                     </execution>
                 </executions>
             </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-compiler-plugin</artifactId>
-                <configuration>
-                    <annotationProcessorPaths>
-                        <path>
-                            <artifactId>lombok</artifactId>
-                            <groupId>org.projectlombok</groupId>
-                            <version>${lombok.version}</version>
-                        </path>
-                        <!-- This is needed when using Lombok 1.18.16 and above -->
-                        <path>
-                            <artifactId>lombok-mapstruct-binding</artifactId>
-                            <groupId>org.projectlombok</groupId>
-                            <version>0.2.0</version>
-                        </path>
-                        <path>
-                            <artifactId>mapstruct-processor</artifactId>
-                            <groupId>org.mapstruct</groupId>
-                            <version>1.5.5.Final</version>
-                        </path>
-                    </annotationProcessorPaths>
-                    <source>${java.version}</source>
-                    <target>${java.version}</target>
-                </configuration>
-            </plugin>
 
-            <plugin>
-                <groupId>org.xolstice.maven.plugins</groupId>
-                <artifactId>protobuf-maven-plugin</artifactId>
-                <version>0.6.1</version>
-                <configuration>
-                    <protocArtifact>com.google.protobuf:protoc:3.25.3:exe:${os.detected.classifier}</protocArtifact>
-                    <pluginId>grpc-java</pluginId>
-                    <pluginArtifact>io.grpc:protoc-gen-grpc-java:1.55.1:exe:${os.detected.classifier}</pluginArtifact>
-                    <protoSourceRoot>${project.basedir}/src/main/proto</protoSourceRoot>
-                    <outputDirectory>${project.build.directory}/generated-sources/protobuf/java</outputDirectory>
-                    <clearOutputDirectory>false</clearOutputDirectory>
-                </configuration>
-                <executions>
-                    <execution>
-                        <goals>
-                            <goal>compile</goal>
-                            <goal>compile-custom</goal>
-                        </goals>
-                    </execution>
-                </executions>
-            </plugin>
+            <!-- Keep single maven-compiler-plugin (merged) -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
@@ -383,6 +337,28 @@
                         </compilerArg>
                     </compilerArgs>
                 </configuration>
+            </plugin>
+
+            <plugin>
+                <groupId>org.xolstice.maven.plugins</groupId>
+                <artifactId>protobuf-maven-plugin</artifactId>
+                <version>0.6.1</version>
+                <configuration>
+                    <protocArtifact>com.google.protobuf:protoc:3.25.3:exe:${os.detected.classifier}</protocArtifact>
+                    <pluginId>grpc-java</pluginId>
+                    <pluginArtifact>io.grpc:protoc-gen-grpc-java:1.55.1:exe:${os.detected.classifier}</pluginArtifact>
+                    <protoSourceRoot>${project.basedir}/src/main/proto</protoSourceRoot>
+                    <outputDirectory>${project.build.directory}/generated-sources/protobuf/java</outputDirectory>
+                    <clearOutputDirectory>false</clearOutputDirectory>
+                </configuration>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>compile</goal>
+                            <goal>compile-custom</goal>
+                        </goals>
+                    </execution>
+                </executions>
             </plugin>
         </plugins>
     </build>
