@@ -1,6 +1,7 @@
 package com.vt.cms.service.Impl;
 
 import com.vt.cms.model.dto.*;
+import java.math.BigDecimal;
 import com.vt.cms.model.entity.Shipping;
 import com.vt.cms.model.repository.ProductRepository;
 import com.vt.cms.model.resp.ProductResponse;
@@ -12,7 +13,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Service
-public class CheckoutSerrviceImpl implements CheckoutService {
+public class CheckoutServiceImpl implements CheckoutService {
 
     private final ShippingService shippingService;
     private final ProductRepository productRepository;
