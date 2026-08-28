@@ -81,14 +81,31 @@ public class CheckoutServiceImpl implements CheckoutService {
             dto.setOriginalFee(s.getFee());
             shippingDTOList.add(dto);
         }
-        // 5. Chọn shipping mặc định (ví dụ: cái đầu tiên)
-       BigDecimal shippingFee = shippingDTOList.isEmpty() ? BigDecimal.ZERO : shippingDTOList.get(0).getOriginalFee();
-        // 6. Tổng tiền = tiền đơn hàng + phí ship
+        // 5. Chọn shipping mặc định (ví dụ: cái đầu tiên)   
+       BigDecimal shippingFee = shippingDTOList.isEmpty() ? BigDecimal.ZERO 
+           : shippingDTOList.get(0).getOriginalFee();
+       //5.1. Lấy tiền phí ship từ việc chọn phương thức vận chuyển
+        BigDecimal shippingFee = BigDecimal.ZERO;
+       if (request.getShippingMethodId() != null) {
+           Shipping selectedShipping = shippingList.stream()
+                    .filter(s -> s.getServicecode()
+                    .equals(request.getShippingMethodId()))
+                     .findFirst()
+                     .orElseThrow(() ->
+                        new RuntimeException("Phương thức vận chuyển không tồn tại"));
+    shippingFee = selectedShipping.getFee();
+}
+        // 6. Danh sách phương thức thanh toán
+        List<PaymentMethodDTO> paymentMethods =  .getPaymentMethods();
+    
+        // 7.Tổng tiền = tiền đơn hàng + phí ship
         BigDecimal total = totalPrice.add(shippingFee);
         // build response
         CheckoutPreviewResponse response = new CheckoutPreviewResponse();
         response.setItems(itemDtos);
         response.setShippingMethods(shippingDTOList);
+        // Bổ sung thêm danh sách phương thức thanh toán
+        response.setPaymentMethods(paymentMethods);
         response.setTotalPrice(total);
         return response;
     }
