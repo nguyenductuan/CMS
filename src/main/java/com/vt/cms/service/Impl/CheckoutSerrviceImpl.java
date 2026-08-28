@@ -81,7 +81,7 @@ public class CheckoutSerrviceImpl implements CheckoutService {
             shippingDTOList.add(dto);
         }
         // 5. Chọn shipping mặc định (ví dụ: cái đầu tiên)
-       BigDecimal shippingFee = shippingDTOList.isEmpty() ? 0 : shippingDTOList.get(0).getOriginalFee();
+       BigDecimal shippingFee = shippingDTOList.isEmpty() ? BigDecimal.ZERO : shippingDTOList.get(0).getOriginalFee();
         // 6. Tổng tiền = tiền đơn hàng + phí ship
         BigDecimal total = totalPrice.add(shippingFee);
         // build response
