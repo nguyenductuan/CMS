@@ -27,6 +27,11 @@ public class PaymentServiceImpl implements PaymentService {
         }
         if (paymentRequest.getResult().equals("success")) {
             //order.setStatus(OrderStatus.CONFIRMED);
+              "cusId":7411393,
+    // "amount":15000,
+    // "partnerBankCode": "OCB",
+    // "timeTransaction":  "03-04-2026 10:07:16",
+    // "transactionCode": "VPO1787909711136R4U",
 //            order.setPaymentStatus(OrderStatus.WAITING_FOR_DELIVERY);
 //            orderRepository.save(order);
 
