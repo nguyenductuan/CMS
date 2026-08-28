@@ -36,7 +36,7 @@ public class CheckoutSerrviceImpl implements CheckoutService {
     }    
         //Khởi tạo item 
         List<ItemDto> itemDtos = new ArrayList<>();
-        BigDecimal totalPrice = 0;
+        BigDecimal totalPrice = BigDecimal.ZERO;
         //       1. Xử lý từng imtem trong request
         for (ItemRequest itemRequest : request.getItems()) {
             ProductResponse product = productRepository.detailProduct(itemRequest.getProductId());
