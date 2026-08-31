@@ -7,6 +7,6 @@ import java.math.BigDecimal;
 
 public interface PriceService {
 
-    BigDecimal calculateItemPrice(ProductResponse product, int quantity);
+    BigDecimal calculateItemPrice(BigDecimal price, int quantity);
 
 }

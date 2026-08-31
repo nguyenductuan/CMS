@@ -7,17 +7,21 @@ import com.vt.cms.model.dto.page.PageInfo;
 import com.vt.cms.model.dto.page.PagingResponse;
 import com.vt.cms.model.entity.Order;
 import com.vt.cms.model.entity.OrderItem;
+import com.vt.cms.model.entity.OrderTracking;
 import com.vt.cms.model.entity.Shipping;
 import com.vt.cms.model.enums.OrderStatus;
+import com.vt.cms.model.enums.TrackingStatus;
 import com.vt.cms.model.repository.*;
 import com.vt.cms.model.resp.BaseResponse;
 import com.vt.cms.model.resp.OrderItemResponse;
 import com.vt.cms.model.resp.OrderResponse;
 import com.vt.cms.model.resp.ProductResponse;
 import com.vt.cms.service.OrderService;
+import com.vt.cms.service.PriceService;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClient;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -30,6 +34,7 @@ public class OrderServiceImpl implements OrderService {
     private ShippingRepository shippingRepository;
     private OrderStatusHistoryRepository orderStatusHistoryRepository;
     private OrderRepository orderRepository;
+    private PriceService priceService;
 
 
     public OrderServiceImpl(OrderRepository orderRepository, OrderStatusHistoryRepository orderStatusHistoryRepository, ProductRepository productRepository, OrderItemRepository orderItemRepository, ShippingRepository shippingRepository, RestClient.Builder builder) {
@@ -38,6 +43,7 @@ public class OrderServiceImpl implements OrderService {
         this.orderItemRepository = orderItemRepository;
         this.shippingRepository = shippingRepository;
         this.orderStatusHistoryRepository = orderStatusHistoryRepository;
+        this.priceService = priceService;
 
     }
 
@@ -102,42 +108,53 @@ public class OrderServiceImpl implements OrderService {
 
     @Override
     public void createOrder(OrderRequest request) {
-//        1. Tính tiền
-//        1.1 Tính tổng tiền của sản phẩm
-        int subtotal = 0;
-        double totalPrice = 0;
-        List<OrderItem> items = new ArrayList<>();
-        for (OrderItemRequest orderItemRequest : request.getOrderItems()) {
-            ProductResponse product = productRepository.detailProduct(orderItemRequest.getProductId());
-            subtotal = product.getPrice() * orderItemRequest.getQuantity();
-            OrderItem orderItem = new OrderItem();
-            orderItem.setProductId(orderItemRequest.getProductId());
-            orderItem.setQuantity(orderItemRequest.getQuantity());
-            orderItem.setPrice(subtotal);
-            items.add(orderItem);
-            totalPrice += subtotal;
-        }
-//       1.2 Lay tien ship qua id
-        Shipping shipping = shippingRepository.detailShipping(request.getShippingMethodId());
-        double shipprice = shipping.getFee();
-//       1.3. Tính tổng tiền
-        double total = totalPrice + shipprice;
-//       2. Tạo order
+        // 1. Lấy thông tin sp gửi lên ở orderItemms
+        //2. Tính tiền sp
+        //3. Lấy thông tin phí ship đã gửi
+        //4. Tính tổng giá tiền
+        //5. Thêm vào bảng order với thông tin: orderId, totalamount, status: chờ thanh toán, createdAt, thông tin người nhận
+        //6. Thêm vào bảng payment với thông tin: id, id đơn, payment_method, payment_provider, transaction_id, status
+        BigDecimal totalAmount = BigDecimal.ZERO;
+        for (OrderItemRequest orderItemRequest : request.getOrder()) {
+            Integer productId = orderItemRequest.getProductId();
+            ProductResponse product = productRepository.detailProduct(productId);
+
+            if (product == null) {
+                throw new RuntimeException("Product not found");
+            }
+            BigDecimal total = priceService.calculateItemPrice(product.getPrice(), orderItemRequest.getQuantity());
+            totalAmount = totalAmount.add(total);
+
+
+        //Lấy thng tin phuwong thức vận chuyển  request gửi lên
+        Shipping shipping = shippingRepository.detailShipping(orderItemRequest.getShippingMethodId());
+        BigDecimal priceshipping = shipping.getFee();
+        totalAmount = totalAmount.add(priceshipping);
+    }
+        //     2. Tạo order
         Order order = new Order();
-        order.setTotal(total);
+        order.setTotal(totalAmount);
         order.setStatus(OrderStatus.WAIT_PAYMENT);
         order.setCreatedAt(LocalDateTime.now());
         order.setExpectedDelivery(LocalDateTime.now().plusDays(2));
         orderRepository.insertorder(order);
-        var orderid = order.getId();
-        String title = "Tạo mới đơn hàng";
-        // Insert thêm bản ghi vào OrderHistory
-        orderStatusHistoryRepository.insertorderByStatus(orderid, order.getStatus(), title);
 
-        for (OrderItem o : items) {
-            o.setOrderId(orderid);
-            orderItemRepository.insertorderCartItem(o);
-        }
+        var orderid = order.getId();
+
+
+        OrderTracking tracking = new OrderTracking();
+        tracking.setOrderId(orderid);
+        tracking.setStatus(TrackingStatus.WAITING_PAYMENT.getCode());
+        tracking.setTitle(TrackingStatus.WAITING_PAYMENT.getDescription());
+        orderStatusHistoryRepository.insertorderByStatus(tracking);
+
+
+//        for (OrderItem o : items) {
+//            o.setOrderId(orderid);
+//            orderItemRepository.insertorderCartItem(o);
+//        }
+
+
     }
 
     public LocalDateTime getEstimatedDeliveryTime() {

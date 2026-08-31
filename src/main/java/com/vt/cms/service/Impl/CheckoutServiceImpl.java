@@ -7,6 +7,7 @@ import com.vt.cms.model.resp.ProductResponse;
 import com.vt.cms.service.CheckoutService;
 import com.vt.cms.service.PriceService;
 import com.vt.cms.service.ShippingService;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
@@ -14,17 +15,14 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Service
+@Slf4j
 public class CheckoutServiceImpl implements CheckoutService {
 
     private final ShippingService shippingService;
     private final ProductRepository productRepository;
     private final PriceService priceService;
 
-    public CheckoutServiceImpl(
-            ShippingService shippingService,
-            ProductRepository productRepository,
-            PriceService priceService
-    ) {
+    public CheckoutServiceImpl(ShippingService shippingService, ProductRepository productRepository, PriceService priceService) {
         this.shippingService = shippingService;
         this.productRepository = productRepository;
         this.priceService = priceService;
@@ -47,7 +45,7 @@ public class CheckoutServiceImpl implements CheckoutService {
         //3. Lấy danh sách vận chuyển + lấy thông tin giá vận chuyển đầu tiên
         List<Shipping> shippingMethodDTO = shippingService.getShipping();
         if (shippingMethodDTO == null || shippingMethodDTO.isEmpty()) {
-            throw new RuntimeException("Phuwong tức ận chuyển không tồn tại");
+            throw new RuntimeException("Phuwong tức vận chuyển không tồn tại");
         }
         BigDecimal shippingFree = shippingMethodDTO.get(0).getFee();
         totalprice = totalprice.add(shippingFree);
@@ -61,6 +59,7 @@ public class CheckoutServiceImpl implements CheckoutService {
         response.setPaymentMethod("QR");
         return response;
     }
+
     /**
      * Validate request checkout
      */
@@ -70,11 +69,8 @@ public class CheckoutServiceImpl implements CheckoutService {
             throw new RuntimeException("Request không được null");
         }
 
-        if (request.getItems() == null
-                || request.getItems().isEmpty()) {
-            throw new RuntimeException(
-                    "Danh sách sản phẩm không được để trống"
-            );
+        if (request.getItems() == null || request.getItems().isEmpty()) {
+            throw new RuntimeException("Danh sách sản phẩm không được để trống");
         }
     }
 
@@ -101,34 +97,3 @@ public class CheckoutServiceImpl implements CheckoutService {
         return itemDTO;
     }
 }
-//    /**
-//     * Lấy phí vận chuyển theo phương thức được chọn
-//     */
-//    private BigDecimal getShippingFee(
-//            CheckoutPreviewRequest request,
-//            List<Shipping> shippingList
-//    ) {
-//        // Chưa chọn shipping
-//        if (request.getShippingMethodId() == null) {
-//            return BigDecimal.ZERO;
-//        }
-//        Shipping selectedShipping =
-//                shippingList.stream()
-//                        .filter(s ->
-//                                s.getServicecode()
-//                                        .equals(request.getShippingMethodId())
-//                        )
-//                        .findFirst()
-//                        .orElseThrow(() ->
-//                                new RuntimeException(
-//                                        "Phương thức vận chuyển không tồn tại"
-//                                )
-//                        );
-//
-//        return new BigDecimal(
-//                selectedShipping.getFee()
-//        );
-//    }
-//
-//
-

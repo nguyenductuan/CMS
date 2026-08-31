@@ -5,13 +5,14 @@ import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import lombok.Data;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
 
 @Data
 public class Order {
     private Integer id;
-    private Double total;
+    private BigDecimal total;
     private OrderStatus paymentStatus;
     private LocalDateTime createdAt;
     private LocalDateTime deliveredAt;

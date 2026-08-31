@@ -1,20 +1,18 @@
 package com.vt.cms.model.resp;
 
-import com.vt.cms.model.enums.OrderStatus;
-import lombok.Data;
 
-import java.time.LocalDateTime;
+import lombok.Data;
+import java.math.BigDecimal;
 import java.util.List;
 
-@Data
 public class OrderResponse {
-    private Integer orderid;
-    private Integer total;
-    private OrderStatus OrderStatus;
-    private LocalDateTime ordercreated;
-    private LocalDateTime deliveredAt;
-    private String notecancel;
-    private LocalDateTime cancelAt;
-    private LocalDateTime expecteddelivery;
-    private List<OrderItemResponse> orderItems;
+
+    private String message;
+    private DataResponse data;
+    @Data
+    public static class DataResponse {
+        private  List<String> orderId;
+        private String paymentmethod;
+        private BigDecimal totalpayment;
+    }
 }

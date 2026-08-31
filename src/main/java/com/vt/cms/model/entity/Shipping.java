@@ -3,6 +3,8 @@ package com.vt.cms.model.entity;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
 
+import java.math.BigDecimal;
+
 @Data
 public class Shipping {
     @JsonProperty("id")
@@ -12,5 +14,5 @@ public class Shipping {
     @JsonProperty("service_name")
     private String servicename;
     @JsonProperty("free")
-    private int fee;
+    private BigDecimal fee;
 }
