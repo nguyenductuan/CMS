@@ -23,12 +23,14 @@ import org.springframework.web.client.RestClient;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
+import java.util.UUID;
 
 @Service
 
 public class OrderServiceImpl implements OrderService {
-    private final PaymentServiceImpl paymentServiceImpl;
+
     private ProductRepository productRepository;
     private OrderItemRepository orderItemRepository;
     private ShippingRepository shippingRepository;
@@ -147,11 +149,18 @@ public class OrderServiceImpl implements OrderService {
         tracking.setStatus(TrackingStatus.WAITING_PAYMENT.getCode());
         tracking.setTitle(TrackingStatus.WAITING_PAYMENT.getDescription());
         orderTrackingRepository.insertordertracking(tracking);
-       // Thêm vò baảng payment
+       // Thêm vào bảng payment
         Payment payment = new Payment();
         payment.setOrderid(String.valueOf(orderid));
         payment.setStatus("WAITING_PAYMENT");
         payment.setAmount(totalAmount);
+        payment.setTrancactioncode( LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMddHHmmss")) +
+                "-" +
+                UUID.randomUUID().toString()
+                        .replace("-", "")
+                        .substring(0, 8)
+                        .toUpperCase());
+
 
         paymentRepostitory.insertpayment(payment);
 

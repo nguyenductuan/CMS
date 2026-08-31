@@ -7,4 +7,8 @@ import org.mapstruct.Mapper;
 public interface PaymentRepostitory {
 
     void insertpayment(Payment payment);
+
+    void updatepayment(String transactionCode);
+
+    void paymentbytransaction(String transactionCode);
 }

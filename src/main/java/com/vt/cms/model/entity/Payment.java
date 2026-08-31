@@ -9,6 +9,6 @@ public class Payment {
     private String paymanrtid;
     private String orderid;
     private String status;
-    private  String trancactionid;
+    private  String trancactioncode;
     private BigDecimal amount;
 }
