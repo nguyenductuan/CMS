@@ -1,6 +1,6 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="com.vt.cms.model.repository.OrderStatusHistoryRepository">
+<mapper namespace="com.vt.cms.model.repository.OrderTrackingRepository">
     <resultMap id="OrderResultMap1" type="com.vt.cms.model.entity.Order">
         <id column="id" property="id" jdbcType="OTHER"/>
         <result column="order_id" property="orderId" jdbcType="OTHER"/>
@@ -8,7 +8,7 @@
         <result column="title" property="title" jdbcType="OTHER"/>
 
     </resultMap>
-    <insert id="insertorderByStatus" parameterType="com.vt.cms.model.entity.OrderstatusHistory"
+    <insert id="insertordertracking" parameterType="com.vt.cms.model.entity.OrderTracking"
     >
         INSERT INTO order_history (order_id, status, title)
         VALUES (#{orderId}, #{status}, #{title})

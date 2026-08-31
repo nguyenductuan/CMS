@@ -6,8 +6,8 @@ import com.vt.cms.model.dto.OrdersRequest;
 import com.vt.cms.model.dto.page.PageInfo;
 import com.vt.cms.model.dto.page.PagingResponse;
 import com.vt.cms.model.entity.Order;
-import com.vt.cms.model.entity.OrderItem;
 import com.vt.cms.model.entity.OrderTracking;
+import com.vt.cms.model.entity.Payment;
 import com.vt.cms.model.entity.Shipping;
 import com.vt.cms.model.enums.OrderStatus;
 import com.vt.cms.model.enums.TrackingStatus;
@@ -23,27 +23,29 @@ import org.springframework.web.client.RestClient;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.List;
 
 @Service
 
 public class OrderServiceImpl implements OrderService {
+    private final PaymentServiceImpl paymentServiceImpl;
     private ProductRepository productRepository;
     private OrderItemRepository orderItemRepository;
     private ShippingRepository shippingRepository;
-    private OrderStatusHistoryRepository orderStatusHistoryRepository;
+    private OrderTrackingRepository orderTrackingRepository;
     private OrderRepository orderRepository;
     private PriceService priceService;
+    private PaymentRepostitory paymentRepostitory;
 
 
-    public OrderServiceImpl(OrderRepository orderRepository, OrderStatusHistoryRepository orderStatusHistoryRepository, ProductRepository productRepository, OrderItemRepository orderItemRepository, ShippingRepository shippingRepository, RestClient.Builder builder) {
+    public OrderServiceImpl(OrderRepository orderRepository, OrderTrackingRepository orderTrackingRepository, ProductRepository productRepository, OrderItemRepository orderItemRepository, ShippingRepository shippingRepository, RestClient.Builder builder, PaymentServiceImpl paymentServiceImpl) {
         this.orderRepository = orderRepository;
         this.productRepository = productRepository;
         this.orderItemRepository = orderItemRepository;
         this.shippingRepository = shippingRepository;
-        this.orderStatusHistoryRepository = orderStatusHistoryRepository;
+        this.orderTrackingRepository = orderTrackingRepository;
         this.priceService = priceService;
+        this.paymentRepostitory = paymentRepostitory;
 
     }
 
@@ -140,13 +142,18 @@ public class OrderServiceImpl implements OrderService {
         orderRepository.insertorder(order);
 
         var orderid = order.getId();
-
-
         OrderTracking tracking = new OrderTracking();
         tracking.setOrderId(orderid);
         tracking.setStatus(TrackingStatus.WAITING_PAYMENT.getCode());
         tracking.setTitle(TrackingStatus.WAITING_PAYMENT.getDescription());
-        orderStatusHistoryRepository.insertorderByStatus(tracking);
+        orderTrackingRepository.insertordertracking(tracking);
+       // Thêm vò baảng payment
+        Payment payment = new Payment();
+        payment.setOrderid(String.valueOf(orderid));
+        payment.setStatus("WAITING_PAYMENT");
+        payment.setAmount(totalAmount);
+
+        paymentRepostitory.insertpayment(payment);
 
 
 //        for (OrderItem o : items) {

@@ -19,13 +19,13 @@ public class DeliveryServiceImpl implements DeliveryService {
     OrderRepository orderRepository;
     ShippingRepository shippingRepository;
     ShipmentRepository shipmentRepository;
-    OrderStatusHistoryRepository orderstatusHistory;
+    OrderTrackingRepository orderstatusHistory;
     ShiperRepository shiperRepository;
 
     public DeliveryServiceImpl(WarehouseRepository warehouseRepository,
                                OrderRepository orderRepository,
                                ShippingRepository shippingRepository,
-                               OrderStatusHistoryRepository orderstatusHistory,
+                               OrderTrackingRepository orderstatusHistory,
                                ShipmentRepository shipmentRepository,
                                ShiperRepository shiperRepository) {
         this.warehouseRepository = warehouseRepository;
