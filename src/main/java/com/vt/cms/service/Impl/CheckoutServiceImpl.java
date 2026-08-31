@@ -33,7 +33,6 @@ public class CheckoutServiceImpl implements CheckoutService {
     @Override
 
     public CheckoutPreviewResponse getCheckout(CheckoutPreviewRequest request) {
-
         // 1. Validate request
         validateRequest(request);
         // 2. Lấy thông tin sản phẩm + tính giá tiền
