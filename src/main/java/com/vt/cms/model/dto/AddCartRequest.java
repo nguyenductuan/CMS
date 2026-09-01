@@ -5,6 +5,6 @@ import lombok.Data;
 @Data
 public class AddCartRequest {
     private Integer userId;
-    private int productId;
-    private int quantity;
+    private Integer productId;
+    private Integer quantity;
 }

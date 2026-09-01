@@ -10,6 +10,7 @@ import com.vt.cms.model.repository.CartRepository;
 import com.vt.cms.model.repository.ProductRepository;
 import com.vt.cms.model.resp.ProductResponse;
 import com.vt.cms.service.CartService;
+import jakarta.transaction.Transactional;
 import org.mapstruct.factory.Mappers;
 import org.springframework.stereotype.Service;
 
@@ -35,7 +36,7 @@ public class CartServiceImpl implements CartService {
     public List<CartItem> getcart(int userId) {
         Cart cart = cartRepository.finByUserId(userId);
         if (cart == null) {
-             return  Collections.emptyList();
+            return List.of();
         }
         return cartItemRepository.finByCartId(cart.getId());
     }
@@ -43,10 +44,10 @@ public class CartServiceImpl implements CartService {
     public int deleteproductAndCart(DeleteRequest request) {
         List<CartItem> cartItems = getcart(request.getUserid());
 
-        if(request.getProductids() != null || request.getProductids().isEmpty()) {
-            return  0;
+        if (request.getProductids() != null || request.getProductids().isEmpty()) {
+            return 0;
         }
-        return cartItemRepository. deleteproductCart(request.getProductids(), request.getUserid());
+        return cartItemRepository.deleteproductCart(request.getProductids(), request.getUserid());
 
     }
 
@@ -59,34 +60,71 @@ public class CartServiceImpl implements CartService {
         return coutproduct;
     }
 
+    @Transactional
     public void addToCart(AddCartRequest request) {
-//        1. Lấy thông tin cart theo userid nếu chưa có tạo mới cart
-//        1.1. Check xem cart theo userid đã cso chưa
+
+        validateaddtocart(request);
+        //1. lấy thông tin cart theo userId nếu chưa có thì tạo mới
+
         Cart cart = cartRepository.finByUserId(request.getUserId());
+
         if (cart == null) {
             cart = new Cart();
             cart.setUserId(request.getUserId());
             cartRepository.insertCart(cart);
         }
-        var cartid = cart.getId();
-//        2. Nếu đã có cart check xem có sản phẩm trong giỏ không nếu không có thì thêm mới vào cart
-        // nếu có thì cập nhật số lượng
+        ProductResponse product = productRepository.detailProduct(request.getProductId());
+        if (product == null) {
+            throw new IllegalArgumentException("Sản phẩm không tồn tại");
+        }
+
+//        2. Nếu đã có cart check xem có sản phẩm trong giỏ không nếu không có thì thêm mới vào cart nếu có thì cập nhật số lượng
         CartItem exitcartItem = cartItemRepository.findByProductIDAndCart(
-                cartid, request.getProductId()
+                cart.getId(),
+                request.getProductId()
         );
+
         if (exitcartItem == null) {
             CartItem cartItem = new CartItem();
-            cartItem.setCartId(cartid);
+            cartItem.setCartId(cart.getId());
             cartItem.setProductId(request.getProductId());
+            ValidateQuantity(0, request.getQuantity(), product.getStock());
             cartItem.setQuantity(request.getQuantity());
-            ProductResponse product = productRepository.detailProduct(request.getProductId());
             cartItem.setProductName(product.getName());
             cartItem.setProductPrice(product.getPrice());
             cartItemRepository.insertCartItem(cartItem);
+            productRepository.updateproduct(product.getStock(), request.getQuantity());
         } else {
+            ValidateQuantity(exitcartItem.getQuantity(), request.getQuantity(), product.getStock());
             exitcartItem.setQuantity(exitcartItem.getQuantity() + request.getQuantity());
             cartItemRepository.updateCartItem(exitcartItem);
+            productRepository.updateproduct(product.getStock(), request.getQuantity());
         }
 
+    }
+
+    private void ValidateQuantity(int existingQuantity, int requestedQuantity, int stock) {
+        int newQuantity = existingQuantity + requestedQuantity;
+        if (newQuantity <= 0) {
+            throw new IllegalArgumentException("Số lượng sản phẩm phải lớn hơn 0");
+        }
+        if (newQuantity > stock) {
+            throw new IllegalArgumentException("Số lượng sản phẩm trong giỏ hàng không được vượt quá số lượng tồn kho");
+        }
+    }
+
+    private void validateaddtocart(AddCartRequest request) {
+        if (request == null) {
+            throw new IllegalArgumentException("Yêu cầu không được để trống");
+        }
+        if (request.getUserId() == null) {
+            throw new IllegalArgumentException("UserId không được để trống");
+        }
+        if (request.getProductId() == null) {
+            throw new IllegalArgumentException("ProductId không được để trống");
+        }
+        if (request.getQuantity() == null) {
+            throw new IllegalArgumentException("Quantity không được để trống");
+        }
     }
 }

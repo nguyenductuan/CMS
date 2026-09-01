@@ -2,6 +2,8 @@ package com.vt.cms.model.entity;
 
 import lombok.Data;
 
+import java.math.BigDecimal;
+
 @Data
 public class CartItem {
     private String id;
@@ -9,6 +11,6 @@ public class CartItem {
     private int productId;
     private Integer quantity;
     private String productName;
-    private int productPrice;
+    private BigDecimal productPrice;
 //    private Cart cart;
 }

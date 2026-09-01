@@ -19,7 +19,7 @@ public class CartController {
     //Thêm vào cart
     @PostMapping("/addcart")
     public ResponseEntity<APIRessponse> AddtoCart(@RequestBody AddCartRequest request) {
-        cartService.addcart(request);
+        cartService.addToCart(request);
         return ResponseEntity.ok(
                 new APIRessponse(200, "Thành công")
         );
