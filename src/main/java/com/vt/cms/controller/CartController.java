@@ -18,13 +18,12 @@ public class CartController {
 
     //Thêm vào cart
     @PostMapping("/addcart")
-    public ResponseEntity<APIRessponse> AddtoCart(@RequestBody AddCartRequest request) {
+    public ResponseEntity<APIRessponse> addToCart(@RequestBody AddCartRequest request) {
         cartService.addToCart(request);
         return ResponseEntity.ok(
                 new APIRessponse(200, "Thành công")
         );
     }
-
     //    Lấy danh sách item trong cart
     @GetMapping("list/{userId}")
     public void ListcartController(@PathVariable("userId") int userId) {
