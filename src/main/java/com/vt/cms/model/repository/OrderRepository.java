@@ -12,7 +12,7 @@ import java.util.List;
 public interface OrderRepository {
     int insertorder(Order order);
 
-    OrderResponse getorderbyid(long orderId);
+    Order getorderbyid(long orderId);
 
     List<OrderResponse> getOrder(OrdersRequest request);
 

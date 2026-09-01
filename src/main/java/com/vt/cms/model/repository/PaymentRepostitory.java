@@ -10,5 +10,5 @@ public interface PaymentRepostitory {
 
     void updatepayment(String transactionCode);
 
-    void paymentbytransaction(String transactionCode);
+    Payment paymentbytransaction(String transactionCode);
 }

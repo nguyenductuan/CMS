@@ -7,7 +7,7 @@ import com.vt.cms.model.entity.CartItem;
 import java.util.List;
 
 public interface CartService {
-    void addcart(AddCartRequest request);
+    void addToCart(AddCartRequest request);
 
     List<CartItem> getcart(int userId);
 

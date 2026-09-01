@@ -13,6 +13,7 @@ import com.vt.cms.service.CartService;
 import org.mapstruct.factory.Mappers;
 import org.springframework.stereotype.Service;
 
+import java.util.Collections;
 import java.util.List;
 
 @Service
@@ -33,22 +34,20 @@ public class CartServiceImpl implements CartService {
 
     public List<CartItem> getcart(int userId) {
         Cart cart = cartRepository.finByUserId(userId);
+        if (cart == null) {
+             return  Collections.emptyList();
+        }
         return cartItemRepository.finByCartId(cart.getId());
     }
 
     public int deleteproductAndCart(DeleteRequest request) {
         List<CartItem> cartItems = getcart(request.getUserid());
-        int count = 0;
-        for (CartItem cartItem : cartItems) {
-            if (request.getProductids() != null &&
-                    request.getProductids().contains(cartItem.getProductId())) {
-                cartItemRepository.deleteproductCart(
-                        request.getProductids(),
-                        cartItem.getCartId());
-            }
-            count++;
+
+        if(request.getProductids() != null || request.getProductids().isEmpty()) {
+            return  0;
         }
-        return count;
+        return cartItemRepository. deleteproductCart(request.getProductids(), request.getUserid());
+
     }
 
     public int CountCartById(int userId) {
@@ -60,7 +59,7 @@ public class CartServiceImpl implements CartService {
         return coutproduct;
     }
 
-    public void addcart(AddCartRequest request) {
+    public void addToCart(AddCartRequest request) {
 //        1. Lấy thông tin cart theo userid nếu chưa có tạo mới cart
 //        1.1. Check xem cart theo userid đã cso chưa
         Cart cart = cartRepository.finByUserId(request.getUserId());
@@ -88,7 +87,6 @@ public class CartServiceImpl implements CartService {
             exitcartItem.setQuantity(exitcartItem.getQuantity() + request.getQuantity());
             cartItemRepository.updateCartItem(exitcartItem);
         }
-//       Trừ stock của sản phẩm
 
     }
 }

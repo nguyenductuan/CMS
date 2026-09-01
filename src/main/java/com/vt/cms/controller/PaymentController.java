@@ -1,7 +1,9 @@
 package com.vt.cms.controller;
 
 import com.vt.cms.model.dto.PaymentRequest;
+import com.vt.cms.model.resp.APIRessponse;
 import com.vt.cms.service.PaymentService;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -17,8 +19,9 @@ public class PaymentController {
     }
 
     @PostMapping("/paymentorder")
-    public void paymentwebhooks(@RequestBody PaymentRequest paymentRequest) {
+    public ResponseEntity<APIRessponse> paymentwebhooks(@RequestBody PaymentRequest paymentRequest) {
         paymentService.Paymentwebhooks(paymentRequest);
+        return ResponseEntity.ok(new APIRessponse(200, "Successfully"));
 
     }
 }

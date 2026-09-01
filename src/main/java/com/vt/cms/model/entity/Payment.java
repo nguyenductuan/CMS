@@ -7,8 +7,10 @@ import java.math.BigDecimal;
 @Data
 public class Payment {
     private String paymanrtid;
-    private String orderid;
+    private Long OrderId;
     private String status;
     private  String trancactioncode;
     private BigDecimal amount;
+
+
 }
