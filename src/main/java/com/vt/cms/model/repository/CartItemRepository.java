@@ -15,5 +15,7 @@ public interface CartItemRepository {
 
     List<CartItem> finByCartId(int cartId);
 
-    int deleteproductCart(List<Integer> productIds, Integer cartId);
+    int deleteProductCart(List<Integer> productIds, Integer cartId);
+
+    int getCartItemCountById(int cartId);
 }

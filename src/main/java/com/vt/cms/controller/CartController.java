@@ -24,25 +24,21 @@ public class CartController {
         return ResponseEntity.ok(new APIRessponse(200, "Thêm sản phẩm vào giỏ hàng thành công")
         );
     }
-
     //    Lấy danh sách item trong cart
     @GetMapping("list/{userId}")
-    public void ListcartController(@PathVariable("userId") int userId) {
-        cartService.getcart(userId);
-
+    public ResponseEntity<APIRessponse>listCart(@PathVariable("userId") int userId) {
+        return ResponseEntity.ok(new APIRessponse(200, "Success", cartService.getCart(userId)));
     }
-
     //    Lâý tổng số lợng sản phẩm trong Cart
     @GetMapping("count/{userId}")
-    public void Countcart(@PathVariable("userId") int userId) {
-        cartService.CountCartById(userId);
+    public ResponseEntity<APIRessponse> countProductCart(@PathVariable("userId") int userId) {
+        int count =  cartService.getCartItemCount(userId);
+        return ResponseEntity.ok(new APIRessponse(200, "Success", count));
     }
-
     //    Xóa sp trong cart
     @DeleteMapping("delete")
-    public ResponseEntity<APIRessponse> DeleteProductAndCart(@RequestBody DeleteRequest request) {
+    public ResponseEntity<APIRessponse> DeleteProductAndCart( @Valid @RequestBody DeleteRequest request) {
         cartService.deleteproductAndCart(request);
-
         return ResponseEntity.ok(
                 new APIRessponse(200, "Xóa sản phẩm không giỏ hàng thành công")
         );

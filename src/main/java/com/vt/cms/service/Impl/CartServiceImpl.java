@@ -31,30 +31,30 @@ public class CartServiceImpl implements CartService {
         this.productRepository = productRepository;
     }
 
-    public List<CartItem> getcart(int userId) {
+    @Transactional
+    public List<CartItem> getCart(int userId) {
         Cart cart = cartRepository.finByUserId(userId);
         if (cart == null) {
             return List.of();
         }
         return cartItemRepository.finByCartId(cart.getId());
     }
-
+    @Transactional
     public int deleteproductAndCart(DeleteRequest request) {
-        List<CartItem> cartItems = getcart(request.getUserid());
 
-        if (request.getProductids() != null || request.getProductids().isEmpty()) {
+        if (request == null || request.getProductids() == null || request.getProductids().isEmpty()) {
+           return  0;
+        }
+        Cart cart = cartRepository.finByUserId(request.getUserid());
+        if (cart == null) {
             return 0;
         }
-        return cartItemRepository.deleteproductCart(request.getProductids(), request.getUserid());
-
+        return cartItemRepository.deleteProductCart(request.getProductids(), cart.getId());
     }
-    public int CountCartById(int userId) {
-        List<CartItem> cartItems = getcart(userId);
-        int coutproduct = 0;
-        for (CartItem items : cartItems) {
-            coutproduct += items.getQuantity();
-        }
-        return coutproduct;
+    @Transactional
+    public int getCartItemCount(int userId) {
+        Cart cart = cartRepository.finByUserId(userId);
+        return cartItemRepository.getCartItemCountById(cart.getId());
     }
 
     @Transactional
@@ -71,7 +71,8 @@ public class CartServiceImpl implements CartService {
             cart.setUserId(request.getUserId());
             cartRepository.insertCart(cart);
         }
-//        2. Nếu đã có cart check xem có sản phẩm trong giỏ không nếu không có thì thêm mới vào cart nếu có thì cập nhật số lượng
+//        2. Nếu đã có cart check xem có sản phẩm trong giỏ không nếu không có thì thêm mới vào cart nếu có thì
+//        cập nhật số lượng
         CartItem exitcartItem = cartItemRepository.findByProductIDAndCart(
                 cart.getId(),
                 request.getProductId()
@@ -100,19 +101,10 @@ public class CartServiceImpl implements CartService {
             throw new IllegalArgumentException("Số lượng sản phẩm trong giỏ hàng không được vượt quá số lượng tồn kho");
         }
     }
-
     private void validateaddtocart(AddCartRequest request) {
         if (request == null) {
             throw new IllegalArgumentException("Yêu cầu không được để trống");
         }
-        if (request.getUserId() == null) {
-            throw new IllegalArgumentException("UserId không được để trống");
-        }
-        if (request.getProductId() == null) {
-            throw new IllegalArgumentException("ProductId không được để trống");
-        }
-        if (request.getQuantity() == null) {
-            throw new IllegalArgumentException("Quantity không được để trống");
-        }
+
     }
 }

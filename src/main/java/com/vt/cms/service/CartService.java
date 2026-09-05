@@ -9,9 +9,9 @@ import java.util.List;
 public interface CartService {
     void addToCart(AddCartRequest request);
 
-    List<CartItem> getcart(int userId);
+    List<CartItem> getCart(int userId);
 
-    int CountCartById(int userId);
+    int getCartItemCount(int userId);
 
     int deleteproductAndCart(DeleteRequest request);
 }

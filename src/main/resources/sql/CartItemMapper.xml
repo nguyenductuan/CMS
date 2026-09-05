@@ -9,6 +9,7 @@
         <result column="quantity" property="quantity" jdbcType="VARCHAR"/>
         <result column="product_name" property="productName" jdbcType="VARCHAR"/>
         <result column="product_price" property="productPrice" jdbcType="INTEGER"/>
+
     </resultMap>
 
     <insert id="insertCartItem">
@@ -48,12 +49,23 @@
             product_price = #{productPrice}
         WHERE id = #{id}
     </update>
-    <delete id="deleteproductCart">
+    <delete id="deleteProductCart">
         DELETE FROM cart_item
         WHERE cart_id = #{cartId}
         AND product_id IN
-        <foreach item="id" collection="productIds" open="(" separator="," close=")">
-            #{id}
+        <foreach item="productId"
+                 collection="productIds"
+                 open="("
+                 separator=","
+                 close=")">
+            #{productId}
         </foreach>
+
     </delete>
+
+    <select id="getCartItemCountById" resultType="int">
+        SELECT COALESCE(SUM(quantity), 0)
+        FROM cart_item
+        WHERE cart_id = #{cartId}
+    </select>
 </mapper>
