@@ -37,7 +37,7 @@ public class OrderController {
     @PostMapping("cancelorder/{orderId}")
     public ResponseEntity<APIRessponse> cancelorder(@PathVariable Integer orderId, String notecancel) {
         orderService.cancelOrder(orderId, notecancel);
-        return ResponseEntity.ok(new APIRessponse(200, "Hủy đơn hàng thành công"));
+        return ResponseEntity.ok(new APIRessponse(200, "Hủy đơn hàng thành công", errors));
     }
 
     @GetMapping("/order/{id}")

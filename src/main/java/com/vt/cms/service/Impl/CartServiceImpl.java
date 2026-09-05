@@ -13,8 +13,6 @@ import com.vt.cms.service.CartService;
 import jakarta.transaction.Transactional;
 import org.mapstruct.factory.Mappers;
 import org.springframework.stereotype.Service;
-
-import java.util.Collections;
 import java.util.List;
 
 @Service
@@ -50,7 +48,6 @@ public class CartServiceImpl implements CartService {
         return cartItemRepository.deleteproductCart(request.getProductids(), request.getUserid());
 
     }
-
     public int CountCartById(int userId) {
         List<CartItem> cartItems = getcart(userId);
         int coutproduct = 0;
@@ -62,28 +59,23 @@ public class CartServiceImpl implements CartService {
 
     @Transactional
     public void addToCart(AddCartRequest request) {
-
         validateaddtocart(request);
         //1. lấy thông tin cart theo userId nếu chưa có thì tạo mới
-
+        ProductResponse product = productRepository.detailProduct(request.getProductId());
+        if (product == null) {
+            throw new IllegalArgumentException("Sản phẩm không tồn tại");
+        }
         Cart cart = cartRepository.finByUserId(request.getUserId());
-
         if (cart == null) {
             cart = new Cart();
             cart.setUserId(request.getUserId());
             cartRepository.insertCart(cart);
         }
-        ProductResponse product = productRepository.detailProduct(request.getProductId());
-        if (product == null) {
-            throw new IllegalArgumentException("Sản phẩm không tồn tại");
-        }
-
 //        2. Nếu đã có cart check xem có sản phẩm trong giỏ không nếu không có thì thêm mới vào cart nếu có thì cập nhật số lượng
         CartItem exitcartItem = cartItemRepository.findByProductIDAndCart(
                 cart.getId(),
                 request.getProductId()
         );
-
         if (exitcartItem == null) {
             CartItem cartItem = new CartItem();
             cartItem.setCartId(cart.getId());
@@ -93,16 +85,12 @@ public class CartServiceImpl implements CartService {
             cartItem.setProductName(product.getName());
             cartItem.setProductPrice(product.getPrice());
             cartItemRepository.insertCartItem(cartItem);
-            productRepository.updateproduct(product.getStock(), request.getQuantity());
         } else {
             ValidateQuantity(exitcartItem.getQuantity(), request.getQuantity(), product.getStock());
             exitcartItem.setQuantity(exitcartItem.getQuantity() + request.getQuantity());
             cartItemRepository.updateCartItem(exitcartItem);
-            productRepository.updateproduct(product.getStock(), request.getQuantity());
         }
-
     }
-
     private void ValidateQuantity(int existingQuantity, int requestedQuantity, int stock) {
         int newQuantity = existingQuantity + requestedQuantity;
         if (newQuantity <= 0) {

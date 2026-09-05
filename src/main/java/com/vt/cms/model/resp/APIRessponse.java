@@ -1,19 +1,35 @@
 package com.vt.cms.model.resp;
 
-public class APIRessponse {
-    private int status;
-    private String message;
+import java.util.Map;
 
-    public APIRessponse(int status, String message) {
-        this.status = status;
+public class APIRessponse {
+    private int code;
+    private String message;
+    private Object data;
+    private Map<String, String> errors;
+
+    public APIRessponse(int code, String message) {
+        this.code = code;
         this.message = message;
     }
 
-    public int getStatus() {
-        return status;
+    public APIRessponse(
+            int code,
+            String message,
+            Object data
+    ) {
+        this.code = code;
+        this.message = message;
+        this.data = data;
     }
 
-    public String getMessage() {
-        return message;
+    public APIRessponse(
+            int code,
+            String message,
+            Map<String, String> errors
+    ) {
+        this.code = code;
+        this.message = message;
+        this.errors = errors;
     }
 }

@@ -19,7 +19,7 @@ public class DeliveryController {
     public ResponseEntity<APIRessponse> prepare(@PathVariable Integer orderid, Integer warehousecode) {
         deliveryService.prepare(orderid, warehousecode);
         return ResponseEntity.ok(
-                new APIRessponse(200, "Thành công")
+                new APIRessponse(200, "Thành công", errors)
         );
     }
 

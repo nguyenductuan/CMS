@@ -4,6 +4,7 @@ import com.vt.cms.model.dto.AddCartRequest;
 import com.vt.cms.model.dto.DeleteRequest;
 import com.vt.cms.model.resp.APIRessponse;
 import com.vt.cms.service.CartService;
+import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -18,12 +19,12 @@ public class CartController {
 
     //Thêm vào cart
     @PostMapping("/addcart")
-    public ResponseEntity<APIRessponse> addToCart(@RequestBody AddCartRequest request) {
+    public ResponseEntity<APIRessponse> addToCart( @Valid @RequestBody AddCartRequest request) {
         cartService.addToCart(request);
-        return ResponseEntity.ok(
-                new APIRessponse(200, "Thành công")
+        return ResponseEntity.ok(new APIRessponse(200, "Thêm sản phẩm vào giỏ hàng thành công")
         );
     }
+
     //    Lấy danh sách item trong cart
     @GetMapping("list/{userId}")
     public void ListcartController(@PathVariable("userId") int userId) {

@@ -21,7 +21,7 @@ public class PaymentController {
     @PostMapping("/paymentorder")
     public ResponseEntity<APIRessponse> paymentwebhooks(@RequestBody PaymentRequest paymentRequest) {
         paymentService.Paymentwebhooks(paymentRequest);
-        return ResponseEntity.ok(new APIRessponse(200, "Successfully"));
+        return ResponseEntity.ok(new APIRessponse(200, "Successfully", errors));
 
     }
 }
