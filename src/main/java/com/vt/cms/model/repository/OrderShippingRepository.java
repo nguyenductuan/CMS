@@ -5,7 +5,7 @@ import org.apache.ibatis.annotations.Mapper;
 
 @Mapper
 public interface OrderShippingRepository {
-    int saveshipment(OrderShipping orderShipping);
+    int saveShipment(OrderShipping orderShipping);
 
     OrderShipping getShipmentByTrackingcode(String trackingcode);
 }

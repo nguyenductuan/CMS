@@ -7,7 +7,7 @@ import com.vt.cms.model.resp.OrderResponse;
 public interface OrderShippingService {
     OrderShipping prepare(OrderShippingRequest orderShippingRequest);
 
-    OrderShipping assginShipper(String trackingcode);
+    OrderShipping assignShipper(String trackingcode);
 
     void shipeperdelivery(int orderid);
 

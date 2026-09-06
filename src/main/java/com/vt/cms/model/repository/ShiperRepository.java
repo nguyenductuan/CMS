@@ -5,7 +5,7 @@ import org.apache.ibatis.annotations.Mapper;
 
 @Mapper
 public interface ShiperRepository {
-    int saveshiper(Shipper shipper);
+    int saveShiper(Shipper shipper);
 
     Shipper getlistShipper();
 }

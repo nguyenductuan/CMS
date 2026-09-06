@@ -13,6 +13,10 @@ import java.util.List;
 public class Order {
     private Integer id;
     private BigDecimal total;
+    private BigDecimal productweight;
+    private BigDecimal productlength;
+    private BigDecimal productwidth;
+    private BigDecimal productheight;
     private OrderStatus paymentStatus;
     private LocalDateTime createdAt;
     private LocalDateTime deliveredAt;
@@ -23,5 +27,7 @@ public class Order {
     private OrderStatus status;
     private List<OrderItem> orderItems;
     private LocalDateTime expectedDelivery;
+    private  Double DeliveryLatitude;
+    private  Double DeliveryLongitude;
 
 }

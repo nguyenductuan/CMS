@@ -1,5 +1,8 @@
 package com.vt.cms.model.entity;
 
+import com.vt.cms.model.enums.OrderShippingStatus;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import lombok.Data;
 
 import java.math.BigDecimal;
@@ -7,6 +10,7 @@ import java.time.LocalDateTime;
 
 @Data
 public class OrderShipping {
+
     private Integer id;// id của shipment để tracking
     private Integer orderId;// mã đơn
     private String shipmentName;// tên shipper
@@ -23,5 +27,6 @@ public class OrderShipping {
     private LocalDateTime estimatedDeliveryTime; //thời gian giao dự kiến trả từ API vận chuyển
     private LocalDateTime shippedAt;//Thời điểm đơn hàng bắt đầu được giao (Kho → Shipper nhận hàng → bắt đầu đi giao)
     private LocalDateTime deliveredAt;//Thời điểm đơn hàng giao thành công (user nhận hàng) (Shipper giao → User bấm "Đã nhận hàng")
-    private String status; // CREATED, READY, DELIVERING, DELIVERED
+    @Enumerated(EnumType.STRING)
+    private OrderShippingStatus status; // CREATED, READY, DELIVERING, DELIVERED
 }

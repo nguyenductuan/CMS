@@ -9,5 +9,7 @@ public class WarehouseSellerinfo {
     private String address;
     private String warehousecode;
     private String warehouseName;
+    private Double latitude;
+    private Double longitude;
 
 }

@@ -2,10 +2,13 @@ package com.vt.cms.service.Impl;
 
 import com.vt.cms.model.dto.OrderShippingRequest;
 import com.vt.cms.model.entity.*;
+import com.vt.cms.model.enums.OrderShippingStatus;
 import com.vt.cms.model.enums.OrderStatus;
+import com.vt.cms.model.enums.TrackingStatus;
 import com.vt.cms.model.repository.*;
 import com.vt.cms.model.resp.OrderResponse;
 import com.vt.cms.service.OrderShippingService;
+import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
@@ -19,21 +22,24 @@ public class OrderShippingServiceImpl implements OrderShippingService {
     OrderRepository orderRepository;
     ShippingRepository shippingRepository;
     OrderShippingRepository orderShippingRepository;
-    OrderTrackingRepository orderstatusHistory;
     ShiperRepository shiperRepository;
+    OrderTrackingRepository orderTrackingRepository;
 
     public OrderShippingServiceImpl(WarehouseRepository warehouseRepository,
                                     OrderRepository orderRepository,
                                     ShippingRepository shippingRepository,
                                     OrderTrackingRepository orderstatusHistory,
                                     OrderShippingRepository orderShippingRepository,
-                                    ShiperRepository shiperRepository) {
+                                    ShiperRepository shiperRepository,
+                                    OrderTrackingRepository orderTrackingRepository
+    ) {
         this.warehouseRepository = warehouseRepository;
         this.orderRepository = orderRepository;
         this.shippingRepository = shippingRepository;
-        this.orderstatusHistory = orderstatusHistory;
+
         this.orderShippingRepository = orderShippingRepository;
         this.shiperRepository = shiperRepository;
+        this.orderTrackingRepository = orderTrackingRepository;
     }
 
     @Override
@@ -63,16 +69,15 @@ public class OrderShippingServiceImpl implements OrderShippingService {
          orders.add(order);
         }
         //2. Tạo shipperment gán orderid và washercode
-
         OrderShipping orderShipping = new OrderShipping();
         for (Order order : orders) {
             orderShipping.setOrderId(order.getId());
             orderShipping.setWarehouseName(warehouse1.getWarehouse_name());
             orderShipping.setWarehouseCode(warehouse1.getWarehouse_code());
             orderShipping.setTrackingCode(genTracking());
-            orderShipping.setStatus("WAIT_SHIPPING");
+            orderShipping.setStatus(OrderShippingStatus.WAIT_SHIPPING);
             orderShipping.setOrderAmount(order.getTotal());
-            orderShipping.setShippingFee(calculateShipperFree());
+            orderShipping.setShippingFee(calculateShipperFree(orderShippingRequest, order));
             BigDecimal totalAmount = orderShipping.getOrderAmount().add(orderShipping.getShippingFee());
             orderShipping.setTotalAmount(totalAmount);
             orderShipping.setCreatedAt(LocalDateTime.now());
@@ -80,32 +85,33 @@ public class OrderShippingServiceImpl implements OrderShippingService {
             order1.setStatus(OrderStatus.PREPARING);
             orderRepository.save(order1);
             orderShipping.setDeliveredAt(order1.getDeliveredAt());
-            orderShippingRepository.saveshipment(orderShipping);
+            orderShippingRepository.saveShipment(orderShipping);
+
+            OrderTracking orderTracking = new OrderTracking();
+            orderTracking.setOrderId(order.getId());
+            orderTracking.setStatusCode(TrackingStatus.CONFIRMED.getCode());
+            orderTracking.setStatusName(TrackingStatus.CONFIRMED.getName());
+            orderTracking.setDescription(TrackingStatus.CONFIRMED.getDescription());
+
+            orderTrackingRepository.insertordertracking(orderTracking);
         }
         return orderShipping;
-
-//        // Gán thông tin vào bảng statushistory
-//        OrderResponse order2 = orderRepository.getorderbyid(orderid);
-//        String title = "Chẩn bị hàng";
-//
-//        orderstatusHistory.insertorderByStatus(orderid, order2.getOrderStatus(), title);
     }
-    public BigDecimal calculateShipperFree(){
-        //Phí vận chuyển = phí dịch vụ đã chọn + phí cân năng + Phí khoảng cách
-        BigDecimal shippingKm= shippingKm();
-        BigDecimal shippWeight= shippingWeight();
-        BigDecimal shippingFee = shippingKm.add(shippWeight);
-        return shippingFee;
+    //Hàm tính phí vận chuyển
+    public BigDecimal calculateShipperFree(OrderShippingRequest orderShippingRequest, Order order) {
+        //Phí vận chuyển = phí cân năng + Phí khoảng cách
+        BigDecimal shippingKm= shippingKm(orderShippingRequest,order);
+        BigDecimal shippWeight= shippingWeight(order);
+        return shippingKm.add(shippWeight);
     }
-    public  BigDecimal shippingKm(){
-
+    //Hàm tính phí khoảng cách
+    public  BigDecimal shippingKm(OrderShippingRequest orderShippingRequest, Order order) {
         double distance = calculateDistance(
-                warehouse.getLatitude().doubleValue(),
-                warehouse.getLongitude().doubleValue(),
-                order.getDeliveryLatitude().doubleValue(),
-                order.getDeliveryLongitude().doubleValue()
+                orderShippingRequest.getSellerInfos().get(0).getLatitude(),
+                orderShippingRequest.getSellerInfos().get(0).getLongitude(),
+                order.getDeliveryLatitude(),
+                order.getDeliveryLongitude()
         );
-
         return calculateShippingFee(distance);
     }
     private BigDecimal calculateShippingFee(double distance) {
@@ -126,10 +132,8 @@ public class OrderShippingServiceImpl implements OrderShippingService {
         );
     }
     private double calculateDistance(
-            double lat1,
-            double lon1,
-            double lat2,
-            double lon2) {
+            double lat1,double lon1,
+            double lat2,double lon2) {
         final int EARTH_RADIUS_KM = 6371;
         double latDistance = Math.toRadians(lat2 - lat1);
         double lonDistance = Math.toRadians(lon2 - lon1);
@@ -144,35 +148,69 @@ public class OrderShippingServiceImpl implements OrderShippingService {
         return EARTH_RADIUS_KM * c;
 
     }
-    public  BigDecimal shippingWeight(){
-        return BigDecimal.ZERO;
+    //Hàm tính phí cân nặng
+    public  BigDecimal shippingWeight(Order order){
+BigDecimal a = order.getProductheight().multiply(order.getProductlength()).multiply(order.getProductwidth());
+BigDecimal b = a.divide(BigDecimal.valueOf(1000));
+        BigDecimal weight = b.compareTo(order.getProductweight()) > 0
+                ? a
+                : order.getProductweight();
+        if (weight != null) {
+            BigDecimal baseFee = BigDecimal.valueOf(10_000);
+            BigDecimal pricePerKg = BigDecimal.valueOf(2_000);
+            // 1 kg đầu: 10.000đ
+            if (weight.compareTo(BigDecimal.ONE) <= 0) {
+                return baseFee;
+            }
+            // Từ kg thứ 2: 2.000đ/kg
+            return baseFee.add(
+                    pricePerKg.multiply(
+                            weight.subtract(BigDecimal.ONE)
+                    )
+            );
+        }
+            throw new RuntimeException("Không thể tính phí vận chuyển do không có thông tin cân nặng của đơn hàng");
     }
-    @Override
-    public OrderShipping assginShipper(String trackingcode) {
+
+ @Transactional
+    public OrderShipping assignShipper(String trackingCode) {
         // Lấy danh sách shiper AVAILABLE -> shiperment set tên shiper,
         // set thời gian dự kiến, set status DELIVERING
         //shiper set status thành BUSY
         //order set status thành DELIVERING
         Shipper shipper = shiperRepository.getlistShipper();
-        OrderShipping orderShipping = orderShippingRepository.getShipmentByTrackingcode(trackingcode);
+
+        OrderShipping orderShipping = orderShippingRepository.getShipmentByTrackingcode(trackingCode);
+        if (orderShipping == null) {
+            throw new RuntimeException("Không tìm thấy mã đơn hàng: " + trackingCode);
+        }
+        if (shipper == null || shipper.getId() == null) {
+            throw new RuntimeException("Không tìm thấy shipper available");
+        }
         orderShipping.setShipperId(shipper.getId());
+
         orderShipping.setEstimatedDeliveryTime(getEstimatedDeliveryTime());
-        orderShipping.setStatus("SHIPPING");
+        orderShipping.setStatus(OrderShippingStatus.SHIPPING);
         shipper.setStatus("BUSY");
-        orderShippingRepository.saveshipment(orderShipping);
-        shiperRepository.saveshiper(shipper);
+        orderShippingRepository.saveShipment(orderShipping);
+        shiperRepository.saveShiper(shipper);
 
+     Order order = orderRepository.getorderbyid(
+             orderShipping.getOrderId()
+     );
 
-        Order order2 = new Order();
-        order2.setId(orderShipping.getOrderId());
-        order2.setStatus(OrderStatus.SHIPPING);
+     order.setStatus(OrderStatus.SHIPPING);
+     orderRepository.save(order);
         //Lưu order
-        orderRepository.save(order2);
+        orderRepository.save(order);
 
-        // Gán thông tin vào bảng statushistory
-        OrderResponse order = orderRepository.getorderbyid(orderShipping.getOrderId());
-        String title = "Giao hàng cho shipper";
-        orderstatusHistory.insertorderByStatus(orderShipping.getOrderId(), order.getOrderStatus(), title);
+        // Gán thông tin vào bảng orderTracking
+        OrderTracking orderTracking = new OrderTracking();
+        orderTracking.setOrderId(orderShipping.getOrderId());
+        orderTracking.setStatusCode(TrackingStatus.SHIPPING.getCode());
+        orderTracking.setStatusName(TrackingStatus.SHIPPING.getName());
+        orderTracking.setDescription(TrackingStatus.SHIPPING.getDescription());
+        orderTrackingRepository.insertordertracking(orderTracking);
         return orderShipping;
 
     }
@@ -207,10 +245,8 @@ public class OrderShippingServiceImpl implements OrderShippingService {
 
     //Hàm sinh mã vâ đơn
     public String genTracking() {
-
         return "VTP" + System.currentTimeMillis();
     }
-
     //Hàm tính thời gian giao dự kiến
     public LocalDateTime getEstimatedDeliveryTime() {
         return LocalDateTime.now().plusDays(2); // check lại không nhận hàm này khi lấy thời gian ở trên
