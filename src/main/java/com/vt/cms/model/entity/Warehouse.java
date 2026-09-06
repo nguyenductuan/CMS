@@ -7,7 +7,7 @@ import java.time.LocalDateTime;
 @Data
 public class Warehouse {
     private Integer id;
-    private Integer warehouse_code;
+    private String warehouse_code;
     private String warehouse_name;
     private LocalDateTime created_at;
     private LocalDateTime updated_at;

@@ -52,6 +52,7 @@ public class ProductServiceImpl implements ProductService {
         if (product == null) {
             throw new RuntimeException("Không tìm thâý sản phẩm"); // cần response trả về 200
         }
+
         Product product1 = new Product();
         product1.setName(productRequest.getProductName());
         product1.setStock(productRequest.getStock());

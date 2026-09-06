@@ -2,18 +2,23 @@ package com.vt.cms.model.entity;
 
 import lombok.Data;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 @Data
-public class Shipment {
+public class OrderShipping {
     private Integer id;// id của shipment để tracking
     private Integer orderId;// mã đơn
     private String shipmentName;// tên shipper
     private String warehouseName;// ten kho
+    private String warehouseCode;// mã kho
     private String shippingProvider; // GHN, GHTK
     private String trackingCode; // mã vận đơn
     private LocalDateTime createdAt;
     private Integer shipperId;
+    private BigDecimal shippingFee; // phí vận chuyển
+    private  BigDecimal orderAmount;
+    private  BigDecimal totalAmount; // tổng tiền đơn hàng (tổng tiền sản phẩm + phí vận chuyển)
     private String title;
     private LocalDateTime estimatedDeliveryTime; //thời gian giao dự kiến trả từ API vận chuyển
     private LocalDateTime shippedAt;//Thời điểm đơn hàng bắt đầu được giao (Kho → Shipper nhận hàng → bắt đầu đi giao)
