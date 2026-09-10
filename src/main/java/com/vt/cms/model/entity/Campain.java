@@ -1,7 +1,9 @@
 package com.vt.cms.model.entity;
 
-import java.time.LocalDateTime;
+import lombok.Data;
 
+import java.time.LocalDateTime;
+@Data
 public class Campain {
     private int campainid;
     private String campainname;

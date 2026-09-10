@@ -1,13 +1,14 @@
 package com.vt.cms.model.dto;
 
-import java.util.List;
+import lombok.Data;
 
+import java.time.LocalDateTime;
+import java.util.List;
+@Data
 public class CreatedCampainRequest {
     private String campainname;
-    private String startdate;
-    private String enddate;
+    private LocalDateTime startdate;
+    private LocalDateTime enddate;
     private int discountpercent;
-    private int disacountamount;
     private List<CampainProductRequest> products;
-
 }

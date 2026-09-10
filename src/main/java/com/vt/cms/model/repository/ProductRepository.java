@@ -23,4 +23,6 @@ public interface ProductRepository {
     void editstatusproduct(Integer id, String status, LocalDateTime updatedAt);
 
     void deleteproduct(Integer id);
+
+    List<Product> listproduct(Integer productIds);
 }

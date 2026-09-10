@@ -33,6 +33,7 @@ public class ProductServiceImpl implements ProductService {
         product.setName(productRequest.getProductName());
         product.setStock(productRequest.getStock());
         product.setDescription(productRequest.getProductDescription());
+
         product.setStatus("WAITING APPROVED");
         product.setIs_delete("false");
         product.setPrice(productRequest.getProductPrice());

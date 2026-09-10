@@ -1,11 +1,11 @@
 package com.vt.cms.model.dto;
 
-import java.math.BigDecimal;
+import lombok.Data;
 
+import java.math.BigDecimal;
+import java.util.List;
+@Data
 public class CampainProductRequest {
     private int productid;
-    private BigDecimal price;
-    private int quantity;
-    private BigDecimal campaignPrice;
-    private int sortorder;
+   private List<CampainProductSku> skus;
 }
