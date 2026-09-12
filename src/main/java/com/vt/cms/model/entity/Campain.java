@@ -11,4 +11,5 @@ public class Campain {
     private LocalDateTime enddate;
     private int discountpercent;
     private int disacountamount;
+    private String status;
 }

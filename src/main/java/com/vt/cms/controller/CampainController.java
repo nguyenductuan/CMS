@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping
 @RestController
 
-//Thêm mới campain (1 campain nhiều sản phẩm)
+//Thêm mới chiến dịch (1 campain nhiều sản phẩm)
 public class CampainController {
     private CampainService campainService;
     @PostMapping("/campain")
@@ -18,15 +18,18 @@ public class CampainController {
         return ResponseEntity.ok(new
                 APIRessponse(200, "Tạo chiến dịch thành công"));
     }
-    // Lấy danh sách campain
+    // Lấy danh sách chiến dịch: cờ xử lý, Đang diễn ra, Săp diễn ra, Đã kết thúc
     @GetMapping("/campain")
     public String getCampain() {
         return "Get campain successfully";
     }
-    @PutMapping("/campain")
-    public String updateCampain() {
+    //Thay đổi trạng thái chiến dịch(Duyệt, kết thúc chiến dịch)
+    @PostMapping("/campainstatus")
+    public String updateCampain( @RequestBody int campainId, String status) {
+        campainService.updatestatus(campainId, status);
         return "Campain updated successfully";
     }
+    // Xóa chiến dịch
     @DeleteMapping("/campain")
     public String deleteCampain() {
         return "Campain deleted successfully";

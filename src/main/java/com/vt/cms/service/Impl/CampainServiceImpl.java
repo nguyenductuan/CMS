@@ -5,44 +5,58 @@ import com.vt.cms.model.dto.CampainProductSku;
 import com.vt.cms.model.dto.CreatedCampainRequest;
 import com.vt.cms.model.entity.Campain;
 import com.vt.cms.model.entity.CampainProduct;
-import com.vt.cms.model.entity.CampainproductSku;
-import com.vt.cms.model.entity.Product;
+
+import com.vt.cms.model.repository.CampainProductRepository;
 import com.vt.cms.model.repository.CampainRepository;
 import com.vt.cms.model.repository.ProductRepository;
 import com.vt.cms.service.CampainService;
 
 public class CampainServiceImpl implements CampainService {
     private CampainRepository campainRepository;
+    private CampainProductRepository campainProductRepository;
 
-    public CampainServiceImpl(CampainRepository campainRepository, ProductRepository productRepository) {
+    public CampainServiceImpl(CampainRepository campainRepository,
+                              CampainProductRepository campainProductRepository,
+                              ProductRepository productRepository) {
         this.campainRepository = campainRepository;
+        this.campainProductRepository = campainProductRepository;
     }
 
     @Override
     public void createdCampain(CreatedCampainRequest request) {
         Campain campain = new Campain();
         campain.setCampainname(request.getCampainname());
+        campain.setStatus("PendingApproved");
         campain.setStartdate(request.getStartdate());
         campain.setEnddate(request.getEnddate());
         campain.setDiscountpercent(request.getDiscountpercent());
-
         campainRepository.savecampain(campain);
-        long campainId = campain.getCampainid();
+
+        int campainId = campain.getCampainid();
         CampainProduct campainProduct = new CampainProduct();
-        CampainproductSku campainproductSku = new CampainproductSku();
-        for (CampainProductRequest campainProductRequest : request.getProducts() )
+
+        for (CampainProductRequest productcampain : request.getProducts() )
         {
             campainProduct.setCampainid(campainId);
-            campainProduct.setProductId(campainProductRequest.getProductid());
-            campainProductRepository.save(campainProduct);
-            long campainProductId = campainProduct.getProductId();
-            for (CampainProductSku campainProductSkurequest: campainProductRequest.getSkus())
+            campainProduct.setProductId(productcampain.getProductid());
+            for (CampainProductSku skuID: productcampain.getSkus())
             {
-                campainproductSku.setProductID(campainProductId);
-                campainproductSku.setDiscountPrice();
-                campainproductSku.setStatus();
-                campainProductSkuRepository.save(campainproductSku);
+
+               campainProduct.setSkuId(skuID.getSkuId());
+               campainProduct.setDiscountPrice(skuID.getDiscountPrice());
+               campainProduct.setStockCampaign("10");
+               campainProduct.setStatus(skuID.getStatus());
+               campainProduct.setPrice(skuID.getDiscountPrice());
             }
+            campainProductRepository.savecampainproduct(campainProduct);
         }
     }
+
+    @Override
+    public void updatestatus(int campainID, String status) {
+        Campain campain = campainRepository.getCampainById(campainID);
+        campain.setStatus(status);
+        campainRepository.savecampain(campain);
+    }
+
 }
