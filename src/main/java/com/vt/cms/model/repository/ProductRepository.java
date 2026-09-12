@@ -25,4 +25,6 @@ public interface ProductRepository {
     void deleteproduct(Integer id);
 
     List<Product> listproduct(Integer productIds);
+
+
 }

@@ -17,21 +17,21 @@ import java.util.List;
 public class ProductController {
     @Autowired
     private final ProductService productService;
-
     public ProductController(ProductService productService) {
         this.productService = productService;
     }
-
     @GetMapping("listproduct")
     public BaseResponse<PagingResponse<List<ProductResponse>>> listProduct(@ModelAttribute OrdersRequest request) {
         return productService.listproduct(request);
     }
-
+    @PostMapping ("approveproduct")
+    public void approvedProduct(@RequestBody int productID){
+        productService.editstatusproduct(productID);
+    }
     @GetMapping("detail/{id}")
     public ProductResponse product_detail(@PathVariable Integer id) {
         return productService.detail(id);
     }
-
     @PostMapping("addproduct")
     public void addproduct(@RequestBody ProductRequest productRequest) {
         productService.addproduct(productRequest);
@@ -46,10 +46,5 @@ public class ProductController {
     @DeleteMapping("deleteproduct/{id}")
     public void deleteproduct(@PathVariable Integer id) {
         productService.deleteproduct(id);
-    }
-
-    @PutMapping("editstatus/{id}")
-    public void editstatus(@PathVariable Integer id, String status) {
-        productService.editstatusproduct(id, status);
     }
 }

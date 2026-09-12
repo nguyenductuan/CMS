@@ -11,6 +11,7 @@ import com.vt.cms.model.dto.product.SkuRequest;
 import com.vt.cms.model.entity.Product;
 import com.vt.cms.model.entity.Product_Sku;
 import com.vt.cms.model.repository.ProductRepository;
+import com.vt.cms.model.repository.ProductSkuRepository;
 import com.vt.cms.model.resp.BaseResponse;
 import com.vt.cms.model.resp.ProductResponse;
 import com.vt.cms.service.ProductService;
@@ -30,6 +31,7 @@ public class ProductServiceImpl implements ProductService {
     private final Modelmapper modelMapper = Mappers.getMapper(Modelmapper.class);
     private final ProductRepository productRepository;
     private final ObjectMapper objectMapper;
+    private final ProductSkuRepository productSkuRepository;
 
 
     @Override
@@ -48,7 +50,6 @@ public class ProductServiceImpl implements ProductService {
         }
         product.setPrice_display(productRequest.getProductPrice());
         product.setCreatedAt(LocalDateTime.now());
-        product.setImage("https://down-vn.img.susercontent.com/file/sg-11134201-822zi-mibaop7aot8g88.webp");
         productRepository.insertproduct(product);
         Product_Sku productSku = new Product_Sku();
         for (SkuRequest skuRequest : productRequest.getSkus()){
@@ -56,14 +57,12 @@ public class ProductServiceImpl implements ProductService {
             productSku.setHeight(skuRequest.getHeightCm());
             productSku.setWidth(skuRequest.getWidthCm());
             productSku.setWeight(skuRequest.getWeightGram());
-
-            productSku.getStock(skuRequest.getStock());
-            productSku.getStatus(skuRequest.getStatus());
-            productSku.getSku_code(skuRequest.getSkuCode());
-            productSku.getCreated_at(LocalDateTime.now());
-
+            productSku.setStock(skuRequest.getStock());
+            productSku.setStatus(skuRequest.getStatus());
+            productSku.setSku_code(skuRequest.getSkuCode());
+            productSku.setCreated_at(LocalDateTime.now());
+            productSkuRepository.saveproduct(productSku);
         }
-
     }
 
     @Override
@@ -82,7 +81,7 @@ public class ProductServiceImpl implements ProductService {
         product1.setName(productRequest.getProductName());
         product1.setStock(productRequest.getStock());
         product1.setDescription(productRequest.getProductDescription());
-        product1.setPrice(productRequest.getProductPrice());
+        product1.setPrice_display(productRequest.getProductPrice());
         product1.setUpdatedAt(LocalDateTime.now());
         product1.setImage(productRequest.getProductimage());
         productRepository.upload(product1, id);
@@ -92,34 +91,28 @@ public class ProductServiceImpl implements ProductService {
     public BaseResponse<PagingResponse<List<ProductResponse>>> listproduct(OrdersRequest request) {
         List<ProductResponse> product = productRepository.listproduct(request);
         long totalCount = productRepository.countproduct();
-        long totalpage = totalCount / (request.getPageSize());
-
-
+        long totalpage = (long) Math.ceil((double) totalCount / request.getPageSize());
         // page info
         PageInfo pageInfo = new PageInfo();
         pageInfo.setPageNo(request.getPageNo());
         pageInfo.setPageSize(request.getPageSize());
         pageInfo.setTotalCount(totalCount);
         pageInfo.setTotalPage(totalpage);
-
         // paging response
         PagingResponse<List<ProductResponse>> pagingResponse = new PagingResponse<>();
-
         pagingResponse.setPageInfo(pageInfo);
         pagingResponse.setData(product);
-
         // base response
         BaseResponse<PagingResponse<List<ProductResponse>>> response = new BaseResponse<>();
-
         response.setMessage("Successful!");
         response.setData(pagingResponse);
-
         return response;
     }
 
     @Override
-    public void editstatusproduct(Integer id, String status) {
+    public void editstatusproduct(Integer id) {
         var update = LocalDateTime.now();
+        String status = "Approved";
         productRepository.editstatusproduct(id, status, update);
     }
 
@@ -127,5 +120,7 @@ public class ProductServiceImpl implements ProductService {
     public void deleteproduct(Integer id) {
         productRepository.deleteproduct(id);
     }
+
+
 
 }
