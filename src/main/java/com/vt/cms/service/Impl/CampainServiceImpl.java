@@ -51,7 +51,7 @@ public class CampainServiceImpl implements CampainService {
             campainProductRepository.savecampainproduct(campainProduct);
         }
     }
-
+// Luồng ập nhật trạng thái chiến dịch
     @Override
     public void updatestatus(int campainID, String status) {
         Campain campain = campainRepository.getCampainById(campainID);
