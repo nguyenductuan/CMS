@@ -1,11 +1,15 @@
 package com.vt.cms.service.Impl;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.vt.cms.mapper.Modelmapper;
 import com.vt.cms.model.dto.OrdersRequest;
 import com.vt.cms.model.dto.ProductRequest;
 import com.vt.cms.model.dto.page.PageInfo;
 import com.vt.cms.model.dto.page.PagingResponse;
+import com.vt.cms.model.dto.product.SkuRequest;
 import com.vt.cms.model.entity.Product;
+import com.vt.cms.model.entity.Product_Sku;
 import com.vt.cms.model.repository.ProductRepository;
 import com.vt.cms.model.resp.BaseResponse;
 import com.vt.cms.model.resp.ProductResponse;
@@ -25,6 +29,7 @@ public class ProductServiceImpl implements ProductService {
 
     private final Modelmapper modelMapper = Mappers.getMapper(Modelmapper.class);
     private final ProductRepository productRepository;
+    private final ObjectMapper objectMapper;
 
 
     @Override
@@ -33,13 +38,32 @@ public class ProductServiceImpl implements ProductService {
         product.setName(productRequest.getProductName());
         product.setStock(productRequest.getStock());
         product.setDescription(productRequest.getProductDescription());
-
         product.setStatus("WAITING APPROVED");
         product.setIs_delete("false");
-        product.setPrice(productRequest.getProductPrice());
+        try {
+            String jsonImage = objectMapper.writeValueAsString(productRequest.getImages());
+            product.setJson_image(jsonImage);
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException("Cannot convert images to JSON", e);
+        }
+        product.setPrice_display(productRequest.getProductPrice());
         product.setCreatedAt(LocalDateTime.now());
         product.setImage("https://down-vn.img.susercontent.com/file/sg-11134201-822zi-mibaop7aot8g88.webp");
         productRepository.insertproduct(product);
+        Product_Sku productSku = new Product_Sku();
+        for (SkuRequest skuRequest : productRequest.getSkus()){
+            productSku.setProductId(product.getId());
+            productSku.setHeight(skuRequest.getHeightCm());
+            productSku.setWidth(skuRequest.getWidthCm());
+            productSku.setWeight(skuRequest.getWeightGram());
+
+            productSku.getStock(skuRequest.getStock());
+            productSku.getStatus(skuRequest.getStatus());
+            productSku.getSku_code(skuRequest.getSkuCode());
+            productSku.getCreated_at(LocalDateTime.now());
+
+        }
+
     }
 
     @Override

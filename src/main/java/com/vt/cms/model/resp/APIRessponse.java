@@ -6,7 +6,6 @@ public class APIRessponse {
     private int code;
     private String message;
     private Object data;
-    private Map<String, String> errors;
 
     public APIRessponse(int code, String message) {
         this.code = code;
@@ -30,6 +29,5 @@ public class APIRessponse {
     ) {
         this.code = code;
         this.message = message;
-        this.errors = errors;
     }
 }

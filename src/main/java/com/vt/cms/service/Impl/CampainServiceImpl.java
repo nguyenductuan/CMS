@@ -13,11 +13,9 @@ import com.vt.cms.service.CampainService;
 
 public class CampainServiceImpl implements CampainService {
     private CampainRepository campainRepository;
-    private ProductRepository productRepository;
 
     public CampainServiceImpl(CampainRepository campainRepository, ProductRepository productRepository) {
         this.campainRepository = campainRepository;
-        this.productRepository = productRepository;
     }
 
     @Override

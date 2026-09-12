@@ -15,8 +15,5 @@ public class BaseResponse<T> {
     private T data;
 
 
-//    public static <T> BaseResponse<T> of(T data) {
-//
-//        return new BaseResponse<>(data);
-//    }
+
 }
