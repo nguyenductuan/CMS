@@ -5,4 +5,6 @@ import com.vt.cms.model.entity.Campain;
 public interface CampainRepository {
     int savecampain(Campain campain);
    Campain getCampainById(Integer campainId);
+    void getlistcampain();
+    void deletecampain(Integer campainID );
 }

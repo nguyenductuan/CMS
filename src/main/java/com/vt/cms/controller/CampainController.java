@@ -21,6 +21,7 @@ public class CampainController {
     // Lấy danh sách chiến dịch: cờ xử lý, Đang diễn ra, Săp diễn ra, Đã kết thúc
     @GetMapping("/campain")
     public String getCampain() {
+        campainService.getlist();
         return "Get campain successfully";
     }
     //Thay đổi trạng thái chiến dịch(Duyệt, kết thúc chiến dịch)
@@ -30,8 +31,9 @@ public class CampainController {
         return "Campain updated successfully";
     }
     // Xóa chiến dịch
-    @DeleteMapping("/campain")
-    public String deleteCampain() {
+    @DeleteMapping("/campain/{id}")
+    public String deleteCampain(Integer campainId) {
+      campainService.deletecampain(campainId);
         return "Campain deleted successfully";
     }
 }
