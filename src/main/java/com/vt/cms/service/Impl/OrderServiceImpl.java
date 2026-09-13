@@ -3,6 +3,7 @@ package com.vt.cms.service.Impl;
 import com.vt.cms.model.dto.OrderItemRequest;
 import com.vt.cms.model.dto.OrderRequest;
 import com.vt.cms.model.dto.OrdersRequest;
+import com.vt.cms.model.dto.SkuOrderRequest;
 import com.vt.cms.model.dto.page.PageInfo;
 import com.vt.cms.model.dto.page.PagingResponse;
 import com.vt.cms.model.entity.Order;
@@ -109,51 +110,75 @@ public class OrderServiceImpl implements OrderService {
 
     @Override
     public void createOrder(OrderRequest request) {
-        // 1. Lấy thông tin sp gửi lên ở orderItemms
-        //2. Tính tiền sp
-        //3. Lấy thông tin phí ship đã gửi
-        //4. Tính tổng giá tiền
-        //5. Thêm vào bảng order với thông tin: orderId, totalamount, status: chờ thanh toán, createdAt, thông tin người nhận
-        //6. Thêm vào bảng payment với thông tin: id, id đơn, payment_method, payment_provider, transaction_id, status
-        BigDecimal totalAmount = BigDecimal.ZERO;
+        // ==========================================
+        // 1. Lấy sản phẩm + SKU và tính tiền sản phẩm //
+        // =========================
+            BigDecimal totalAmount = BigDecimal.ZERO;
+        BigDecimal priceshipping = null;
         for (OrderItemRequest orderItemRequest : request.getOrder()) {
             Integer productId = orderItemRequest.getProductId();
             Integer campainID= orderItemRequest.getCampainId();
             ProductDetailResponse product = productRepository.getproduct(productId,campainID);
-
             if (product == null) {
                 throw new RuntimeException("Product not found");
             }
-
-            BigDecimal total = priceService.calculateItemPrice
-                    (
-                            product.getPrice(), orderItemRequest.getQuantity()
-                    );
-            totalAmount = totalAmount.add(total);
-
-
+            // Duyệt các SKU trong order
+            for (SkuOrderRequest item : orderItemRequest.getItem()) {
+                // Tìm SKU tương ứng
+                SkuResponse sku = product.getSkus() .stream() .
+                        filter(s -> s.getId().equals(item.getSkuId())) .
+                        findFirst() .orElseThrow(()
+                                -> new RuntimeException( "SKU not found: " + item.getSkuId() ) );
+                // Kiểm tra số lượng
+                if (item.getQuantity() == null || item.getQuantity() <= 0)
+                {
+                    throw new RuntimeException( "Invalid quantity for SKU: " + item.getSkuId() );
+                }
+                // Kiểm tra tồn kho
+                if (sku.getStock() < item.getQuantity())
+                {
+                    throw new RuntimeException( "Not enough stock for SKU: " + item.getSkuId() );
+                }
+                // Lấy giá bán
+                BigDecimal price = sku.getPriceDiscountCampaign();
+                if (price == null)
+                {
+                    price = sku.getPrice();
+                }
+                if (price == null)
+                {
+                    throw new RuntimeException( "Price not found for SKU: " + item.getSkuId() );
+                }
+                // Tính tiền SKU
+                BigDecimal itemAmount = priceService.calculateItemPrice( price, item.getQuantity() );
+                totalAmount = totalAmount.add(itemAmount);
+            }
+            Shipping shipping = shippingRepository.detailShipping(orderItemRequest.getShippingMethodId());
+            priceshipping = shipping.getFee();
+        }
+        // ==========================================
+        // 3. Tính tổng tiền
+        // ==========================================
         //Lấy thng tin phuwong thức vận chuyển  request gửi lên
-        Shipping shipping = shippingRepository.detailShipping(orderItemRequest.getShippingMethodId());
-        BigDecimal priceshipping = shipping.getFee();
-        totalAmount = totalAmount.add(priceshipping);
-    }
+
+        BigDecimal totalAmountt = totalAmount.add(priceshipping);
         //     2. Tạo order
         Order order = new Order();
-        order.setTotal(totalAmount);
+        order.setTotal(totalAmountt);
         order.setStatus(OrderStatus.WAIT_PAYMENT);
         order.setCreatedAt(LocalDateTime.now());
         order.setExpectedDelivery(LocalDateTime.now().plusDays(2));
         orderRepository.insertorder(order);
 
-        var orderid = order.getId();
+       Integer orderid = order.getId();
         OrderTracking tracking = new OrderTracking();
         tracking.setOrderId(orderid);
-        tracking.setStatus(TrackingStatus.WAITING_PAYMENT.getCode());
+        tracking.setStatusCode(TrackingStatus.WAITING_PAYMENT.getCode());
         tracking.setTitle(TrackingStatus.WAITING_PAYMENT.getDescription());
         orderTrackingRepository.insertordertracking(tracking);
        // Thêm vào bảng payment
         Payment payment = new Payment();
-        payment.setOrderid(String.valueOf(orderid));
+        payment.setOrderId(orderid);
         payment.setStatus("WAITING_PAYMENT");
         payment.setAmount(totalAmount);
         payment.setTrancactioncode( LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMddHHmmss")) +

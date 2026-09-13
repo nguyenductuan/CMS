@@ -10,6 +10,6 @@ import java.math.BigDecimal;
 public class PriceServiceImpl implements PriceService {
     @Override
     public BigDecimal calculateItemPrice(BigDecimal price, int quantity) {
-        return product.getPrice().multiply(BigDecimal.valueOf(quantity));
+        return price.multiply(BigDecimal.valueOf(quantity));
     }
 }
