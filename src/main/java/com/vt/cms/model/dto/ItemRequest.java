@@ -7,6 +7,7 @@ import lombok.Data;
 public class ItemRequest {
     @JsonProperty("product_id")
     private Integer productId;
+    private  Integer campainId;
     private int quantity;
 
 }

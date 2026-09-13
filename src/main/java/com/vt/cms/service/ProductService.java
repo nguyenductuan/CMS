@@ -4,6 +4,7 @@ import com.vt.cms.model.dto.OrdersRequest;
 import com.vt.cms.model.dto.ProductRequest;
 import com.vt.cms.model.dto.page.PagingResponse;
 import com.vt.cms.model.resp.BaseResponse;
+import com.vt.cms.model.resp.ProductDetailResponse;
 import com.vt.cms.model.resp.ProductResponse;
 
 import java.util.List;
@@ -21,6 +22,7 @@ public interface ProductService {
 
     void deleteproduct(Integer id);
 
+    ProductDetailResponse product_detail(Integer campainId, Integer productId);
 
 
 }

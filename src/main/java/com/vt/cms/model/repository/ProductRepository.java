@@ -2,6 +2,7 @@ package com.vt.cms.model.repository;
 
 import com.vt.cms.model.dto.OrdersRequest;
 import com.vt.cms.model.entity.Product;
+import com.vt.cms.model.resp.ProductDetailResponse;
 import com.vt.cms.model.resp.ProductResponse;
 import org.apache.ibatis.annotations.Mapper;
 
@@ -25,6 +26,7 @@ public interface ProductRepository {
     void deleteproduct(Integer id);
 
     List<Product> listproduct(Integer productIds);
+    ProductDetailResponse getproduct(Integer product, Integer campainId);
 
 
 }

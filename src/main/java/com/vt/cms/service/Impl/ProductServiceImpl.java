@@ -13,6 +13,7 @@ import com.vt.cms.model.entity.Product_Sku;
 import com.vt.cms.model.repository.ProductRepository;
 import com.vt.cms.model.repository.ProductSkuRepository;
 import com.vt.cms.model.resp.BaseResponse;
+import com.vt.cms.model.resp.ProductDetailResponse;
 import com.vt.cms.model.resp.ProductResponse;
 import com.vt.cms.service.ProductService;
 import lombok.RequiredArgsConstructor;
@@ -121,6 +122,8 @@ public class ProductServiceImpl implements ProductService {
         productRepository.deleteproduct(id);
     }
 
-
-
+    @Override
+    public ProductDetailResponse product_detail(Integer productId, Integer campainId) {
+      return  productRepository.getproduct(productId,campainId);
+    }
 }

@@ -11,6 +11,7 @@ public class ItemDto {
     private int productId;
     @JsonProperty("product_name")
     private String productName;
+    private Integer campainID;
     private BigDecimal price;
     private int quantity;
     private int stock;

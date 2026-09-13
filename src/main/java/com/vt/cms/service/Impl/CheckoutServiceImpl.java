@@ -90,6 +90,7 @@ public class CheckoutServiceImpl implements CheckoutService {
         }
         ItemDto itemDTO = new ItemDto();
         itemDTO.setProductId(product.getId());
+        itemDTO.setCampainID(itemRequest.getCampainId());
         itemDTO.setProductName(product.getName());
         itemDTO.setPrice(product.getPrice());
         itemDTO.setQuantity(itemRequest.getQuantity());

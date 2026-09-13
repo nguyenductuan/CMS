@@ -12,10 +12,7 @@ import com.vt.cms.model.entity.Shipping;
 import com.vt.cms.model.enums.OrderStatus;
 import com.vt.cms.model.enums.TrackingStatus;
 import com.vt.cms.model.repository.*;
-import com.vt.cms.model.resp.BaseResponse;
-import com.vt.cms.model.resp.OrderItemResponse;
-import com.vt.cms.model.resp.OrderResponse;
-import com.vt.cms.model.resp.ProductResponse;
+import com.vt.cms.model.resp.*;
 import com.vt.cms.service.OrderService;
 import com.vt.cms.service.PriceService;
 import org.springframework.stereotype.Service;
@@ -121,12 +118,17 @@ public class OrderServiceImpl implements OrderService {
         BigDecimal totalAmount = BigDecimal.ZERO;
         for (OrderItemRequest orderItemRequest : request.getOrder()) {
             Integer productId = orderItemRequest.getProductId();
-            ProductResponse product = productRepository.detailProduct(productId);
+            Integer campainID= orderItemRequest.getCampainId();
+            ProductDetailResponse product = productRepository.getproduct(productId,campainID);
 
             if (product == null) {
                 throw new RuntimeException("Product not found");
             }
-            BigDecimal total = priceService.calculateItemPrice(product.getPrice(), orderItemRequest.getQuantity());
+
+            BigDecimal total = priceService.calculateItemPrice
+                    (
+                            product.getPrice(), orderItemRequest.getQuantity()
+                    );
             totalAmount = totalAmount.add(total);
 
 
@@ -163,13 +165,6 @@ public class OrderServiceImpl implements OrderService {
 
 
         paymentRepostitory.insertpayment(payment);
-
-
-//        for (OrderItem o : items) {
-//            o.setOrderId(orderid);
-//            orderItemRepository.insertorderCartItem(o);
-//        }
-
 
     }
 

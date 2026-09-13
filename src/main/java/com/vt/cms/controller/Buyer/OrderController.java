@@ -1,4 +1,4 @@
-package com.vt.cms.controller;
+package com.vt.cms.controller.Buyer;
 
 import com.vt.cms.model.dto.OrderRequest;
 import com.vt.cms.model.dto.OrdersRequest;
