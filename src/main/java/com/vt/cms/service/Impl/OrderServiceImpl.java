@@ -38,7 +38,14 @@ public class OrderServiceImpl implements OrderService {
     private PaymentRepostitory paymentRepostitory;
 
 
-    public OrderServiceImpl(OrderRepository orderRepository, OrderTrackingRepository orderTrackingRepository, ProductRepository productRepository, OrderItemRepository orderItemRepository, ShippingRepository shippingRepository, RestClient.Builder builder, PaymentServiceImpl paymentServiceImpl) {
+    public OrderServiceImpl(OrderRepository orderRepository,
+                            OrderTrackingRepository orderTrackingRepository,
+                            ProductRepository productRepository,
+                            OrderItemRepository orderItemRepository,
+                            ShippingRepository shippingRepository,
+                            PriceService priceService,
+                            PaymentRepostitory paymentRepostitory
+                            ) {
         this.orderRepository = orderRepository;
         this.productRepository = productRepository;
         this.orderItemRepository = orderItemRepository;
@@ -52,7 +59,7 @@ public class OrderServiceImpl implements OrderService {
     @Override
     public OrderResponse getdetailorder(long orderId) {
         // 1. Lấy order
-        OrderResponse order = orderRepository.getorderbyid(orderId);
+        Order order = orderRepository.getorderbyid(orderId);
         if (order == null) {
             throw new RuntimeException("Order not found");
         }
@@ -72,8 +79,6 @@ public class OrderServiceImpl implements OrderService {
         order.setCancelAt(LocalDateTime.now());
         orderRepository.cancelOrder(order);
     }
-
-
     @Override
     public BaseResponse<PagingResponse<List<OrderResponse>>> getorderlist(OrdersRequest request) {
         List<OrderResponse> order = orderRepository.getOrder(request);
@@ -107,7 +112,6 @@ public class OrderServiceImpl implements OrderService {
         return response;
 
     }
-
     @Override
     public void createOrder(OrderRequest request) {
         // ==========================================
@@ -192,7 +196,6 @@ public class OrderServiceImpl implements OrderService {
         paymentRepostitory.insertpayment(payment);
 
     }
-
     public LocalDateTime getEstimatedDeliveryTime() {
         return LocalDateTime.now().plusDays(2);
     }
