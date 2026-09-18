@@ -44,9 +44,4 @@ public class OrderController {
     public OrderResponse order(@PathVariable long id) {
         return orderService.getdetailorder(id);
     }
-
-//    @GetMapping("/order/{customerId}")
-//    public OrderResponse order(@PathVariable Integer customerId) {
-//        return orderService.getlistorder();
-//    }
 }

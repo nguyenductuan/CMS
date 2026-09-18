@@ -10,7 +10,9 @@ import com.vt.cms.model.repository.CampainProductRepository;
 import com.vt.cms.model.repository.CampainRepository;
 import com.vt.cms.model.repository.ProductRepository;
 import com.vt.cms.service.CampainService;
+import org.springframework.stereotype.Service;
 
+@Service
 public class CampainServiceImpl implements CampainService {
     private CampainRepository campainRepository;
     private CampainProductRepository campainProductRepository;

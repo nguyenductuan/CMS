@@ -59,14 +59,11 @@ public class OrderServiceImpl implements OrderService {
     @Override
     public OrderResponse getdetailorder(long orderId) {
         // 1. Lấy order
-        Order order = orderRepository.getorderbyid(orderId);
+        OrderResponse order = orderRepository.getorderbyid(orderId);
         if (order == null) {
             throw new RuntimeException("Order not found");
         }
-        // 2. Lấy list items
-        List<OrderItemResponse> items = orderRepository.getItemsByOrderId(orderId);
-        // 3. Set vào order
-        order.setOrderItems(items);
+
         return order;
     }
 
