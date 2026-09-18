@@ -13,6 +13,8 @@ public class ItemDto {
     private String productName;
     private Integer campainID;
     private BigDecimal price;
+    private  BigDecimal price_campain;
+    private BigDecimal price_discount;
     private int quantity;
     private int stock;
 

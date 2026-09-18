@@ -1,7 +1,7 @@
 package com.vt.cms.model.resp;
 
 
-import com.vt.cms.model.entity.OrderItem;
+import com.vt.cms.model.dto.ItemDto;
 import lombok.Data;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -18,6 +18,6 @@ private LocalDateTime receive_at;
 private LocalDateTime confirm_dealine_at;
 private LocalDateTime expected_delivery_from;
 private  LocalDateTime expected_delivery_to;
-private List<OrderItem> orderItems;
+private List<ItemDto> orderItems;
 
 }
