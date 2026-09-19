@@ -6,5 +6,5 @@ import lombok.Data;
 public class MediaRequest {
     private String type;
     private String url;
-    private Integer sortOrder;
+    private Integer sort_order;
 }

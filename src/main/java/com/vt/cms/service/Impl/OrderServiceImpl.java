@@ -35,7 +35,7 @@ public class OrderServiceImpl implements OrderService {
     private OrderTrackingRepository orderTrackingRepository;
     private OrderRepository orderRepository;
     private PriceService priceService;
-    private PaymentRepostitory paymentRepostitory;
+//    private PaymentRepostitory paymentRepostitory;
 
 
     public OrderServiceImpl(OrderRepository orderRepository,
@@ -43,8 +43,8 @@ public class OrderServiceImpl implements OrderService {
                             ProductRepository productRepository,
                             OrderItemRepository orderItemRepository,
                             ShippingRepository shippingRepository,
-                            PriceService priceService,
-                            PaymentRepostitory paymentRepostitory
+                            PriceService priceService
+
                             ) {
         this.orderRepository = orderRepository;
         this.productRepository = productRepository;
@@ -52,7 +52,7 @@ public class OrderServiceImpl implements OrderService {
         this.shippingRepository = shippingRepository;
         this.orderTrackingRepository = orderTrackingRepository;
         this.priceService = priceService;
-        this.paymentRepostitory = paymentRepostitory;
+
 
     }
 
@@ -80,8 +80,8 @@ public class OrderServiceImpl implements OrderService {
     public BaseResponse<PagingResponse<List<OrderResponse>>> getorderlist(OrdersRequest request) {
         List<OrderResponse> order = orderRepository.getOrder(request);
         for (OrderResponse o : order) {
-            List<OrderItemResponse> items1 = orderRepository.getItemsByOrderId(o.getOrderid());
-            o.setOrderItems(items1);
+            List<OrderItemResponse> items1 = orderRepository.getItemsByOrderId(o.getOrderId());
+           // o.setOrderItems(items1);
         }
         long totalCount = orderRepository.countorder();
         long totalpage = totalCount / (request.getPageSize());
@@ -190,7 +190,7 @@ public class OrderServiceImpl implements OrderService {
                         .toUpperCase());
 
 
-        paymentRepostitory.insertpayment(payment);
+        //paymentRepostitory.insertpayment(payment);
 
     }
     public LocalDateTime getEstimatedDeliveryTime() {

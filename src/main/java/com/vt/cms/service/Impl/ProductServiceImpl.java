@@ -7,10 +7,12 @@ import com.vt.cms.model.dto.OrdersRequest;
 import com.vt.cms.model.dto.ProductRequest;
 import com.vt.cms.model.dto.page.PageInfo;
 import com.vt.cms.model.dto.page.PagingResponse;
+//import com.vt.cms.model.dto.product.SkuRequest;
 import com.vt.cms.model.dto.product.SkuRequest;
 import com.vt.cms.model.entity.Product;
 import com.vt.cms.model.entity.Product_Sku;
 import com.vt.cms.model.repository.ProductRepository;
+//import com.vt.cms.model.repository.ProductSkuRepository;
 import com.vt.cms.model.repository.ProductSkuRepository;
 import com.vt.cms.model.resp.BaseResponse;
 import com.vt.cms.model.resp.ProductDetailResponse;
@@ -32,37 +34,54 @@ public class ProductServiceImpl implements ProductService {
     private final Modelmapper modelMapper = Mappers.getMapper(Modelmapper.class);
     private final ProductRepository productRepository;
     private final ObjectMapper objectMapper;
-    private final ProductSkuRepository productSkuRepository;
+  private final ProductSkuRepository productSkuRepository;
+
 
 
     @Override
     public void addproduct(ProductRequest productRequest) {
         Product product = new Product();
-        product.setName(productRequest.getProductName());
-        product.setStock(productRequest.getStock());
-        product.setDescription(productRequest.getProductDescription());
-        product.setStatus("WAITING APPROVED");
-        product.setIs_delete("false");
-        try {
-            String jsonImage = objectMapper.writeValueAsString(productRequest.getImages());
-            product.setJson_image(jsonImage);
-        } catch (JsonProcessingException e) {
-            throw new RuntimeException("Cannot convert images to JSON", e);
+        product.setName(productRequest.getName());
+        //product.setStock(productRequest.getStock());
+        product.setDescription(productRequest.getDescription());
+        product.setStatus(productRequest.getStatus());
+        product.setIs_deleted("false");
+
+       // product.setPrice_display(productRequest.getProductPrice());
+        product.setCreated_at(LocalDateTime.now());
+        product.setCreated_by("SYSTEMS");
+        try{
+            product.setType_products(objectMapper.writeValueAsString(productRequest.getType_products()));
+            product.setJson_attributes(objectMapper.writeValueAsString(productRequest.getAttributes()));
+            product.setJson_medias(objectMapper.writeValueAsString(productRequest.getMedias()));
+            product.setJson_images(objectMapper.writeValueAsString(productRequest.getImages()));
         }
-        product.setPrice_display(productRequest.getProductPrice());
-        product.setCreatedAt(LocalDateTime.now());
+        catch (JsonProcessingException e) {
+            throw new RuntimeException("Cannot convert to JSON", e);
+        }
+
+        product.setJson_attributes_name(productRequest.getAttributes_name());
+        product.setType_products_name(productRequest.getType_products_name());
         productRepository.insertproduct(product);
+
         Product_Sku productSku = new Product_Sku();
         for (SkuRequest skuRequest : productRequest.getSkus()){
-            productSku.setProductId(product.getId());
-            productSku.setHeight(skuRequest.getHeightCm());
-            productSku.setWidth(skuRequest.getWidthCm());
-            productSku.setWeight(skuRequest.getWeightGram());
+            productSku.setProduct_id(product.getId());
+            productSku.setHeight_cm(skuRequest.getHeight_cm());
+            productSku.setWidth_cm(skuRequest.getWidth_cm());
+            productSku.setWeight_gram(skuRequest.getWeight_gram());
+            productSku.setType_product(skuRequest.getType_product());
             productSku.setStock(skuRequest.getStock());
             productSku.setStatus(skuRequest.getStatus());
-            productSku.setSku_code(skuRequest.getSkuCode());
+            productSku.setSku_code(skuRequest.getSku_code());
+            productSku.setPrice(skuRequest.getPrice());
+            productSku.setImage_url(skuRequest.getImage_url());
+            productSku.setAttribute(skuRequest.getAttribute());
+            productSku.setCreated_by("SYSTEM");
+            productSku.setIs_deleted("false");
+
             productSku.setCreated_at(LocalDateTime.now());
-            productSkuRepository.saveproduct(productSku);
+            productSkuRepository.inserproductsku(productSku);
         }
     }
 
@@ -73,20 +92,25 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     public void editproduct(Integer id, ProductRequest productRequest) {
-        ProductResponse product = productRepository.detailProduct(id);
-        if (product == null) {
-            throw new RuntimeException("Không tìm thâý sản phẩm"); // cần response trả về 200
-        }
 
-        Product product1 = new Product();
-        product1.setName(productRequest.getProductName());
-        product1.setStock(productRequest.getStock());
-        product1.setDescription(productRequest.getProductDescription());
-        product1.setPrice_display(productRequest.getProductPrice());
-        product1.setUpdatedAt(LocalDateTime.now());
-        product1.setImage(productRequest.getProductimage());
-        productRepository.upload(product1, id);
     }
+
+//    @Override
+//    public void editproduct(Integer id, ProductRequest productRequest) {
+//        ProductResponse product = productRepository.detailProduct(id);
+//        if (product == null) {
+//            throw new RuntimeException("Không tìm thâý sản phẩm"); // cần response trả về 200
+//        }
+//
+//        Product product1 = new Product();
+//        product1.setName(productRequest.getProductName());
+//        product1.setStock(productRequest.getStock());
+//        product1.setDescription(productRequest.getProductDescription());
+//        product1.setPrice_display(productRequest.getProductPrice());
+//        product1.setUpdatedAt(LocalDateTime.now());
+//        product1.setImage(productRequest.getProductimage());
+//        productRepository.upload(product1, id);
+//    }
 
     @Override
     public BaseResponse<PagingResponse<List<ProductResponse>>> listproduct(OrdersRequest request) {

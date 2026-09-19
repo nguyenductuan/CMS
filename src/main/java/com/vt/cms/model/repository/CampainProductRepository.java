@@ -5,5 +5,5 @@ import org.mapstruct.Mapper;
 
 @Mapper
 public interface CampainProductRepository {
-    void savecampainproduct(CampainProduct campainProduct);
+    CampainProduct savecampainproduct(CampainProduct campainProduct);
 }

@@ -1,8 +1,8 @@
-package com.vt.cms.service;
-
-import com.vt.cms.model.dto.PaymentRequest;
-
-public interface PaymentService {
-    void Paymentwebhooks(PaymentRequest paymentRequest);
-
-}
+//package com.vt.cms.service;
+//
+//import com.vt.cms.model.dto.PaymentRequest;
+//
+//public interface PaymentService {
+//    void Paymentwebhooks(PaymentRequest paymentRequest);
+//
+//}

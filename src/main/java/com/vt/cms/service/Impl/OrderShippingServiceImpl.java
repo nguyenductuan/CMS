@@ -59,7 +59,7 @@ public class OrderShippingServiceImpl implements OrderShippingService {
             if (o.getId() == null) {
                 throw new RuntimeException("OrderId không được để trống");
             }
-            Order order = orderRepository.getorderbyid(o.getId());
+            Order order = orderRepository.getorderbyId(o.getId());
             if (order.getStatus() != OrderStatus.PAID){
                 throw new RuntimeException("Đơn hàng khác trạng thái đã thanh toán, không thể chuẩn bị hàng");
             }
@@ -81,7 +81,7 @@ public class OrderShippingServiceImpl implements OrderShippingService {
             BigDecimal totalAmount = orderShipping.getOrderAmount().add(orderShipping.getShippingFee());
             orderShipping.setTotalAmount(totalAmount);
             orderShipping.setCreatedAt(LocalDateTime.now());
-            Order order1 =orderRepository.getorderbyid(order.getId());
+            Order order1 =orderRepository.getorderbyId(order.getId());
             order1.setStatus(OrderStatus.PREPARING);
             orderRepository.save(order1);
             orderShipping.setDeliveredAt(order1.getDeliveredAt());
@@ -195,7 +195,7 @@ BigDecimal b = a.divide(BigDecimal.valueOf(1000));
         orderShippingRepository.saveShipment(orderShipping);
         shiperRepository.saveShiper(shipper);
 
-     Order order = orderRepository.getorderbyid(
+     Order order = orderRepository.getorderbyId(
              orderShipping.getOrderId()
      );
 
@@ -224,7 +224,7 @@ BigDecimal b = a.divide(BigDecimal.valueOf(1000));
         orderRepository.save(order1);
         OrderResponse orderResponse = orderRepository.getorderbyid(orderid);
         String title = "Shipper giao hàng cho khách hàng";
-        orderstatusHistory.insertorderByStatus(orderid, orderResponse.getOrderStatus(), title);
+       // orderstatusHistory.insertorderByStatus(orderid, orderResponse.getOrderStatus(), title);
     }
 
     @Override
@@ -239,7 +239,7 @@ BigDecimal b = a.divide(BigDecimal.valueOf(1000));
         orderRepository.save(order3);
         OrderResponse orderResponse = orderRepository.getorderbyid(orderid);
         String title = "Khách hàng đã nhận hàng";
-        orderstatusHistory.insertorderByStatus(orderid, orderResponse.getOrderStatus(), title);
+        //orderstatusHistory.insertorderByStatus(orderid, orderResponse.getOrderStatus(), title);
         return order;
     }
 

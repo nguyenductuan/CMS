@@ -1,0 +1,126 @@
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.vt.cms.model.repository.ProductSkuRepository">
+
+    <resultMap id="Product_SkuResultMap"
+               type="com.vt.cms.model.entity.Product_Sku">
+
+        <id column="id"
+            property="id"
+            jdbcType="INTEGER"/>
+
+        <result column="created_at"
+                property="created_at"
+                jdbcType="TIMESTAMP"/>
+
+        <result column="created_by"
+                property="created_by"
+                jdbcType="VARCHAR"/>
+
+        <result column="is_deleted"
+                property="is_deleted"
+                jdbcType="VARCHAR"/>
+
+        <result column="updated_at"
+                property="updated_at"
+                jdbcType="TIMESTAMP"/>
+
+        <result column="updated_by"
+                property="updated_by"
+                jdbcType="VARCHAR"/>
+
+        <result column="attribute"
+                property="attribute"
+                jdbcType="VARCHAR"/>
+
+        <result column="height_cm"
+                property="height_cm"
+                jdbcType="VARCHAR"/>
+
+        <result column="length_cm"
+                property="length_cm"
+                jdbcType="VARCHAR"/>
+
+        <result column="width_cm"
+                property="width_cm"
+                jdbcType="VARCHAR"/>
+
+        <result column="weight_gram"
+                property="weight_gram"
+                jdbcType="VARCHAR"/>
+
+        <result column="product_id"
+                property="product_id"
+                jdbcType="INTEGER"/>
+
+        <result column="stock"
+                property="stock"
+                jdbcType="INTEGER"/>
+
+        <result column="type_product"
+                property="type_product"
+                jdbcType="VARCHAR"/>
+
+        <result column="price"
+                property="price"
+                jdbcType="DECIMAL"/>
+
+        <result column="image_url"
+                property="image_url"
+                jdbcType="VARCHAR"/>
+
+        <result column="sku_code"
+                property="sku_code"
+                jdbcType="VARCHAR"/>
+
+        <result column="status"
+                property="status"
+                jdbcType="VARCHAR"/>
+
+    </resultMap>
+
+
+    <insert id="inserproductsku"
+            parameterType="com.vt.cms.model.entity.Product_Sku"
+            useGeneratedKeys="true"
+            keyProperty="id">
+
+        INSERT INTO product_sku (
+            product_id,
+            height_cm,
+            length_cm,
+            width_cm,
+            weight_gram,
+            type_product,
+            stock,
+            status,
+            sku_code,
+            price,
+            image_url,
+            attribute,
+            created_by,
+            is_deleted,
+            created_at
+        )
+        VALUES (
+                   #{product_id},
+                   #{height_cm},
+                   #{length_cm},
+                   #{width_cm},
+                   #{weight_gram},
+                   #{type_product},
+                   #{stock},
+                   #{status},
+                   #{sku_code},
+                   #{price},
+                   #{image_url},
+                   #{attribute},
+                   #{created_by},
+                   #{is_deleted},
+                   #{created_at}
+               )
+
+    </insert>
+
+</mapper>
