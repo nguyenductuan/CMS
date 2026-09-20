@@ -39,11 +39,11 @@
         <result column="approved_time" property="approved_time" jdbcType="TIMESTAMP"/>
     </resultMap>
 
-<!--    <select id="detailProduct">-->
-<!--        SELECT *-->
-<!--        FROM product-->
-<!--        where id = #{id}-->
-<!--    </select>-->
+    <select id="detailProduct">
+        SELECT *
+        FROM products
+        where id = #{id}
+    </select>
 
 <!--    <select id="listproduct" resultMap="ProductResultMap">-->
 <!--        SELECT *-->

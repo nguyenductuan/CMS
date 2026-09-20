@@ -1,6 +1,7 @@
 package com.vt.cms.service.Impl;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.vt.cms.mapper.Modelmapper;
 import com.vt.cms.model.dto.OrdersRequest;
@@ -8,7 +9,7 @@ import com.vt.cms.model.dto.ProductRequest;
 import com.vt.cms.model.dto.page.PageInfo;
 import com.vt.cms.model.dto.page.PagingResponse;
 //import com.vt.cms.model.dto.product.SkuRequest;
-import com.vt.cms.model.dto.product.SkuRequest;
+import com.vt.cms.model.dto.product.*;
 import com.vt.cms.model.entity.Product;
 import com.vt.cms.model.entity.Product_Sku;
 import com.vt.cms.model.repository.ProductRepository;
@@ -24,6 +25,7 @@ import org.mapstruct.factory.Mappers;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -34,11 +36,10 @@ public class ProductServiceImpl implements ProductService {
     private final Modelmapper modelMapper = Mappers.getMapper(Modelmapper.class);
     private final ProductRepository productRepository;
     private final ObjectMapper objectMapper;
-  private final ProductSkuRepository productSkuRepository;
-
-
+    private final ProductSkuRepository productSkuRepository;
 
     @Override
+    //Thêm mới sp
     public void addproduct(ProductRequest productRequest) {
         Product product = new Product();
         product.setName(productRequest.getName());
@@ -84,11 +85,113 @@ public class ProductServiceImpl implements ProductService {
             productSkuRepository.inserproductsku(productSku);
         }
     }
-
     @Override
-    public ProductResponse detail(Integer id) {
-        return productRepository.detailProduct(id);
+    public ProductResponse detail(Integer product_id) {
+
+        Product product = productRepository.detailProduct(product_id);
+
+
+        ProductResponse response =
+                new ProductResponse();
+
+        response.setId(product.getId());
+        response.setName(product.getName());
+        response.setDescription(product.getDescription());
+        response.setStatus(product.getStatus());
+
+
+        // =========================
+        // ATTRIBUTES
+        // =========================
+
+        response.setAttributes(
+                parseJson(
+                        product.getJson_attributes(),
+                        new TypeReference<List<AttributeRequest>>() {}
+                )
+        );
+
+        response.setAttributes_name(
+                product.getJson_attributes_name()
+        );
+
+        // =========================
+        // TYPE PRODUCTS
+        // =========================
+
+        response.setType_products(
+                parseJson(
+                        product.getType_products(),
+                        new TypeReference<List<TypeProductRequest>>() {}
+                )
+        );
+
+        response.setType_products_name(
+                product.getType_products_name()
+        );
+
+        // =========================
+        // IMAGES
+        // =========================
+
+        response.setImages(
+                parseJson(
+                        product.getJson_images(),
+                        new TypeReference<List<ImageRequest>>() {}
+                )
+        );
+
+        // =========================
+        // MEDIAS
+        // =========================
+
+        response.setMedias(
+                parseJson(
+                        product.getJson_medias(),
+                        new TypeReference<List<MediaRequest>>() {}
+                )
+        );
+        // =========================
+        // SKU
+        // =========================
+
+        List<Product_Sku> productSkus =
+                productSkuRepository.findByProductId(product_id);
+
+        List<SkuRequest> skus = productSkus.stream()
+                .map(sku -> {
+                    SkuRequest request = new SkuRequest();
+                    request.setSku_code(sku.getSku_code());
+                    request.setPrice(sku.getPrice());
+                    request.setStock(sku.getStock());
+                    request.setStatus(sku.getStatus());
+
+                    return request;
+                })
+                .toList();
+        response.setSkus(skus);
+        return response;
     }
+
+    private <T> List<T> parseJson(
+            String json,
+            TypeReference<List<T>> typeReference) {
+
+        if (json == null || json.trim().isEmpty()) {
+            return new ArrayList<>();
+        }
+
+        try {
+            return objectMapper.readValue(json,typeReference);
+
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException(
+                    "JSON sản phẩm không hợp lệ: " + json,
+                    e
+            );
+        }
+    }
+
 
     @Override
     public void editproduct(Integer id, ProductRequest productRequest) {
@@ -133,8 +236,8 @@ public class ProductServiceImpl implements ProductService {
         response.setData(pagingResponse);
         return response;
     }
-
     @Override
+    //Cập nhật trạng thái sp
     public void editstatusproduct(Integer product_id) {
         var updated_at = LocalDateTime.now();
         String status = "APPROVAL";
@@ -142,12 +245,11 @@ public class ProductServiceImpl implements ProductService {
         var approved_time = LocalDateTime.now();
         productRepository.editstatusproduct(product_id, status, updated_at, approve_by, approved_time);
     }
-
     @Override
+    //Xóa sp
     public void deleteproduct(Integer product_id) {
         productRepository.deleteproduct(product_id);
     }
-
     @Override
     public ProductDetailResponse product_detail(Integer productId, Integer campainId) {
       return  productRepository.getproduct(productId,campainId);

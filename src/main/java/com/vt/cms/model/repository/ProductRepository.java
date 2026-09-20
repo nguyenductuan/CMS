@@ -11,7 +11,7 @@ import java.util.List;
 
 @Mapper
 public interface ProductRepository {
-    ProductResponse detailProduct(Integer id);
+    Product detailProduct(Integer id);
 
     List<ProductResponse> listproduct(OrdersRequest request);
 
