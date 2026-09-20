@@ -20,7 +20,7 @@ public interface Modelmapper {
 
     CartResponse finByUserId(Cart cart);
 
-    ProductResponse convertProduct(Product product);
+    //ProductResponse convertProduct(Product product);
 
     ShippingResponse convertShippingId(Shipping shipping);
 

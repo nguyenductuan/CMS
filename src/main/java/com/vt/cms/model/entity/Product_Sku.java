@@ -14,6 +14,7 @@ public class Product_Sku {
     private LocalDateTime updated_at;
     private String updated_by;
      private String attribute;
+     private String AttrIndex;
      private String height_cm;
      private String length_cm;
      private  String  width_cm;
@@ -25,4 +26,5 @@ public class Product_Sku {
      private  String image_url;
      private String sku_code;
      private String status;
+
 }

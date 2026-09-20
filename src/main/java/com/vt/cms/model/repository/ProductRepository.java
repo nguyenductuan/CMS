@@ -6,12 +6,13 @@ import com.vt.cms.model.resp.ProductDetailResponse;
 import com.vt.cms.model.resp.ProductResponse;
 import org.apache.ibatis.annotations.Mapper;
 
+
 import java.time.LocalDateTime;
 import java.util.List;
 
 @Mapper
 public interface ProductRepository {
-    Product detailProduct(Integer id);
+    Product detailProduct(Integer product_id);
 
     List<ProductResponse> listproduct(OrdersRequest request);
 

@@ -70,6 +70,7 @@ public class ProductServiceImpl implements ProductService {
             productSku.setProduct_id(product.getId());
             productSku.setHeight_cm(skuRequest.getHeight_cm());
             productSku.setWidth_cm(skuRequest.getWidth_cm());
+            productSku.setLength_cm(skuRequest.getLength_cm());
             productSku.setWeight_gram(skuRequest.getWeight_gram());
             productSku.setType_product(skuRequest.getType_product());
             productSku.setStock(skuRequest.getStock());
@@ -90,7 +91,6 @@ public class ProductServiceImpl implements ProductService {
 
         Product product = productRepository.detailProduct(product_id);
 
-
         ProductResponse response =
                 new ProductResponse();
 
@@ -98,8 +98,11 @@ public class ProductServiceImpl implements ProductService {
         response.setName(product.getName());
         response.setDescription(product.getDescription());
         response.setStatus(product.getStatus());
-
-
+        response.setCreated_at(product.getCreated_at());
+        response.setIs_deleted(product.getIs_deleted());
+        response.setCreated_by(product.getCreated_by());
+        System.out.println("product = " + product);
+        System.out.println("json_attributes = " + product.getJson_attributes());
         // =========================
         // ATTRIBUTES
         // =========================
@@ -162,10 +165,18 @@ public class ProductServiceImpl implements ProductService {
                 .map(sku -> {
                     SkuRequest request = new SkuRequest();
                     request.setSku_code(sku.getSku_code());
+                    request.setAttribute(sku.getAttribute());
+                    request.setType_product(sku.getType_product());
+                    request.setImage_url(sku.getImage_url());
+                    request.setWeight_gram(sku.getWeight_gram());
+                    request.setWidth_cm(sku.getWidth_cm());
+                    request.setHeight_cm(sku.getHeight_cm());
+                    request.setLength_cm(sku.getLength_cm());
                     request.setPrice(sku.getPrice());
                     request.setStock(sku.getStock());
                     request.setStatus(sku.getStatus());
-
+                    request.setAttribute(sku.getAttribute());
+                    request.setAttrIndex(sku.getAttrIndex());
                     return request;
                 })
                 .toList();
@@ -173,10 +184,7 @@ public class ProductServiceImpl implements ProductService {
         return response;
     }
 
-    private <T> List<T> parseJson(
-            String json,
-            TypeReference<List<T>> typeReference) {
-
+    private <T> List<T> parseJson(String json, TypeReference<List<T>> typeReference) {
         if (json == null || json.trim().isEmpty()) {
             return new ArrayList<>();
         }

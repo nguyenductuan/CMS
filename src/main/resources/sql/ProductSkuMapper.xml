@@ -123,4 +123,33 @@
 
     </insert>
 
+    <select id="findByProductId"
+            parameterType="java.lang.Integer"
+            resultMap="Product_SkuResultMap">
+
+        SELECT
+            id,
+            created_at,
+            created_by,
+            is_deleted,
+            updated_at,
+            updated_by,
+            attribute,
+            height_cm,
+            length_cm,
+            width_cm,
+            weight_gram,
+            product_id,
+            stock,
+            type_product,
+            price,
+            image_url,
+            sku_code,
+            status
+        FROM product_sku
+        WHERE product_id = #{product_id}
+          AND is_deleted = 'false'
+        ORDER BY id DESC
+
+    </select>
 </mapper>

@@ -17,6 +17,8 @@ public class SkuRequest {
     private String width_cm;
     private String height_cm;
     private String status;
-    private Integer attrIndex;
+    private String attrIndex;
     private Integer typeProductIndex;
+
+
 }

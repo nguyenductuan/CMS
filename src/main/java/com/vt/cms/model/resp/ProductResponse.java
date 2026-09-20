@@ -7,6 +7,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Data
@@ -19,6 +20,10 @@ public class ProductResponse {
     private List<MediaRequest> medias;
     private List<AttributeRequest> attributes;
     private String attributes_name;
+//    private String json_attributes_name;
+    private LocalDateTime created_at;
+    private String created_by;
+    private String 	is_deleted;
     private List<TypeProductRequest> type_products;
     private String type_products_name;
     private List<SkuRequest> skus;

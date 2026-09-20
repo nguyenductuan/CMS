@@ -38,9 +38,9 @@ public class ProductController {
         return ResponseEntity.ok(new APIRessponse(200,"Duyệt sản phẩm thành công"));
     }
     // Chi tiết sp
-    @GetMapping("detail/{id}")
+    @GetMapping("detail/{product_id}")
     public ResponseEntity<APIRessponse> product_detail(@PathVariable Integer product_id) {
-        ProductResponse response=   productService.detail(product_id);
+        ProductResponse response=  productService.detail(product_id);
        return ResponseEntity.ok(new APIRessponse(200,"Thành công", response));
     }
     // Thêm mới sản phẩm
