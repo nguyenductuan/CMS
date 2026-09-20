@@ -51,9 +51,10 @@ public class ProductController {
     public void editproduct(@PathVariable Integer id, ProductRequest productRequest) {
         productService.editproduct(id, productRequest);
     }
-    @DeleteMapping("deleteproduct/{id}")
+    @DeleteMapping("deleteproduct/{product_id}")
     //Xóa sản phẩm
-    public void deleteproduct(@PathVariable Integer id) {
-        productService.deleteproduct(id);
+    public ResponseEntity<APIRessponse> deleteproduct(@PathVariable Integer product_id) {
+        productService.deleteproduct(product_id);
+        return ResponseEntity.ok(new APIRessponse(200, "Xóa sản phẩm thành công"));
     }
 }

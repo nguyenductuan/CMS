@@ -21,9 +21,9 @@ public interface ProductRepository {
 
     void upload(Product product, Integer id);
 
-    void editstatusproduct(Integer id, String status, LocalDateTime updated_at);
+    void editstatusproduct(Integer id, String status, LocalDateTime updated_at, String approve_by, LocalDateTime approved_time);
 
-    void deleteproduct(Integer id);
+    void deleteproduct(Integer product_id);
 
     List<Product> listproduct(Integer productIds);
     ProductDetailResponse getproduct(Integer product, Integer campainId);

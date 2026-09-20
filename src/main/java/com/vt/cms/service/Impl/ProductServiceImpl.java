@@ -138,12 +138,14 @@ public class ProductServiceImpl implements ProductService {
     public void editstatusproduct(Integer product_id) {
         var updated_at = LocalDateTime.now();
         String status = "APPROVAL";
-        productRepository.editstatusproduct(product_id, status, updated_at);
+        String approve_by = "SYSTEM";
+        var approved_time = LocalDateTime.now();
+        productRepository.editstatusproduct(product_id, status, updated_at, approve_by, approved_time);
     }
 
     @Override
-    public void deleteproduct(Integer id) {
-        productRepository.deleteproduct(id);
+    public void deleteproduct(Integer product_id) {
+        productRepository.deleteproduct(product_id);
     }
 
     @Override

@@ -25,6 +25,6 @@ public class Product {
     private String cancel_at;
     private  String cancel_by;
     private  String approve_by;
-    private  LocalDateTime approve_time;
+    private  LocalDateTime approved_time;
 }
 

@@ -36,7 +36,7 @@
         <result column="cancel_by" property="cancel_by" jdbcType="VARCHAR"/>
 
         <result column="approve_by" property="approve_by" jdbcType="VARCHAR"/>
-        <result column="approve_time" property="approve_time" jdbcType="TIMESTAMP"/>
+        <result column="approved_time" property="approved_time" jdbcType="TIMESTAMP"/>
     </resultMap>
 
 <!--    <select id="detailProduct">-->
@@ -102,15 +102,17 @@
     <update id="editstatusproduct" parameterType="com.vt.cms.model.entity.Product">
         UPDATE products
         SET status     = #{status},
-            updated_at = #{updated_at}
+            updated_at = #{updated_at},
+            approved_time= #{approved_time},
+            approve_by = #{approve_by}
         WHERE id = #{id}
     </update>
 
-<!--    <update id="deleteproduct" parameterType="com.vt.cms.model.entity.Product">-->
-<!--        UPDATE product-->
-<!--        SET is_delete = 'true'-->
-<!--        WHERE id = #{id}-->
-<!--    </update>-->
+    <update id="deleteproduct" parameterType="com.vt.cms.model.entity.Product">
+        UPDATE products
+        SET is_deleted = 'true'
+        WHERE id = #{id}
+    </update>
 
 
 </mapper>
