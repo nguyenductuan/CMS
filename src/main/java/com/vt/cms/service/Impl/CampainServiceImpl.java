@@ -10,8 +10,10 @@ import com.vt.cms.model.repository.CampainProductRepository;
 import com.vt.cms.model.repository.CampainRepository;
 import com.vt.cms.model.repository.ProductRepository;
 import com.vt.cms.service.CampainService;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+@Slf4j
 @Service
 public class CampainServiceImpl implements CampainService {
     private CampainRepository campainRepository;
@@ -27,11 +29,18 @@ public class CampainServiceImpl implements CampainService {
     @Override
     public void createdCampain(CreatedCampainRequest request) {
         Campain campain = new Campain();
-        campain.setCampainname(request.getCampainname());
+        campain.setName(request.getName());
         campain.setStatus("PendingApproved");
-        campain.setStartdate(request.getStartdate());
-        campain.setEnddate(request.getEnddate());
-        campain.setDiscountpercent(request.getDiscountpercent());
+        campain.setCreatedAt(request.getStartTime());
+        campain.setCreatedBy("SYSTEM");
+        campain.setIsDeleted("false");
+        campain.setStartTime(request.getStartTime());
+        campain.setEndTime(request.getEndTime());
+        campain.setQuantity(10);
+        campain.setTotalStock(100);
+        campain.setDiscount(request.getDiscount());
+        campain.setSalesCommission(request.getSalesCommission());
+        System.out.println(campain);
         campainRepository.savecampain(campain);
 
         int campainId = campain.getCampainid();
@@ -39,15 +48,16 @@ public class CampainServiceImpl implements CampainService {
 
         for (CampainProductRequest productcampain : request.getProducts() )
         {
-            campainProduct.setCampainid(campainId);
+            campainProduct.setCampaignId(campainId);
             campainProduct.setProductId(productcampain.getProductid());
             for (CampainProductSku skuID: productcampain.getSkus())
             {
-
                campainProduct.setSkuId(skuID.getSkuId());
-               campainProduct.setDiscountPrice(skuID.getDiscountPrice());
-               campainProduct.setStockCampaign("10");
+               campainProduct.setPrice_discount(skuID.getDiscountPrice());
+               campainProduct.setStockCampaign(skuID.getStock());
                campainProduct.setStatus(skuID.getStatus());
+               campainProduct.setIsDeleted("false");
+               campainProduct.setCreatedBy("SYSTEM");
                campainProduct.setPrice(skuID.getDiscountPrice());
             }
             campainProductRepository.savecampainproduct(campainProduct);

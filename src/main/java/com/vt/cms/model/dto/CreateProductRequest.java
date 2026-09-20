@@ -8,7 +8,7 @@ import java.util.List;
 
 @Data
 
-public class ProductRequest {
+public class CreateProductRequest {
     @NotBlank(message = "Tên sản phẩm không được để trống")
     private String name;
     private String description;

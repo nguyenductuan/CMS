@@ -1,9 +1,9 @@
 package com.vt.cms.model.repository;
 
 import com.vt.cms.model.entity.CampainProduct;
-import org.mapstruct.Mapper;
+import org.apache.ibatis.annotations.Mapper;
 
 @Mapper
 public interface CampainProductRepository {
-    CampainProduct savecampainproduct(CampainProduct campainProduct);
+    void savecampainproduct(CampainProduct campainProduct);
 }

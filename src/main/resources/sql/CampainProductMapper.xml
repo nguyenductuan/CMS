@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.vt.cms.model.repository.CampainProductRepository">
+
+    <!-- Ánh xạ kết quả từ DB sang entity -->
+    <resultMap id="CampainProductResultMap" type="com.vt.cms.model.entity.CampainProduct">
+        <id property="id" column="id"/>
+
+        <result property="createdAt" column="created_at"/>
+        <result property="createdBy" column="created_by"/>
+        <result property="isDeleted" column="is_deleted"/>
+        <result property="updatedAt" column="updated_at"/>
+        <result property="updatedBy" column="updated_by"/>
+        <result property="campaignId" column="campaign_id"/>
+        <result property="productId" column="product_id"/>
+        <result property="skuId" column="sku_id"/>
+        <result property="stockCampaign" column="stock_campaign"/>
+        <result property="price" column="price"/>
+        <result property="price_discount" column="price_discount"/>
+        <result property="discountAmount" column="discount_amount"/>
+        <result property="status" column="status"/>
+    </resultMap>
+
+    <!-- Lệnh insert -->
+    <insert id="savecampainproduct" parameterType="com.vt.cms.model.entity.CampainProduct"
+            useGeneratedKeys="true"
+            keyProperty="id">
+        INSERT INTO campain_product (
+
+            created_at,
+            created_by,
+            is_deleted,
+            updated_at,
+            updated_by,
+            campaign_id,
+            product_id,
+            sku_id,
+            stock_campaign,
+            price,
+            price_discount,
+            discount_amount,
+            status
+        )
+        VALUES (
+
+                   #{createdAt},
+                   #{createdBy},
+                   #{isDeleted},
+                   #{updatedAt},
+                   #{updatedBy},
+                   #{campaignId},
+                   #{productId},
+                   #{skuId},
+                   #{stockCampaign},
+                   #{price},
+                   #{price_discount},
+                   #{discountAmount},
+                   #{status}
+               )
+    </insert>
+
+</mapper>

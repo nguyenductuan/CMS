@@ -1,7 +1,7 @@
 package com.vt.cms.controller;
 
 import com.vt.cms.model.dto.OrdersRequest;
-import com.vt.cms.model.dto.ProductRequest;
+import com.vt.cms.model.dto.CreateProductRequest;
 import com.vt.cms.model.dto.page.PagingResponse;
 import com.vt.cms.model.resp.APIRessponse;
 import com.vt.cms.model.resp.BaseResponse;
@@ -45,14 +45,14 @@ public class ProductController {
     }
     // Thêm mới sản phẩm
     @PostMapping("addproduct")
-    public ResponseEntity<APIRessponse> addproduct(  @Valid @RequestBody ProductRequest productRequest) {
-        productService.addproduct(productRequest);
+    public ResponseEntity<APIRessponse> addproduct(  @Valid @RequestBody CreateProductRequest createProductRequest) {
+        productService.addproduct(createProductRequest);
         return ResponseEntity.ok(new APIRessponse(200,"Thêm mới thành công"));
     }
     //Sửa sản phẩm
     @PutMapping("editproduct/{id}")
-    public void editproduct(@PathVariable Integer id, ProductRequest productRequest) {
-        productService.editproduct(id, productRequest);
+    public void editproduct(@PathVariable Integer id, CreateProductRequest createProductRequest) {
+        productService.editproduct(id, createProductRequest);
     }
     //Xóa sản phẩm
     @DeleteMapping("deleteproduct/{product_id}")

@@ -6,9 +6,11 @@ import java.time.LocalDateTime;
 import java.util.List;
 @Data
 public class CreatedCampainRequest {
-    private String campainname;
-    private LocalDateTime startdate;
-    private LocalDateTime enddate;
-    private int discountpercent;
+    private String name;
+    private LocalDateTime startTime;
+    private LocalDateTime endTime;
+    private String description;
+    private int discount;
+    private Integer salesCommission;
     private List<CampainProductRequest> products;
 }

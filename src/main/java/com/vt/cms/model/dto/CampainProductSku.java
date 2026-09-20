@@ -10,5 +10,6 @@ public class CampainProductSku {
     private BigDecimal discountPrice;
     private  BigDecimal price;
     private String image;
+    private Integer stock;
     private String status;
 }

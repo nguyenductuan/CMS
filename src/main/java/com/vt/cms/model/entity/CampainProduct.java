@@ -7,20 +7,21 @@ import java.time.LocalDateTime;
 
 @Data
 public class CampainProduct {
-private int campainid;
-private long productId;
-private LocalDateTime createddate;
-    private LocalDateTime updateddate;
-    private String createdAt;
+    private Long id;
+
+    private LocalDateTime createdAt;
     private String createdBy;
     private String isDeleted;
-    private String updatedAt;
+    private LocalDateTime updatedAt;
     private String updatedBy;
+    private Integer campaignId;
+    private Integer productId;
     private Integer skuId;
-    private String stockCampaign;
+    private Integer stockCampaign;
     private BigDecimal price;
-    private BigDecimal discountPrice;
+    private BigDecimal price_discount;
     private String discountAmount;
     private String status;
+
 
 }

@@ -5,15 +5,13 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.vt.cms.mapper.Modelmapper;
 import com.vt.cms.model.dto.OrdersRequest;
-import com.vt.cms.model.dto.ProductRequest;
+import com.vt.cms.model.dto.CreateProductRequest;
 import com.vt.cms.model.dto.page.PageInfo;
 import com.vt.cms.model.dto.page.PagingResponse;
-//import com.vt.cms.model.dto.product.SkuRequest;
 import com.vt.cms.model.dto.product.*;
 import com.vt.cms.model.entity.Product;
 import com.vt.cms.model.entity.Product_Sku;
 import com.vt.cms.model.repository.ProductRepository;
-//import com.vt.cms.model.repository.ProductSkuRepository;
 import com.vt.cms.model.repository.ProductSkuRepository;
 import com.vt.cms.model.resp.BaseResponse;
 import com.vt.cms.model.resp.ProductDetailResponse;
@@ -40,33 +38,30 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     //Thêm mới sp
-    public void addproduct(ProductRequest productRequest) {
+    public void addproduct(CreateProductRequest createProductRequest) {
         Product product = new Product();
-        product.setName(productRequest.getName());
-        //product.setStock(productRequest.getStock());
-        product.setDescription(productRequest.getDescription());
-        product.setStatus(productRequest.getStatus());
+        product.setName(createProductRequest.getName());
+        product.setDescription(createProductRequest.getDescription());
+        product.setStatus(createProductRequest.getStatus());
         product.setIs_deleted("false");
-
-       // product.setPrice_display(productRequest.getProductPrice());
         product.setCreated_at(LocalDateTime.now());
         product.setCreated_by("SYSTEMS");
         try{
-            product.setType_products(objectMapper.writeValueAsString(productRequest.getType_products()));
-            product.setJson_attributes(objectMapper.writeValueAsString(productRequest.getAttributes()));
-            product.setJson_medias(objectMapper.writeValueAsString(productRequest.getMedias()));
-            product.setJson_images(objectMapper.writeValueAsString(productRequest.getImages()));
+            product.setType_products(objectMapper.writeValueAsString(createProductRequest.getType_products()));
+            product.setJson_attributes(objectMapper.writeValueAsString(createProductRequest.getAttributes()));
+            product.setJson_medias(objectMapper.writeValueAsString(createProductRequest.getMedias()));
+            product.setJson_images(objectMapper.writeValueAsString(createProductRequest.getImages()));
         }
         catch (JsonProcessingException e) {
             throw new RuntimeException("Cannot convert to JSON", e);
         }
 
-        product.setJson_attributes_name(productRequest.getAttributes_name());
-        product.setType_products_name(productRequest.getType_products_name());
+        product.setJson_attributes_name(createProductRequest.getAttributes_name());
+        product.setType_products_name(createProductRequest.getType_products_name());
         productRepository.insertproduct(product);
 
         Product_Sku productSku = new Product_Sku();
-        for (SkuRequest skuRequest : productRequest.getSkus()){
+        for (SkuRequest skuRequest : createProductRequest.getSkus()){
             productSku.setProduct_id(product.getId());
             productSku.setHeight_cm(skuRequest.getHeight_cm());
             productSku.setWidth_cm(skuRequest.getWidth_cm());
@@ -199,20 +194,12 @@ public class ProductServiceImpl implements ProductService {
             );
         }
     }
-
-
     @Override
-    public void editproduct(Integer id, ProductRequest productRequest) {
-
-    }
-
-//    @Override
-//    public void editproduct(Integer id, ProductRequest productRequest) {
+    public void editproduct(Integer id, CreateProductRequest createProductRequest) {
 //        ProductResponse product = productRepository.detailProduct(id);
 //        if (product == null) {
 //            throw new RuntimeException("Không tìm thâý sản phẩm"); // cần response trả về 200
 //        }
-//
 //        Product product1 = new Product();
 //        product1.setName(productRequest.getProductName());
 //        product1.setStock(productRequest.getStock());
@@ -221,9 +208,10 @@ public class ProductServiceImpl implements ProductService {
 //        product1.setUpdatedAt(LocalDateTime.now());
 //        product1.setImage(productRequest.getProductimage());
 //        productRepository.upload(product1, id);
-//    }
+    }
 
     @Override
+    //Danh sách sản phẩm
     public BaseResponse<PagingResponse<List<ProductResponse>>> listproduct(OrdersRequest request) {
         List<ProductResponse> product = productRepository.listproduct(request);
         long totalCount = productRepository.countproduct();

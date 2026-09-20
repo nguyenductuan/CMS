@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.vt.cms.model.repository.CampainRepository">
+
+    <resultMap id="CampainResultMap" type="com.vt.cms.model.entity.Campain">
+        <id column="id" property="campainid" jdbcType="INTEGER"/>
+        <result column="created_at" property="createdAt" jdbcType="TIMESTAMP"/>
+        <result column="created_by" property="createdBy" jdbcType="VARCHAR"/>
+        <result column="is_deleted" property="isDeleted" jdbcType="BOOLEAN"/>
+        <result column="updated_at" property="updatedAt" jdbcType="TIMESTAMP"/>
+        <result column="status" property="status" jdbcType="VARCHAR"/>
+        <result column="updated_by" property="updatedBy" jdbcType="VARCHAR"/>
+
+        <result column="discount" property="discount" jdbcType="INTEGER"/>
+        <result column="end_time" property="endTime" jdbcType="TIMESTAMP"/>
+        <result column="name" property="name" jdbcType="VARCHAR"/>
+        <result column="quantity" property="quantity" jdbcType="INTEGER"/>
+        <result column="start_time" property="startTime" jdbcType="TIMESTAMP"/>
+        <result column="total_stock" property="totalStock" jdbcType="INTEGER"/>
+        <result column="product_id" property="productId" jdbcType="BIGINT"/>
+        <result column="description" property="description" jdbcType="VARCHAR"/>
+        <result column="sales_commission" property="salesCommission" jdbcType="INTEGER"/>
+    </resultMap>
+
+    <insert id="savecampain" parameterType="com.vt.cms.model.entity.Campain"
+            useGeneratedKeys="true"
+            keyProperty="campainid">
+        INSERT INTO campaign (
+            created_at,
+            created_by,
+            is_deleted,
+            status,
+
+            discount,
+            end_time,
+            name,
+            quantity,
+            start_time,
+            total_stock,
+            product_id,
+            description,
+            sales_commission
+        )
+        VALUES (
+                   #{createdAt},
+                   #{createdBy},
+                   #{isDeleted},
+
+                   #{status},
+
+
+                   #{discount},
+                   #{endTime},
+                   #{name},
+                   #{quantity},
+                   #{startTime},
+                   #{totalStock},
+                   #{productId},
+                   #{description},
+                   #{salesCommission}
+               )
+    </insert>
+
+</mapper>
