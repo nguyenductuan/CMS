@@ -21,7 +21,7 @@ public interface ProductRepository {
 
     void upload(Product product, Integer id);
 
-    void editstatusproduct(Integer id, String status, LocalDateTime updatedAt);
+    void editstatusproduct(Integer id, String status, LocalDateTime updated_at);
 
     void deleteproduct(Integer id);
 

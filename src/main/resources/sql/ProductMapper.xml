@@ -99,12 +99,12 @@
 
 <!--    </update>-->
 
-<!--    <update id="editstatusproduct" parameterType="com.vt.cms.model.entity.Product">-->
-<!--        UPDATE product-->
-<!--        SET status     = #{status},-->
-<!--            updated_at = #{updatedAt}-->
-<!--        WHERE id = #{id}-->
-<!--    </update>-->
+    <update id="editstatusproduct" parameterType="com.vt.cms.model.entity.Product">
+        UPDATE products
+        SET status     = #{status},
+            updated_at = #{updated_at}
+        WHERE id = #{id}
+    </update>
 
 <!--    <update id="deleteproduct" parameterType="com.vt.cms.model.entity.Product">-->
 <!--        UPDATE product-->

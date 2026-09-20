@@ -135,10 +135,10 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
-    public void editstatusproduct(Integer id) {
-        var update = LocalDateTime.now();
-        String status = "Approved";
-        productRepository.editstatusproduct(id, status, update);
+    public void editstatusproduct(Integer product_id) {
+        var updated_at = LocalDateTime.now();
+        String status = "APPROVAL";
+        productRepository.editstatusproduct(product_id, status, updated_at);
     }
 
     @Override

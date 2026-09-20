@@ -18,7 +18,7 @@ public interface ProductService {
 
     BaseResponse<PagingResponse<List<ProductResponse>>> listproduct(OrdersRequest request);
 
-    void editstatusproduct(Integer id);
+    void editstatusproduct(Integer product_id);
 
     void deleteproduct(Integer id);
 
