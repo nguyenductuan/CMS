@@ -11,11 +11,9 @@
         <result column="updated_at" property="updatedAt" jdbcType="TIMESTAMP"/>
         <result column="status" property="status" jdbcType="VARCHAR"/>
         <result column="updated_by" property="updatedBy" jdbcType="VARCHAR"/>
-
         <result column="discount" property="discount" jdbcType="INTEGER"/>
         <result column="end_time" property="endTime" jdbcType="TIMESTAMP"/>
         <result column="name" property="name" jdbcType="VARCHAR"/>
-        <result column="quantity" property="quantity" jdbcType="INTEGER"/>
         <result column="start_time" property="startTime" jdbcType="TIMESTAMP"/>
         <result column="total_stock" property="totalStock" jdbcType="INTEGER"/>
         <result column="product_id" property="productId" jdbcType="BIGINT"/>
@@ -35,7 +33,7 @@
             discount,
             end_time,
             name,
-            quantity,
+
             start_time,
             total_stock,
             product_id,
@@ -53,7 +51,7 @@
                    #{discount},
                    #{endTime},
                    #{name},
-                   #{quantity},
+
                    #{startTime},
                    #{totalStock},
                    #{productId},

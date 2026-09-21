@@ -12,11 +12,9 @@ public class Campain {
     private LocalDateTime updatedAt;
     private String status;
     private String updatedBy;
-    private Long version;
     private Integer discount;
     private LocalDateTime endTime;
     private String name;
-    private Integer quantity;
     private LocalDateTime startTime;
     private Integer totalStock;
     private Long productId;

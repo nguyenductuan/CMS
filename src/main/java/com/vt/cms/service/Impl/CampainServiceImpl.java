@@ -36,11 +36,10 @@ public class CampainServiceImpl implements CampainService {
         campain.setIsDeleted("false");
         campain.setStartTime(request.getStartTime());
         campain.setEndTime(request.getEndTime());
-        campain.setQuantity(10);
-        campain.setTotalStock(100);
+        campain.setTotalStock(request.getTotal_stock());
         campain.setDiscount(request.getDiscount());
         campain.setSalesCommission(request.getSalesCommission());
-        System.out.println(campain);
+
         campainRepository.savecampain(campain);
 
         int campainId = campain.getCampainid();
@@ -50,17 +49,19 @@ public class CampainServiceImpl implements CampainService {
         {
             campainProduct.setCampaignId(campainId);
             campainProduct.setProductId(productcampain.getProductid());
+            System.out.println(productcampain.getSkus());
             for (CampainProductSku skuID: productcampain.getSkus())
             {
                campainProduct.setSkuId(skuID.getSkuId());
                campainProduct.setPrice_discount(skuID.getDiscountPrice());
-               campainProduct.setStockCampaign(skuID.getStock());
+               campainProduct.setStockCampaign(skuID.getStock_campaign());
                campainProduct.setStatus(skuID.getStatus());
                campainProduct.setIsDeleted("false");
                campainProduct.setCreatedBy("SYSTEM");
                campainProduct.setPrice(skuID.getDiscountPrice());
+                campainProductRepository.savecampainproduct(campainProduct);
             }
-            campainProductRepository.savecampainproduct(campainProduct);
+
         }
     }
 // Luồng cập nhật trạng thái chiến dịch

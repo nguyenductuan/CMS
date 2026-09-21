@@ -11,6 +11,7 @@ public class CreatedCampainRequest {
     private LocalDateTime endTime;
     private String description;
     private int discount;
+    private Integer total_stock;
     private Integer salesCommission;
     private List<CampainProductRequest> products;
 }
