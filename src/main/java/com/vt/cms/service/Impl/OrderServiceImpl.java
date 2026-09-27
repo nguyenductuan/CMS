@@ -6,10 +6,7 @@ import com.vt.cms.model.dto.OrdersRequest;
 import com.vt.cms.model.dto.SkuOrderRequest;
 import com.vt.cms.model.dto.page.PageInfo;
 import com.vt.cms.model.dto.page.PagingResponse;
-import com.vt.cms.model.entity.Order;
-import com.vt.cms.model.entity.OrderTracking;
-import com.vt.cms.model.entity.Payment;
-import com.vt.cms.model.entity.Shipping;
+import com.vt.cms.model.entity.*;
 import com.vt.cms.model.enums.OrderStatus;
 import com.vt.cms.model.enums.TrackingStatus;
 import com.vt.cms.model.repository.*;
@@ -119,7 +116,7 @@ public class OrderServiceImpl implements OrderService {
         for (OrderItemRequest orderItemRequest : request.getOrder()) {
             Integer productId = orderItemRequest.getProductId();
             Integer campainID= orderItemRequest.getCampainId();
-            ProductDetailResponse product = productRepository.getproduct(productId,campainID);
+            ProductDetail product = productRepository.getproduct1(productId,campainID);
             if (product == null) {
                 throw new RuntimeException("Product not found");
             }

@@ -40,7 +40,7 @@ public class CampainServiceImpl implements CampainService {
         campain.setDiscount(request.getDiscount());
         campain.setSalesCommission(request.getSalesCommission());
 
-        campainRepository.savecampain(campain);
+        //campainRepository.savecampain(campain); bổ sung thêm
 
         int campainId = campain.getCampainid();
         CampainProduct campainProduct = new CampainProduct();
@@ -58,7 +58,7 @@ public class CampainServiceImpl implements CampainService {
                campainProduct.setStatus(skuID.getStatus());
                campainProduct.setIsDeleted("false");
                campainProduct.setCreatedBy("SYSTEM");
-               campainProduct.setPrice(skuID.getDiscountPrice());
+               campainProduct.setPrice(skuID.getPrice());
                 campainProductRepository.savecampainproduct(campainProduct);
             }
 
@@ -67,9 +67,8 @@ public class CampainServiceImpl implements CampainService {
 // Luồng cập nhật trạng thái chiến dịch
     @Override
     public void updatestatus(int campainID, String status) {
-        Campain campain = campainRepository.getCampainById(campainID);
-        campain.setStatus(status);
-        campainRepository.savecampain(campain);
+
+        campainRepository.savecampain(campainID, status);
     }
 
     @Override

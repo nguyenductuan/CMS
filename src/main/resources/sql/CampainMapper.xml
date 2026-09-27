@@ -29,7 +29,6 @@
             created_by,
             is_deleted,
             status,
-
             discount,
             end_time,
             name,

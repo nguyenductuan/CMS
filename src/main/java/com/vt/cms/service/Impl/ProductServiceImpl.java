@@ -10,12 +10,14 @@ import com.vt.cms.model.dto.page.PageInfo;
 import com.vt.cms.model.dto.page.PagingResponse;
 import com.vt.cms.model.dto.product.*;
 import com.vt.cms.model.entity.Product;
+import com.vt.cms.model.entity.ProductDetail;
 import com.vt.cms.model.entity.Product_Sku;
 import com.vt.cms.model.repository.ProductRepository;
 import com.vt.cms.model.repository.ProductSkuRepository;
 import com.vt.cms.model.resp.BaseResponse;
 import com.vt.cms.model.resp.ProductDetailResponse;
 import com.vt.cms.model.resp.ProductResponse;
+import com.vt.cms.model.resp.SkuResponse;
 import com.vt.cms.service.ProductService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -24,6 +26,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 
 @Service
@@ -247,7 +250,41 @@ public class ProductServiceImpl implements ProductService {
         productRepository.deleteproduct(product_id);
     }
     @Override
-    public ProductDetailResponse product_detail(Integer productId, Integer campainId) {
-      return  productRepository.getproduct(productId,campainId);
+    public ProductDetailResponse product_detail(Integer product_id, Integer campaign_id) {
+        ProductDetail product = productRepository.getproduct1(product_id, campaign_id);
+
+        if (product == null) {
+            return null;
+        }
+        ProductDetailResponse response = new ProductDetailResponse();
+        response.setName(product.getName());
+        response.setId(product.getId());
+        response.setCampaignEndAt(product.getCampaignEndAt());
+        response.setDescription(product.getDescription());
+        response.setCampaignStartAt(product.getCampaignStartAt());
+        response.setCampaignId(product.getCampaignId());
+        response.setPriceCampaign(product.getPriceCampaign());
+
+        response.setStatus(product.getStatus());
+        response.setTypeProductsName(product.getTypeProductsName());
+        response.setAttributesName(product.getAttributesName());
+        response.setSkus(product.getSkus());
+
+        response.setCampaignStatus(product.getCampaignStatus());
+        response.setCreateAt(product.getCreateAt());
+
+        /* * Tìm SKU có giá sau giảm thấp nhất */
+        if (product.getSkus() != null && !product.getSkus().isEmpty())
+        { SkuResponse minPriceSku = product.getSkus() .stream() .filter(sku -> sku.getPriceDiscountCampaign() != null)
+                .min(Comparator.comparing( SkuResponse::getPriceDiscountCampaign )).orElse(null);
+            if (minPriceSku != null) {
+                    // Giá gốc của chính SKU có giá sau giảm thấp nhất
+            response.setPriceCampaign( minPriceSku.getPrice() );
+                    // Giá sau giảm thấp nhất
+            response.setPriceDiscountCampaign( minPriceSku.getPriceDiscountCampaign() );
+            }
+        }
+
+        return response;
     }
 }

@@ -22,7 +22,7 @@ public interface ProductService {
 
     void deleteproduct(Integer product_id);
 
-    ProductDetailResponse product_detail(Integer campainId, Integer productId);
+    ProductDetailResponse product_detail(Integer campaign_id, Integer product_id);
 
 
 }
