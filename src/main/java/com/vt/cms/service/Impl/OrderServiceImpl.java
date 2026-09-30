@@ -141,6 +141,7 @@ public class OrderServiceImpl implements OrderService {
                 BigDecimal price = sku.getPriceDiscountCampaign();
                 if (price == null)
                 {
+                    // Xem lại hàm này
                     price = sku.getPrice();
                 }
                 if (price == null)

@@ -21,6 +21,12 @@
         <result column="sales_commission" property="salesCommission" jdbcType="INTEGER"/>
     </resultMap>
 
+    <update id="savecampain1">
+        UPDATE campaign
+        SET status = #{status}
+        WHERE id = #{campain_id}
+    </update>
+
     <insert id="savecampain" parameterType="com.vt.cms.model.entity.Campain"
             useGeneratedKeys="true"
             keyProperty="campainid">
@@ -32,7 +38,6 @@
             discount,
             end_time,
             name,
-
             start_time,
             total_stock,
             product_id,

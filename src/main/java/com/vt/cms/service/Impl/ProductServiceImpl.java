@@ -279,7 +279,7 @@ public class ProductServiceImpl implements ProductService {
                 .min(Comparator.comparing( SkuResponse::getPriceDiscountCampaign )).orElse(null);
             if (minPriceSku != null) {
                     // Giá gốc của chính SKU có giá sau giảm thấp nhất
-            response.setPriceCampaign( minPriceSku.getPrice() );
+            response.setPriceCampaign( minPriceSku.getPriceCampaign() );
                     // Giá sau giảm thấp nhất
             response.setPriceDiscountCampaign( minPriceSku.getPriceDiscountCampaign() );
             }

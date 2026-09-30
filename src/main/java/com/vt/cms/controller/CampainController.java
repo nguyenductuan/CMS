@@ -34,8 +34,8 @@ public class CampainController {
     }
     //Thay đổi trạng thái chiến dịch(Duyệt, kết thúc chiến dịch)
     @PostMapping("/campainstatus")
-    public String updateCampain( @RequestBody int campainId, String status) {
-        campainService.updatestatus(campainId, status);
+    public String updateCampain( @RequestBody Integer campain_id, String status) {
+        campainService.updatestatus(campain_id, status);
         return "Campain updated successfully";
     }
     // Xóa chiến dịch

@@ -184,7 +184,7 @@
                             ON p.id = #{product_id}
                                 AND p.is_deleted = 'false'
 
-        WHERE c.id = #{campaign_id};
+        WHERE c.id = #{campaign_id} and c.status='APPROVAL';
 
     </select>
 

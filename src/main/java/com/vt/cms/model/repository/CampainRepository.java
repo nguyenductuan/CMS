@@ -5,8 +5,9 @@ import org.apache.ibatis.annotations.Mapper;
 
 @Mapper
 public interface CampainRepository {
-    void savecampain(Integer campainId, String status);
+    void savecampain1(Integer campain_id, String status);
    Campain getCampainById(Integer campainId);
   int getlistcampain();
     Campain deletecampain(Integer campainID );
+
 }

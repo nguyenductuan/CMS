@@ -12,7 +12,7 @@ public class SkuResponse {
     private String skuCode;
     private String attribute;
     private String typeProduct;
-    private BigDecimal price;
+     private BigDecimal price;
     private Integer stock;
     private Integer weightGram;
     private BigDecimal lengthCm;
