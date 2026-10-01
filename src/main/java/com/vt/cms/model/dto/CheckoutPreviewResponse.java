@@ -9,10 +9,10 @@ import java.util.List;
 @Data
 public class CheckoutPreviewResponse {
     private List<ItemDto> items;
-    private List<ShippingMethodDTO> shippingMethods;
-    @JsonProperty("total_price")
+//    private List<ShippingMethodDTO> shippingMethods;
+//    @JsonProperty("total_price")
     private BigDecimal totalPrice;
-    private Double shipping_fee; // xem lại có cần không
-    private Double subtotal;
+    private BigDecimal shipping_fee;
+//    private Double subtotal;
     private String paymentMethod;
 }

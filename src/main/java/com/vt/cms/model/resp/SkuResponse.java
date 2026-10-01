@@ -8,7 +8,7 @@ import java.math.BigDecimal;
 @JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy.class)
 @Data
 public class SkuResponse {
-    private String id;
+    private Integer id;
     private String skuCode;
     private String attribute;
     private String typeProduct;

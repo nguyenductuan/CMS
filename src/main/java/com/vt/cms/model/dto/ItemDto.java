@@ -8,11 +8,11 @@ import java.math.BigDecimal;
 @Data
 public class ItemDto {
     @JsonProperty("product_id")
-    private int productId;
+    private Integer productId;
     @JsonProperty("product_name")
     private String productName;
     private Integer campainID;
-    private BigDecimal price;
+//    private BigDecimal price;
     private  BigDecimal price_campain;
     private BigDecimal price_discount;
     private int quantity;

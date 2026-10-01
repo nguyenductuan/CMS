@@ -14,7 +14,7 @@ public class ProductDetail {
     // Product
     // =========================
 
-    private String id;
+    private Integer id;
 
     private Integer campaignId;
 

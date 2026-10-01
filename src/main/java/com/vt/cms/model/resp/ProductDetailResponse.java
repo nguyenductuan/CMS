@@ -8,7 +8,7 @@ import java.util.List;
 
 @Data
 public class ProductDetailResponse {
-    private String id;
+    private Integer id;
     private Integer campaignId;
     private String name;
     private BigDecimal priceCampaign;
