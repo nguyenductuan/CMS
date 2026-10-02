@@ -9,9 +9,8 @@ public class OrderItem {
     private int productId;
     private Integer quantity;
     private BigDecimal price;
-    private BigDecimal campain_price;
-    private BigDecimal price_discount;
-    private int orderId;
-    private String skucode;
+  private  BigDecimal totalprice;
+    private Integer orderId;
+    private Integer skucode;
 
 }

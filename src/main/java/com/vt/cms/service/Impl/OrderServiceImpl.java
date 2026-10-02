@@ -1,5 +1,6 @@
 package com.vt.cms.service.Impl;
 
+import com.vt.cms.Exception.BusinessException;
 import com.vt.cms.model.dto.OrderItemRequest;
 import com.vt.cms.model.dto.OrderRequest;
 import com.vt.cms.model.dto.OrdersRequest;
@@ -7,6 +8,7 @@ import com.vt.cms.model.dto.SkuOrderRequest;
 import com.vt.cms.model.dto.page.PageInfo;
 import com.vt.cms.model.dto.page.PagingResponse;
 import com.vt.cms.model.entity.*;
+import com.vt.cms.model.enums.MessageCode;
 import com.vt.cms.model.enums.OrderStatus;
 import com.vt.cms.model.enums.TrackingStatus;
 import com.vt.cms.model.repository.*;
@@ -19,8 +21,12 @@ import org.springframework.stereotype.Service;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 @Service
 
@@ -108,36 +114,63 @@ public class OrderServiceImpl implements OrderService {
     }
     @Override
     public void createOrder(OrderRequest request) {
+
+        if (request.getOrder() == null || request.getOrder().isEmpty()) {
+            throw new RuntimeException("Order is empty");
+        }
+
+        if (request.getShipping() == null || request.getShipping().isEmpty()) {
+            throw new RuntimeException("Shipping information is required");
+        }
+        BigDecimal totalAmount = BigDecimal.ZERO;
+        BigDecimal priceshipping = null;
+        List<OrderItem> orderItems = new ArrayList<>();
+
         // ==========================================
         // 1. Lấy sản phẩm + SKU và tính tiền sản phẩm //
         // =========================
-            BigDecimal totalAmount = BigDecimal.ZERO;
-        BigDecimal priceshipping = null;
+
         for (OrderItemRequest orderItemRequest : request.getOrder()) {
             Integer productId = orderItemRequest.getProductId();
             Integer campainID= orderItemRequest.getCampainId();
             ProductDetail product = productRepository.getproduct1(productId,campainID);
             if (product == null) {
-                throw new RuntimeException("Product not found");
+                throw new BusinessException(MessageCode.PRODUCT_NOT_FOUND);
+
             }
+            // Chuyển List SKU -> Map để lookup O(1)
+            Map<Integer, SkuResponse> skuMap = product.getSkus()
+                    .stream()
+                    .collect(Collectors.toMap(
+                            SkuResponse::getId,
+                            Function.identity()
+                    ));
+
+
             // Duyệt các SKU trong order
             for (SkuOrderRequest item : orderItemRequest.getItem()) {
-                // Tìm SKU tương ứng
-                SkuResponse sku = product.getSkus() .stream() .
-                        filter(s -> s.getId().equals(item.getSkuId())) .
-                        findFirst() .orElseThrow(()
-                                -> new RuntimeException( "SKU not found: " + item.getSkuId() ) );
+                SkuResponse sku = skuMap.get(item.getSkuId());
+
+                if (sku == null) {
+                    throw new BusinessException(MessageCode.SKU_NOT_FOUND);
+                }
+
+                // ==========================================
+                // 3. Check stock
+                // ==========================================
+                if (sku.getStock() < item.getQuantity()) {
+                    throw  new BusinessException(MessageCode.STOCK_NOT_ENOUGH);
+
+                }
+
                 // Kiểm tra số lượng
                 if (item.getQuantity() == null || item.getQuantity() <= 0)
                 {
-                    throw new RuntimeException( "Invalid quantity for SKU: " + item.getSkuId() );
+                    throw new BusinessException(MessageCode.INVALID_QUANTITY);
                 }
-                // Kiểm tra tồn kho
-                if (sku.getStock() < item.getQuantity())
-                {
-                    throw new RuntimeException( "Not enough stock for SKU: " + item.getSkuId() );
-                }
-                // Lấy giá bán
+                // ==========================================
+                // 4. Lấy giá
+                // ==========================================
                 BigDecimal price = sku.getPriceDiscountCampaign();
                 if (price == null)
                 {
@@ -146,13 +179,26 @@ public class OrderServiceImpl implements OrderService {
                 }
                 if (price == null)
                 {
-                    throw new RuntimeException( "Price not found for SKU: " + item.getSkuId() );
+                    throw new BusinessException(MessageCode.PRICE_NOT_FOUND_SKU);
                 }
+
                 // Tính tiền SKU
                 BigDecimal itemAmount = priceService.calculateItemPrice( price, item.getQuantity() );
                 totalAmount = totalAmount.add(itemAmount);
+                // ==========================================
+                // 6. Chuẩn bị OrderItem
+                // ==========================================
+                OrderItem orderItem = new OrderItem();
+
+                orderItem.setProductId(productId);
+                orderItem.setSkucode(item.getSkuId());
+                orderItem.setQuantity(item.getQuantity());
+                orderItem.setPrice(price);
+                orderItem.setTotalprice(itemAmount);
+
+                orderItems.add(orderItem);
             }
-            Shipping shipping = shippingRepository.detailShipping(orderItemRequest.getShippingMethodId());
+            Shipping shipping = shippingRepository.detailShipping(orderItemRequest.getShipping_service_code());
             priceshipping = shipping.getFee();
         }
         // ==========================================
@@ -168,6 +214,14 @@ public class OrderServiceImpl implements OrderService {
         order.setCreatedAt(LocalDateTime.now());
         order.setExpectedDelivery(LocalDateTime.now().plusDays(2));
         orderRepository.insertorder(order);
+
+        for (OrderItem orderItem : orderItems) {
+            orderItem.setOrderId(order.getId());
+        }
+        // ==========================================
+        // 11. Batch insert OrderItem
+        // ==========================================
+        orderItemRepository.insertorderitems(orderItems);
 
        Integer orderid = order.getId();
         OrderTracking tracking = new OrderTracking();

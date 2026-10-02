@@ -9,8 +9,8 @@ public class OrderItemRequest {
     private Integer productId;
     private Integer campainId;
     private List<SkuOrderRequest> item;
-    private String ShippingMethodId;
-    private String ShippingMethodName;
+    private String shipping_service_code;
+    private String shipping_service_name;
     // gửi thng tin địa chỉ kho của seller tạo chến dịch chứa sp đó
 
 
