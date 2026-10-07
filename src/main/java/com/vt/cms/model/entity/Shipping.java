@@ -10,9 +10,9 @@ public class Shipping {
     @JsonProperty("id")
     private Integer id;
     @JsonProperty("service_code")
-    private String servicecode;
+    private String service_code;
     @JsonProperty("service_name")
-    private String servicename;
+    private String service_name;
     @JsonProperty("free")
     private BigDecimal fee;
 }

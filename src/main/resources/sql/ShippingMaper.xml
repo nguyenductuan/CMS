@@ -4,8 +4,8 @@
 <mapper namespace="com.vt.cms.model.repository.ShippingRepository">
     <resultMap id="ShippingResultMap" type="com.vt.cms.model.entity.Shipping">
         <id column="id" property="id" jdbcType="OTHER"/>
-        <result column="service_code" property="servicecode" jdbcType="VARCHAR"/>
-        <result column="service_name" property="servicename" jdbcType="VARCHAR"/>
+        <result column="service_code" property="service_code" jdbcType="VARCHAR"/>
+        <result column="service_name" property="service_name" jdbcType="VARCHAR"/>
         <result column="fee" property="fee" jdbcType="OTHER"/>
     </resultMap>
 
@@ -17,7 +17,7 @@
     <select id="detailShipping" resultMap="ShippingResultMap">
         SELECT *
         FROM shipping
-        where service_code = #{servicecode}
+        where service_code = #{service_code}
     </select>
 
 

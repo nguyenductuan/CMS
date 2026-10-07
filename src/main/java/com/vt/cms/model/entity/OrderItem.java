@@ -6,11 +6,10 @@ import java.math.BigDecimal;
 
 @Data
 public class OrderItem {
-    private int productId;
     private Integer quantity;
     private BigDecimal price;
-  private  BigDecimal totalprice;
-    private Integer orderId;
-    private Integer skucode;
+    private  BigDecimal total_price;
+    private Integer order_id;
+    private Integer sku_id;
 
 }

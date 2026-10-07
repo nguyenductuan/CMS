@@ -5,18 +5,31 @@
     <resultMap id="OrderItemResultMap" type="com.vt.cms.model.entity.OrderItem">
         <id column="id" property="id" jdbcType="OTHER"/>
         <result column="quantity" property="quantity" jdbcType="OTHER"/>
-        <result column="order_id" property="orderId" jdbcType="OTHER"/>
+        <result column="order_id" property="order_id" jdbcType="OTHER"/>
+        <result column="sku_id" property="sku_id" jdbcType="OTHER"/>
         <result column="price" property="price" jdbcType="OTHER"/>
-        <result column="product_id" property="productId" jdbcType="OTHER"/>
+        <result column="total_price" property="total_price" jdbcType="OTHER"/>
 
     </resultMap>
 
-    <insert id="insertorderCartItem" parameterType="com.vt.cms.model.entity.OrderItem">
-        INSERT INTO order_item (product_id, order_id, quantity, price)
-        VALUES (#{productId},
-                #{orderId},
-                #{quantity},
-                #{price})
+    <insert id="insertorderitems" parameterType="com.vt.cms.model.entity.OrderItem">
+        INSERT INTO order_item (
+        order_id,
+        quantity,
+        price,
+        total_price,
+        sku_id
+        )
+        VALUES
+            <foreach collection="list" item="item" separator=",">
+            (
+            #{item.order_id},
+            #{item.quantity},
+            #{item.price},
+            #{item.total_price},
+            #{item.sku_id}
+            )
+        </foreach>
     </insert>
 
 </mapper>

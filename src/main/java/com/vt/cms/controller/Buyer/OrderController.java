@@ -3,8 +3,10 @@ package com.vt.cms.controller.Buyer;
 import com.vt.cms.model.dto.OrderRequest;
 import com.vt.cms.model.dto.OrdersRequest;
 import com.vt.cms.model.dto.page.PagingResponse;
+import com.vt.cms.model.enums.Order;
 import com.vt.cms.model.resp.APIRessponse;
 import com.vt.cms.model.resp.BaseResponse;
+import com.vt.cms.model.resp.OrderCreateResponse;
 import com.vt.cms.model.resp.OrderResponse;
 import com.vt.cms.service.OrderService;
 import org.springframework.http.ResponseEntity;
@@ -28,16 +30,15 @@ public class OrderController {
     }
 
     @PostMapping("/order")
-    public ResponseEntity<OrderResponse> order(@RequestBody OrderRequest orderRequest) {
-        orderService.createOrder(orderRequest);
-        return ResponseEntity.ok(new OrderResponse());
+    public ResponseEntity<APIRessponse>  order(@RequestBody OrderRequest orderRequest) {
+        OrderCreateResponse orderCreateResponse =   orderService.createOrder(orderRequest);
+        return ResponseEntity.ok(new APIRessponse(200, Order.ORDER_SUCCESS.getMessage(), orderCreateResponse));
+
     }
-
-
     @PostMapping("cancelorder/{orderId}")
     public ResponseEntity<APIRessponse> cancelorder(@PathVariable Integer orderId, String notecancel) {
         orderService.cancelOrder(orderId, notecancel);
-        return ResponseEntity.ok(new APIRessponse(200, "Hủy đơn hàng thành công"));
+        return ResponseEntity.ok(new APIRessponse(200, Order.ORDER_CANCEL.getMessage()));
     }
 
     @GetMapping("/order/{id}")

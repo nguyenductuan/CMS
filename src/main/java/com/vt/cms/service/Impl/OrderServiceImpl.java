@@ -74,7 +74,7 @@ public class OrderServiceImpl implements OrderService {
     public void cancelOrder(int orderId, String notecancel) {
         Order order = new Order();
         order.setId(orderId);
-        order.setStatus(OrderStatus.CANCELLED);
+        order.setOrder_status(OrderStatus.CANCELLED);
         order.setNotecancel(notecancel);
         order.setCancelAt(LocalDateTime.now());
         orderRepository.cancelOrder(order);
@@ -113,15 +113,15 @@ public class OrderServiceImpl implements OrderService {
 
     }
     @Override
-    public void createOrder(OrderRequest request) {
+    public OrderCreateResponse createOrder(OrderRequest request) {
 
         if (request.getOrder() == null || request.getOrder().isEmpty()) {
             throw new RuntimeException("Order is empty");
         }
-
-        if (request.getShipping() == null || request.getShipping().isEmpty()) {
-            throw new RuntimeException("Shipping information is required");
-        }
+//
+//        if (request.getShipping() == null || request.getShipping().isEmpty()) {
+//            throw new RuntimeException("Shipping information is required");
+//        }
         BigDecimal totalAmount = BigDecimal.ZERO;
         BigDecimal priceshipping = null;
         List<OrderItem> orderItems = new ArrayList<>();
@@ -134,6 +134,7 @@ public class OrderServiceImpl implements OrderService {
             Integer productId = orderItemRequest.getProductId();
             Integer campainID= orderItemRequest.getCampainId();
             ProductDetail product = productRepository.getproduct1(productId,campainID);
+
             if (product == null) {
                 throw new BusinessException(MessageCode.PRODUCT_NOT_FOUND);
 
@@ -190,12 +191,10 @@ public class OrderServiceImpl implements OrderService {
                 // ==========================================
                 OrderItem orderItem = new OrderItem();
 
-                orderItem.setProductId(productId);
-                orderItem.setSkucode(item.getSkuId());
+                orderItem.setSku_id(item.getSkuId());
                 orderItem.setQuantity(item.getQuantity());
                 orderItem.setPrice(price);
-                orderItem.setTotalprice(itemAmount);
-
+                orderItem.setTotal_price(itemAmount);
                 orderItems.add(orderItem);
             }
             Shipping shipping = shippingRepository.detailShipping(orderItemRequest.getShipping_service_code());
@@ -210,39 +209,44 @@ public class OrderServiceImpl implements OrderService {
         //     2. Tạo order
         Order order = new Order();
         order.setTotal(totalAmountt);
-        order.setStatus(OrderStatus.WAIT_PAYMENT);
+        order.setOrder_status(OrderStatus.WAIT_PAYMENT);
         order.setCreatedAt(LocalDateTime.now());
-        order.setExpectedDelivery(LocalDateTime.now().plusDays(2));
+       // order.setExpectedDelivery(LocalDateTime.now().plusDays(2));
         orderRepository.insertorder(order);
 
         for (OrderItem orderItem : orderItems) {
-            orderItem.setOrderId(order.getId());
+            orderItem.setOrder_id(order.getId());
         }
         // ==========================================
         // 11. Batch insert OrderItem
         // ==========================================
         orderItemRepository.insertorderitems(orderItems);
 
-       Integer orderid = order.getId();
-        OrderTracking tracking = new OrderTracking();
-        tracking.setOrderId(orderid);
-        tracking.setStatusCode(TrackingStatus.WAITING_PAYMENT.getCode());
-        tracking.setTitle(TrackingStatus.WAITING_PAYMENT.getDescription());
-        orderTrackingRepository.insertordertracking(tracking);
-       // Thêm vào bảng payment
-        Payment payment = new Payment();
-        payment.setOrderId(orderid);
-        payment.setStatus("WAITING_PAYMENT");
-        payment.setAmount(totalAmount);
-        payment.setTrancactioncode( LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMddHHmmss")) +
-                "-" +
-                UUID.randomUUID().toString()
-                        .replace("-", "")
-                        .substring(0, 8)
-                        .toUpperCase());
+//       Integer orderid = order.getId();
+//        OrderTracking tracking = new OrderTracking();
+//        tracking.setOrderId(orderid);
+//        tracking.setStatusCode(TrackingStatus.WAITING_PAYMENT.getCode());
+//        tracking.setTitle(TrackingStatus.WAITING_PAYMENT.getDescription());
+//        orderTrackingRepository.insertordertracking(tracking);
+//       // Thêm vào bảng payment
+//        Payment payment = new Payment();
+//        payment.setOrderId(orderid);
+//        payment.setStatus("WAITING_PAYMENT");
+//        payment.setAmount(totalAmount);
+//        payment.setTrancactioncode( LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMddHHmmss")) +
+//                "-" +
+//                UUID.randomUUID().toString()
+//                        .replace("-", "")
+//                        .substring(0, 8)
+//                        .toUpperCase());
 
 
         //paymentRepostitory.insertpayment(payment);
+        OrderCreateResponse orderCreateResponse = new OrderCreateResponse();
+        orderCreateResponse.setOrderId(order.getId());
+        orderCreateResponse.setTotal_payment(totalAmountt);
+        orderCreateResponse.setPayment_method("QR Code");
+        return orderCreateResponse;
 
     }
     public LocalDateTime getEstimatedDeliveryTime() {

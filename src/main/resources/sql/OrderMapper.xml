@@ -5,7 +5,7 @@
     <resultMap id="OrderResultMap" type="com.vt.cms.model.entity.Order">
         <id column="id" property="id" jdbcType="OTHER"/>
         <result column="total" property="total" jdbcType="OTHER"/>
-        <result column="status" property="status" jdbcType="OTHER"/>
+        <result column="order_status" property="order_status" jdbcType="OTHER"/>
         <result column="deliveredAt" property="deliveredAt" jdbcType="OTHER"/>
         <result column="cancelAt" property="cancelAt" jdbcType="OTHER"/>
         <result column="notecancel" property="notecancel" jdbcType="OTHER"/>
@@ -18,8 +18,8 @@
     <insert id="insertorder" parameterType="com.vt.cms.model.entity.Order"
             useGeneratedKeys="true"
             keyProperty="id">
-        INSERT INTO orders (total, status, created_at, expected_delivery)
-        VALUES (#{total}, #{status}, #{createdAt}, #{expectedDelivery})
+        INSERT INTO orders (total, order_status, created_at)
+        VALUES (#{total}, #{order_status}, #{createdAt})
     </insert>
 
     <select id="getdetailById"

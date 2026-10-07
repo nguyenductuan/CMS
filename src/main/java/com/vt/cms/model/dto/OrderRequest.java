@@ -8,7 +8,7 @@ import java.util.List;
 @Data
 public class OrderRequest {
     private List<OrderItemRequest> order;
-    private List<ShippingRequest> shipping;
+//    private List<ShippingRequest> shipping;
     private Double totalamount;
 }
 

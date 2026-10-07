@@ -24,7 +24,7 @@ public class Order {
     private OrderStatus substatus;
     private String notecancel;
     @Enumerated(EnumType.STRING)
-    private OrderStatus status;
+    private OrderStatus order_status;
     private List<OrderItem> orderItems;
     private LocalDateTime expectedDelivery;
     private  Double DeliveryLatitude;
