@@ -23,7 +23,7 @@ public class OrderController {
         this.orderService = orderService;
     }
 
-    @GetMapping("order-list")
+    @GetMapping("lít-order")
     public BaseResponse<PagingResponse<List<OrderResponse>>> orderlist(
             @ModelAttribute OrdersRequest request) {
         return orderService.getorderlist(request);
