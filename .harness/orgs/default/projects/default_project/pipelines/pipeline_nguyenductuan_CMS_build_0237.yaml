@@ -1,0 +1,40 @@
+pipeline:
+  id: pipeline_nguyenductuan_CMS_build_0237
+  name: pipeline_nguyenductuan_CMS_build_0237
+  stages:
+    - name: Build and Test
+      id: build_and_test
+      runtime: cloud
+      platform:
+        os: linux
+        arch: amd64
+      clone:
+        enabled: true
+      cache:
+        enabled: true
+      build-intelligence:
+        enabled: true
+      steps:
+        - name: Build and Test
+          id: build_and_test_step
+          run:
+            shell: bash
+            script: |-
+              # Set Java 17
+              export JAVA_HOME=/opt/java/openjdk-17
+              export PATH=$JAVA_HOME/bin:$PATH
+
+              # Verify Java version
+              java -version
+
+              # Make Maven wrapper executable
+              chmod +x ./mvnw
+
+              # Run tests
+              ./mvnw test -DfailIfNoTests=false
+            report:
+              type: junit
+              paths:
+                - "**/target/surefire-reports/*.xml"
+  tags:
+    onboarding: "true"
