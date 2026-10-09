@@ -15,6 +15,7 @@ import com.vt.cms.model.repository.*;
 import com.vt.cms.model.resp.*;
 import com.vt.cms.service.OrderService;
 import com.vt.cms.service.PriceService;
+import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 
 
@@ -111,7 +112,7 @@ public class OrderServiceImpl implements OrderService {
         return response;
 
     }
-    @Override
+    @Transactional
     public OrderCreateResponse createOrder(OrderRequest request) {
 
         if (request.getOrder() == null || request.getOrder().isEmpty()) {
@@ -122,7 +123,7 @@ public class OrderServiceImpl implements OrderService {
 //            throw new RuntimeException("Shipping information is required");
 //        }
         BigDecimal totalAmount = BigDecimal.ZERO;
-        BigDecimal priceshipping = null;
+        BigDecimal priceshipping = BigDecimal.ZERO;
         List<OrderItem> orderItems = new ArrayList<>();
 
         // ==========================================
@@ -158,15 +159,16 @@ public class OrderServiceImpl implements OrderService {
                 // ==========================================
                 // 3. Check stock
                 // ==========================================
-                if (sku.getStock() < item.getQuantity()) {
-                    throw  new BusinessException(MessageCode.STOCK_NOT_ENOUGH);
-
-                }
 
                 // Kiểm tra số lượng
                 if (item.getQuantity() == null || item.getQuantity() <= 0)
                 {
                     throw new BusinessException(MessageCode.INVALID_QUANTITY);
+                }
+                //Check stock
+                if (sku.getStock() < item.getQuantity()) {
+                    throw  new BusinessException(MessageCode.STOCK_NOT_ENOUGH);
+
                 }
                 // ==========================================
                 // 4. Lấy giá
@@ -197,7 +199,14 @@ public class OrderServiceImpl implements OrderService {
                 orderItems.add(orderItem);
             }
             Shipping shipping = shippingRepository.detailShipping(orderItemRequest.getShipping_service_code());
-            priceshipping = shipping.getFee();
+            if (shipping == null || shipping.getFee() == null) {
+                throw new BusinessException(MessageCode.SHIPPING_NOT_FOUND);
+            }
+
+            if (shipping.getFee().compareTo(BigDecimal.ZERO) < 0) {
+                throw new BusinessException(MessageCode.SHIPPING_NOT_FOUND);
+            }
+            priceshipping = priceshipping.add(shipping.getFee());
         }
         // ==========================================
         // 3. Tính tổng tiền
