@@ -5,7 +5,19 @@ public enum MessageCode {
             "SHIPPING_NOT_FOUND",
             "Phương thức vận chuyển không tồn tại"
     ),
-PRODUCT_NOT_FOUND(
+    INVALID_SHIPPING_FEE(
+            "INVALID_SHIPPING_FEE",
+            "Phí vận chuyển không hợp lệ"
+    ),
+    INVALID_ORDER(
+            "INVALID_ORDER",
+            "Thông tin đơn hàng không hợp lệ"
+    ),
+    INVALID_PRICE(
+            "INVALID_PRICE",
+            "Giá sản phẩm không hợp lệ"
+    ),
+    PRODUCT_NOT_FOUND(
             "PRODUCT_NOT_FOUND",
             "Sản phẩm không tồn tại"
     ),
@@ -29,6 +41,7 @@ PRODUCT_NOT_FOUND(
             "PRODUCT_SKU_NOT_FOUND",
             "SKU sản phẩm không tồn tại"
     );
+
     private final String code;
     private final String message;
 
