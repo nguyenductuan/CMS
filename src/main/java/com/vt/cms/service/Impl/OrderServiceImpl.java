@@ -38,7 +38,6 @@ public class OrderServiceImpl implements OrderService {
     private OrderTrackingRepository orderTrackingRepository;
     private OrderRepository orderRepository;
     private PriceService priceService;
-//    private PaymentRepostitory paymentRepostitory;
 
 
     public OrderServiceImpl(OrderRepository orderRepository,
