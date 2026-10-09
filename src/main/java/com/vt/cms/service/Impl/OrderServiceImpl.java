@@ -19,7 +19,6 @@ import com.vt.cms.model.resp.BaseResponse;
 import com.vt.cms.model.resp.OrderCreateResponse;
 import com.vt.cms.model.resp.OrderItemResponse;
 import com.vt.cms.model.resp.OrderResponse;
-import com.vt.cms.model.resp.PagingResponse;
 import com.vt.cms.model.resp.SkuResponse;
 import com.vt.cms.service.InventoryService;
 import com.vt.cms.service.OrderPricingService;
