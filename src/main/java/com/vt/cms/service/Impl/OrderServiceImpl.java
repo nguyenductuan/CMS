@@ -169,7 +169,7 @@ public class OrderServiceImpl implements OrderService {
         order.setTotal(grandTotal);
         order.setOrder_status(OrderStatus.WAIT_PAYMENT);
         order.setCreatedAt(LocalDateTime.now());
-        order.setConfirm_deadline_at(getEstimatedDeliveryTime());
+        order.setExpectedDelivery(getEstimatedDeliveryTime());
         order.setCreated_by("SYSTEM");
 
 

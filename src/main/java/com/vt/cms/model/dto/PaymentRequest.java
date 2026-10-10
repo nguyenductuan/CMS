@@ -4,12 +4,12 @@ import lombok.Data;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Data
 public class PaymentRequest {
-    private String transactionCode;
-    private LocalDateTime timeTransaction;
-    private BigDecimal amount;
-    private String partnerBankCode;
-    private String result;
+   private List<Integer> orderIds;
+   private String paymentMethod;
+    private String paymentProvider;
+    private BigDecimal totalPayment;
 }

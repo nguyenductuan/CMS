@@ -1,9 +1,9 @@
 package com.vt.cms.model.repository;
 
 import com.vt.cms.model.entity.Payment;
-import org.mapstruct.Mapper;
+import org.apache.ibatis.annotations.Mapper;
 
-
+@Mapper
 public interface PaymentRepostitory {
 
     int insertpayment(Payment payment);

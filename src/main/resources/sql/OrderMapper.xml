@@ -19,8 +19,8 @@
     <insert id="insertorder" parameterType="com.vt.cms.model.entity.Order"
             useGeneratedKeys="true"
             keyProperty="id">
-        INSERT INTO orders (total, order_status, created_at, confirm_deadline_at,	created_by)
-        VALUES (#{total}, #{order_status}, #{createdAt}, #{confirm_deadline_at}, #{created_by})
+        INSERT INTO orders (total, order_status, created_at, 	expected_delivery,	created_by)
+        VALUES (#{total}, #{order_status}, #{createdAt}, #{expectedDelivery}, #{created_by})
     </insert>
 
     <select id="getdetailById"
