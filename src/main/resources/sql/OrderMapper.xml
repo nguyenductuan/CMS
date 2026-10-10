@@ -100,36 +100,27 @@
         SELECT oi.product_id as productId,
                p.name        as productName,
                oi.price      as price,
-               oi.quantity
-
+               oi.quantity,
+               cp.price as price_campain,
+               cp.price_discount as price_discount
         FROM order_item oi
-                 LEFT JOIN products p ON oi.product_id = p.id
+        LEFT JOIN products p ON oi.product_id = p.id
+        LEFT JOIN 	campain_product cp ON cp.product_id = p.id
         WHERE oi.order_id = #{orderId}
     </select>
 
 
     <select id="getOrder" resultType="com.vt.cms.model.resp.OrderResponse">
-#         SELECT id               as order_Id,
-#                total            as total,
-#                created_at       as ordercreated,
-#                order_status           as   order_status
-#         FROM orders
-
-SELECT
-    p.id as productId,
-    p.name as productName,
-    oi.price,
-    s.sku_code AS skuCode,
-    s.id AS skuId,
-    p.json_images as jsonImages,
-    cp.price as priceCampaign,
-    cp.price_discount as priceDiscountCampaign,
-    oi.quantity
-FROM order_item oi
-         JOIN products p ON p.id = oi.product_id
-         LEFT JOIN product_sku s ON s.id = oi.sku_id
-         LEFT JOIN campain_product cp ON cp.product_id = oi.product_id AND cp.sku_id = oi.sku_id
+        SELECT
+            o.id AS orderId,
+            o.order_status AS orderStatus,
+            o.total AS total,
+            o.created_at AS orderDate,
+            o.expected_delivery AS expected_delivery,
+            o.created_by AS createdBy
+        FROM orders o
+        ORDER BY o.created_at DESC
         LIMIT #{pageSize}
-        OFFSET #{offset}
+            OFFSET #{offset}
     </select>
 </mapper>

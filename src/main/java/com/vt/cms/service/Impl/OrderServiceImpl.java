@@ -85,7 +85,24 @@ public class OrderServiceImpl implements OrderService {
         System.out.println("Orders: " + orders);
         for (OrderResponse order : orders) {
             List<OrderItemResponse> items = orderRepository.getItemsByOrderId(order.getOrderId());
-            System.out.println("Order Items: " + items);
+
+            // Map OrderItemResponse sang ItemDto
+            List<ItemDto> itemDtos = items.stream()
+                    .map(item -> {
+                        ItemDto dto = new ItemDto();
+
+                        // Đổi tên getter/setter theo class thực tế của bạn
+                        dto.setProductId(item.getProductId());
+                        dto.setProductName(item.getProductName());
+//                        dto.setPrice(item.getPrice());
+                        dto.setQuantity(item.getQuantity());
+
+                        return dto;
+                    })
+                    .toList();
+
+            // Gắn danh sách item vào order
+            order.setOrderItems(itemDtos);
         }
 
         long totalCount = orderRepository.countorder();
