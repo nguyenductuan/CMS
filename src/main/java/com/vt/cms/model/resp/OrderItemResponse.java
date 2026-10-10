@@ -9,6 +9,8 @@ public class OrderItemResponse {
     private Integer productId;
     private Integer quantity;
     private String productName;
-    private BigDecimal price_campain;
-    private BigDecimal price_discount;
+    private BigDecimal priceCampain;
+    private BigDecimal priceDiscount;
+    private  Integer stockCampain;
+    private  Integer campaignId;
 }

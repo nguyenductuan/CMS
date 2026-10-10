@@ -97,15 +97,19 @@
     </select>
     <!-- Query 2: Items -->
     <select id="getItemsByOrderId" resultType="com.vt.cms.model.resp.OrderItemResponse">
-        SELECT oi.product_id as productId,
-               p.name        as productName,
-               oi.price      as price,
-               oi.quantity,
-               cp.price as price_campain,
-               cp.price_discount as price_discount
+        SELECT
+            oi.product_id AS productId,
+            p.name AS productName,
+            oi.quantity AS quantity,
+            cp.price AS priceCampain,
+            cp.campaign_id AS campaignId,
+            cp.stock_campaign AS stockCampain,
+            cp.price_discount AS priceDiscount
         FROM order_item oi
-        LEFT JOIN products p ON oi.product_id = p.id
-        LEFT JOIN 	campain_product cp ON cp.product_id = p.id
+                 LEFT JOIN products p
+                           ON oi.product_id = p.id
+                 LEFT JOIN campain_product cp
+                           ON cp.product_id = p.id
         WHERE oi.order_id = #{orderId}
     </select>
 
@@ -116,7 +120,7 @@
             o.order_status AS orderStatus,
             o.total AS total,
             o.created_at AS orderDate,
-            o.expected_delivery AS expected_delivery,
+            o.expected_delivery AS expectedDelivery,
             o.created_by AS createdBy
         FROM orders o
         ORDER BY o.created_at DESC
