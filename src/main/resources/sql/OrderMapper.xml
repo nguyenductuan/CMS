@@ -9,6 +9,7 @@
         <result column="deliveredAt" property="deliveredAt" jdbcType="OTHER"/>
         <result column="cancelAt" property="cancelAt" jdbcType="OTHER"/>
         <result column="notecancel" property="notecancel" jdbcType="OTHER"/>
+        <result column="created_by" property="created_by" jdbcType="OTHER"/>
         <result column="created_at" property="createdAt" jdbcType="OTHER"/>
         <result column="expected_delivery" property="expectedDelivery" jdbcType="OTHER"/>
 
@@ -18,8 +19,8 @@
     <insert id="insertorder" parameterType="com.vt.cms.model.entity.Order"
             useGeneratedKeys="true"
             keyProperty="id">
-        INSERT INTO orders (total, order_status, created_at)
-        VALUES (#{total}, #{order_status}, #{createdAt})
+        INSERT INTO orders (total, order_status, created_at, confirm_deadline_at,	created_by)
+        VALUES (#{total}, #{order_status}, #{createdAt}, #{confirm_deadline_at}, #{created_by})
     </insert>
 
     <select id="getdetailById"
@@ -53,15 +54,36 @@
             cancelAt   = #{cancelAt}
         WHERE id = #{id}
     </update>
+    <select id="getOrderItemsByOrderId"
+            parameterType="long"
+            resultType="com.vt.cms.model.dto.order.Itemorderdetail">
+        SELECT
+            p.id as productId,
+            p.name as productName,
+            oi.price,
+            s.sku_code AS skuCode,
+            s.id AS skuId,
+            p.json_images as jsonImages,
+            cp.price as priceCampaign,
+            cp.price_discount as priceDiscountCampaign,
+            oi.quantity
+        FROM order_item oi
+                 JOIN products p ON p.id = oi.product_id
+                 LEFT JOIN product_sku s ON s.id = oi.sku_id
+                 LEFT JOIN campain_product cp ON cp.product_id = oi.product_id AND cp.sku_id = oi.sku_id
+        WHERE oi.order_id = #{orderId}
+    </select>
 
     <select id="getorderbyid" resultType="com.vt.cms.model.resp.OrderResponse">
-        SELECT id               as orderid,
-               status           as orderStatus,
-               total            as total,
-               created_at       as ordercreated,
-               notecancel       as notecancel,
-               cancelAt         as cancelAt,
-               expecteddelivery as expecteddelivery
+        SELECT
+            id AS orderId,
+            order_status AS order_status,
+            created_at AS order_date,
+            total AS total,
+            expected_delivery AS expected_delivery,
+            created_by AS createdBy
+
+
         FROM orders
         WHERE id = #{orderId}
     </select>

@@ -1,5 +1,6 @@
 package com.vt.cms.model.repository;
 
+import com.vt.cms.model.dto.ItemDto;
 import com.vt.cms.model.dto.OrdersRequest;
 import com.vt.cms.model.entity.Order;
 import com.vt.cms.model.resp.OrderItemResponse;
@@ -18,7 +19,7 @@ public interface OrderRepository {
     List<OrderResponse> getOrder(OrdersRequest request);
 
     List<OrderItemResponse> getItemsByOrderId(long orderId);
-
+    List<ItemDto> getOrderItemsByOrderId(long orderId);
     void save(Order order);
 
     void cancelOrder(Order order);

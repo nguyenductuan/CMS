@@ -28,7 +28,7 @@ public class OrderController {
             @ModelAttribute OrdersRequest request) {
         return orderService.getorderlist(request);
     }
-
+// Ham tao order
     @PostMapping("/order")
     public ResponseEntity<APIRessponse>  order(@RequestBody OrderRequest orderRequest) {
         OrderCreateResponse orderCreateResponse =   orderService.createOrder(orderRequest);
@@ -40,7 +40,7 @@ public class OrderController {
         orderService.cancelOrder(orderId, notecancel);
         return ResponseEntity.ok(new APIRessponse(200, Order.ORDER_CANCEL.getMessage()));
     }
-
+// Hàm chi tiết order
     @GetMapping("/order/{id}")
     public OrderResponse order(@PathVariable long id) {
         return orderService.getdetailorder(id);

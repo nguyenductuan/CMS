@@ -1,10 +1,7 @@
 package com.vt.cms.service.Impl;
 
 import com.vt.cms.Exception.BusinessException;
-import com.vt.cms.model.dto.OrderItemRequest;
-import com.vt.cms.model.dto.OrderRequest;
-import com.vt.cms.model.dto.OrdersRequest;
-import com.vt.cms.model.dto.SkuOrderRequest;
+import com.vt.cms.model.dto.*;
 import com.vt.cms.model.dto.page.PageInfo;
 import com.vt.cms.model.dto.page.PagingResponse;
 import com.vt.cms.model.entity.Order;
@@ -60,10 +57,14 @@ public class OrderServiceImpl implements OrderService {
 
     @Override
     public OrderResponse getdetailorder(long orderId) {
-        OrderResponse order = orderRepository.getorderbyid(orderId);
+         OrderResponse order = orderRepository.getorderbyid(orderId);
         if (order == null) {
             throw new RuntimeException("Order not found");
         }
+        // Lấy danh sách item của order
+        List<ItemDto> orderItems = orderRepository.getOrderItemsByOrderId(orderId);
+        order.setOrderItems(orderItems);
+        System.out.println("Order ID: " + order);
         return order;
     }
 
@@ -153,6 +154,7 @@ public class OrderServiceImpl implements OrderService {
                 orderItem.setQuantity(requestedSku.getQuantity());
                 orderItem.setPrice(unitPrice);
                 orderItem.setTotal_price(lineTotal);
+                orderItem.setProduct_id(product.getId());
                 orderItems.add(orderItem);
             }
 
@@ -167,6 +169,9 @@ public class OrderServiceImpl implements OrderService {
         order.setTotal(grandTotal);
         order.setOrder_status(OrderStatus.WAIT_PAYMENT);
         order.setCreatedAt(LocalDateTime.now());
+        order.setConfirm_deadline_at(getEstimatedDeliveryTime());
+        order.setCreated_by("SYSTEM");
+
 
         int insertedOrders = orderRepository.insertorder(order);
         if (insertedOrders <= 0 || order.getId() == null) {
@@ -189,8 +194,9 @@ public class OrderServiceImpl implements OrderService {
         response.setPayment_method("QR Code");
         return response;
     }
-
+    //Hàm tính thời gian giao hàng
     public LocalDateTime getEstimatedDeliveryTime() {
-        return LocalDateTime.now().plusDays(2);
+
+        return LocalDateTime.now().plusDays(7); // Example: 7 days from now
     }
 }

@@ -22,6 +22,9 @@ public class Order {
     private LocalDateTime deliveredAt;
     private LocalDateTime cancelAt;
     private OrderStatus substatus;
+    private LocalDateTime confirm_deadline_at;
+
+    private  String created_by;
     private String notecancel;
     @Enumerated(EnumType.STRING)
     private OrderStatus order_status;

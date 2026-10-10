@@ -40,7 +40,7 @@ public class CampainServiceImpl implements CampainService {
         campain.setDiscount(request.getDiscount());
         campain.setSalesCommission(request.getSalesCommission());
 
-        //campainRepository.savecampain(campain); bổ sung thêm
+        campainRepository.savecampain(campain);
 
         int campainId = campain.getCampainid();
         CampainProduct campainProduct = new CampainProduct();
@@ -69,7 +69,7 @@ public class CampainServiceImpl implements CampainService {
     @Override
     public void updatestatus(Integer campain_id, String status) {
 
-        campainRepository.savecampain1(campain_id, status);
+//        campainRepository.savecampain(campain_id, status);
     }
 
     @Override

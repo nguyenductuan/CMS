@@ -8,14 +8,29 @@
         <result column="order_id" property="order_id" jdbcType="OTHER"/>
         <result column="sku_id" property="sku_id" jdbcType="OTHER"/>
         <result column="price" property="price" jdbcType="OTHER"/>
+        <result column="product_id" property="product_id" jdbcType="OTHER"/>
         <result column="total_price" property="total_price" jdbcType="OTHER"/>
 
     </resultMap>
+
+<!--    <select id="getOrderItemsByOrderId"-->
+<!--            parameterType="long"-->
+<!--            resultType="com.vt.cms.model.dto.ItemDto">-->
+<!--        SELECT-->
+<!--            id,-->
+<!--            order_id AS orderId,-->
+<!--            item_id AS itemId,-->
+<!--            quantity,-->
+<!--            price-->
+<!--        FROM order_item-->
+<!--        WHERE order_id = #{orderId}-->
+<!--    </select>-->
 
     <insert id="insertorderitems" parameterType="com.vt.cms.model.entity.OrderItem">
         INSERT INTO order_item (
         order_id,
         quantity,
+        product_id,
         price,
         total_price,
         sku_id
@@ -25,6 +40,7 @@
             (
             #{item.order_id},
             #{item.quantity},
+            #{item.product_id},
             #{item.price},
             #{item.total_price},
             #{item.sku_id}
