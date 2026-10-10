@@ -20,7 +20,7 @@ public class PaymentController {
     public PaymentController(PaymentService paymentService) {
         this.paymentService = paymentService;
     }
-// Gọi API payment từ FE, trả về thông tin thanh toán
+    // Gọi API payment từ FE, trả về thông tin thanh toán
     @PostMapping("/paymentorder")
     public ResponseEntity<APIRessponse> payment(@RequestBody PaymentRequest paymentRequest) {
       PaymentResponse paymentResponse=  paymentService.payment(paymentRequest);

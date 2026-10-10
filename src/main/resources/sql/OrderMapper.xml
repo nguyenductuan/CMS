@@ -9,7 +9,7 @@
         <result column="sub_order_status" property="sub_order_status" jdbcType="OTHER"/>
 
         <result column="deliveredAt" property="deliveredAt" jdbcType="OTHER"/>
-        <result column="cancelAt" property="cancelAt" jdbcType="OTHER"/>
+        <result column="cancel_at" property="cancel_at" jdbcType="OTHER"/>
         <result column="notecancel" property="notecancel" jdbcType="OTHER"/>
         <result column="created_by" property="created_by" jdbcType="OTHER"/>
         <result column="created_at" property="createdAt" jdbcType="OTHER"/>
@@ -53,7 +53,9 @@
         UPDATE orders
         SET order_status = #{order_status},
             notecancel = #{notecancel},
-            cancelAt   = #{cancelAt}
+            cancel_at  = #{cancel_at},
+            updated_at = #{updatedAt},
+            canceled_by = #{canceled_by}
         WHERE id = #{id}
     </update>
     <select id="getOrderItemsByOrderId"
@@ -101,18 +103,33 @@
                oi.quantity
 
         FROM order_item oi
-                 LEFT JOIN product p ON oi.product_id = p.id
+                 LEFT JOIN products p ON oi.product_id = p.id
         WHERE oi.order_id = #{orderId}
     </select>
 
 
     <select id="getOrder" resultType="com.vt.cms.model.resp.OrderResponse">
-        SELECT id               as order_Id,
-               total            as total,
-               created_at       as ordercreated,
-               status           as orderStatus,
-               expecteddelivery as expecteddelivery
-        FROM orders LIMIT #{pageSize}
+#         SELECT id               as order_Id,
+#                total            as total,
+#                created_at       as ordercreated,
+#                order_status           as   order_status
+#         FROM orders
+
+SELECT
+    p.id as productId,
+    p.name as productName,
+    oi.price,
+    s.sku_code AS skuCode,
+    s.id AS skuId,
+    p.json_images as jsonImages,
+    cp.price as priceCampaign,
+    cp.price_discount as priceDiscountCampaign,
+    oi.quantity
+FROM order_item oi
+         JOIN products p ON p.id = oi.product_id
+         LEFT JOIN product_sku s ON s.id = oi.sku_id
+         LEFT JOIN campain_product cp ON cp.product_id = oi.product_id AND cp.sku_id = oi.sku_id
+        LIMIT #{pageSize}
         OFFSET #{offset}
     </select>
 </mapper>

@@ -20,11 +20,12 @@ public class Order {
     private OrderStatus paymentStatus;
     private LocalDateTime createdAt;
     private LocalDateTime deliveredAt;
-    private LocalDateTime cancelAt;
+    private LocalDateTime cancel_at;
     private OrderStatus sub_order_status;
     private LocalDateTime expected_delivery;
 
     private  String created_by;
+    private String cancelled_by;
     private String notecancel;
     @Enumerated(EnumType.STRING)
     private OrderStatus order_status;

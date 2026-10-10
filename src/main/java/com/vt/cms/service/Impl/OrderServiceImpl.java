@@ -74,16 +74,18 @@ public class OrderServiceImpl implements OrderService {
         order.setId(orderId);
         order.setOrder_status(OrderStatus.CANCELLED);
         order.setNotecancel(notecancel);
-        order.setCancelAt(LocalDateTime.now());
+        order.setUpdatedAt(LocalDateTime.now());
+        order.setCancelled_by("SYSTEM");
         orderRepository.cancelOrder(order);
     }
 
     @Override
     public BaseResponse<PagingResponse<List<OrderResponse>>> getorderlist(OrdersRequest request) {
         List<OrderResponse> orders = orderRepository.getOrder(request);
+        System.out.println("Orders: " + orders);
         for (OrderResponse order : orders) {
             List<OrderItemResponse> items = orderRepository.getItemsByOrderId(order.getOrderId());
-            // Keep existing response behavior; attaching items requires a DTO contract change.
+            System.out.println("Order Items: " + items);
         }
 
         long totalCount = orderRepository.countorder();
