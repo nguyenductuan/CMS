@@ -6,6 +6,8 @@
         <id column="id" property="id" jdbcType="OTHER"/>
         <result column="total" property="total" jdbcType="OTHER"/>
         <result column="order_status" property="order_status" jdbcType="OTHER"/>
+        <result column="sub_order_status" property="sub_order_status" jdbcType="OTHER"/>
+
         <result column="deliveredAt" property="deliveredAt" jdbcType="OTHER"/>
         <result column="cancelAt" property="cancelAt" jdbcType="OTHER"/>
         <result column="notecancel" property="notecancel" jdbcType="OTHER"/>
@@ -42,14 +44,14 @@
 
     <update id="save">
         UPDATE orders
-        SET status      = #{status},
-            substatus   = #{substatus},
-            deliveredAt = #{deliveredAt}
+        SET order_status = #{order_status},
+            updated_at = #{updatedAt},
+            updated_by = #{updated_by}
         WHERE id = #{id}
     </update>
     <update id="cancelOrder">
         UPDATE orders
-        SET status     = #{status},
+        SET order_status = #{order_status},
             notecancel = #{notecancel},
             cancelAt   = #{cancelAt}
         WHERE id = #{id}
@@ -82,12 +84,15 @@
             total AS total,
             expected_delivery AS expected_delivery,
             created_by AS createdBy
-
-
         FROM orders
         WHERE id = #{orderId}
     </select>
 
+    <select id="getorderbyId" resultType="com.vt.cms.model.entity.Order">
+        SELECT *
+        FROM orders
+        WHERE id = #{orderId}
+    </select>
     <!-- Query 2: Items -->
     <select id="getItemsByOrderId" resultType="com.vt.cms.model.resp.OrderItemResponse">
         SELECT oi.product_id as productId,

@@ -219,7 +219,7 @@ BigDecimal b = a.divide(BigDecimal.valueOf(1000));
     public void shipeperdelivery(int orderid) {
         Order order1 = new Order();
         order1.setId(orderid);
-        order1.setSubstatus(OrderStatus.SHIPPING);
+        order1.setSub_order_status(OrderStatus.SHIPPING);
         order1.setOrder_status(OrderStatus.DELIVERED);
         orderRepository.save(order1);
         OrderResponse orderResponse = orderRepository.getorderbyid(orderid);
@@ -234,7 +234,7 @@ BigDecimal b = a.divide(BigDecimal.valueOf(1000));
         Order order3 = new Order();
         order3.setId(orderid);
         order3.setOrder_status(OrderStatus.DELIVERED);
-        order3.setSubstatus(OrderStatus.DELIVERED);
+        order3.setSub_order_status(OrderStatus.DELIVERED);
         order3.setDeliveredAt(LocalDateTime.now());
         orderRepository.save(order3);
         OrderResponse orderResponse = orderRepository.getorderbyid(orderid);

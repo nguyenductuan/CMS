@@ -21,13 +21,15 @@ public class Order {
     private LocalDateTime createdAt;
     private LocalDateTime deliveredAt;
     private LocalDateTime cancelAt;
-    private OrderStatus substatus;
+    private OrderStatus sub_order_status;
     private LocalDateTime expected_delivery;
 
     private  String created_by;
     private String notecancel;
     @Enumerated(EnumType.STRING)
     private OrderStatus order_status;
+    private LocalDateTime updatedAt;
+    private String updated_by;
     private List<OrderItem> orderItems;
     private LocalDateTime expectedDelivery;
     private  Double DeliveryLatitude;

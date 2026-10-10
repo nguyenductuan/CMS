@@ -4,7 +4,7 @@ public enum PaymentStatus {
 
     PAYMENT_SUCCESS(
             "PAYMENT_SUCCESS",
-            "Thanh toán thành công"
+            "Thành công"
     ),
     PAYMENT_FAILED(
             "PAYMENT_FAILED",

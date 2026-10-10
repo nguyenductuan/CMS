@@ -43,11 +43,15 @@ public class PaymentServiceImpl implements PaymentService{
             throw new IllegalArgumentException("Amount must be greater than zero");
         }
         //2. Find payment by transaction code
+        System.out.println("transactionCode = " + paymentcallback.getTransactionCode());
         Payment payment = paymentRepostitory.paymentbytransaction(paymentcallback.getTransactionCode());
+        System.out.println("payment = " + payment);
         if (payment == null) {
             throw new IllegalArgumentException("Payment not found");
         }
+        System.out.println("payment.orderId = " + payment.getOrderId());
 
+        System.out.println("START find order");
         //3. Validate amount
         if (paymentcallback.getAmount().compareTo(payment.getAmount()) != 0) {
             throw new IllegalArgumentException("Invalid payment amount");
@@ -56,11 +60,15 @@ public class PaymentServiceImpl implements PaymentService{
         paymentRepostitory.updatepayment(paymentcallback.getTransactionCode());
         //5. Find order
         Order order = orderRepository.getorderbyId(payment.getOrderId());
+        System.out.println("order = " + order);
         if(order == null) {
             throw new IllegalArgumentException("Order not found");
         }
+
         //6. update orrder
         order.setOrder_status(OrderStatus.PREPARING);
+        order.setUpdatedAt(LocalDateTime.now());
+        order.setUpdated_by("SYSTEM");
         orderRepository.save((order));
     }
 
@@ -73,7 +81,7 @@ public class PaymentServiceImpl implements PaymentService{
                         + new Random().nextInt(100000)
         );
 
-        PaymentResponse payment = new PaymentResponse();
+        Payment payment = new Payment();
         // Tạo mã giao dịch mock
         String transactionCode = "VPO"
                 + UUID.randomUUID().toString()
@@ -83,14 +91,23 @@ public class PaymentServiceImpl implements PaymentService{
 
         LocalDateTime createdTime = LocalDateTime.now();
         LocalDateTime expiredTime = createdTime.plusMinutes(15);
-        payment.setPayment_id(paymentId);
-        payment.setAmount(paymentRequest.getTotalPayment());
-        payment.setTransaction_code(transactionCode);
-        payment.setCreated_qr_time(createdTime);
-        payment.setExpired_qr_time(expiredTime);
-        payment.setQr_code(generateQRCode());
+        System.out.println("orderId = " + paymentRequest.getOrderIds());
 
-        return payment;
+      payment.setOrderId(paymentRequest.getOrderIds());
+       payment.setStatus("PENDING");
+       payment.setTransactionCode(transactionCode);
+       payment.setAmount(paymentRequest.getTotalPayment());
+        paymentRepostitory.save(payment);
+        PaymentResponse payment1= new PaymentResponse();
+
+        payment1.setPayment_id(paymentId);
+        payment1.setAmount(paymentRequest.getTotalPayment());
+        payment1.setTransaction_code(transactionCode);
+        payment1.setCreated_qr_time(createdTime);
+        payment1.setExpired_qr_time(expiredTime);
+        payment1.setQr_code(generateQRCode());
+
+        return payment1;
     }
     // Hàm sinh QR code
     public String generateQRCode() {

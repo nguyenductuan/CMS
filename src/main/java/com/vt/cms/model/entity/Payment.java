@@ -6,11 +6,9 @@ import java.math.BigDecimal;
 
 @Data
 public class Payment {
-    private String paymanrtid;
-    private Integer OrderId;
+    private Integer id;
+    private Integer orderId;
     private String status;
-    private  String trancactioncode;
+    private String transactionCode;
     private BigDecimal amount;
-
-
 }

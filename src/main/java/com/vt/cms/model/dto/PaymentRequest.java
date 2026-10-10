@@ -8,7 +8,7 @@ import java.util.List;
 
 @Data
 public class PaymentRequest {
-   private List<Integer> orderIds;
+   private Integer orderIds;
    private String paymentMethod;
     private String paymentProvider;
     private BigDecimal totalPayment;
