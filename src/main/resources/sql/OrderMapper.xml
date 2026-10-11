@@ -65,6 +65,30 @@
             p.id as productId,
             p.name as productName,
             oi.price,
+            cp.campaign_id as campaignId,
+            cp.stock_campaign as stockCampaign,
+            s.sku_code AS skuCode,
+            s.id AS skuId,
+            p.json_images as jsonImages,
+            cp.price as priceCampaign,
+            cp.price_discount as priceDiscountCampaign,
+            oi.quantity
+        FROM order_item oi
+                 JOIN products p ON p.id = oi.product_id
+                 LEFT JOIN product_sku s ON s.id = oi.sku_id
+                 LEFT JOIN campain_product cp ON cp.product_id = oi.product_id AND cp.sku_id = oi.sku_id
+        WHERE oi.order_id = #{orderId}
+    </select>
+
+    <select id="getOrderItemsByOrderId1"
+            parameterType="long"
+            resultType="com.vt.cms.model.dto.order.Itemorderdetail">
+        SELECT
+            p.id as productId,
+            p.name as productName,
+            oi.price,
+            cp.campaign_id as campaignId,
+            cp.stock_campaign as stockCampaign,
             s.sku_code AS skuCode,
             s.id AS skuId,
             p.json_images as jsonImages,

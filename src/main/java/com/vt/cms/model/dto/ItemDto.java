@@ -13,5 +13,6 @@ public class ItemDto {
     private BigDecimal price_discount;
     private Integer quantity;
    private Integer stock;
+   private Integer skuId;
 
 }

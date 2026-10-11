@@ -1,37 +1,39 @@
 package com.vt.cms.service.Impl;
-
 import com.vt.cms.model.dto.PaymentRequest;
-
 import com.vt.cms.model.dto.Paymentcallback;
+import com.vt.cms.model.dto.order.Itemorderdetail;
 import com.vt.cms.model.entity.Order;
 import com.vt.cms.model.entity.Payment;
 import com.vt.cms.model.enums.OrderStatus;
+import com.vt.cms.model.enums.PaymentStatus;
 import com.vt.cms.model.repository.*;
-import com.vt.cms.model.resp.OrderResponse;
 import com.vt.cms.model.resp.PaymentResponse;
 import com.vt.cms.service.PaymentService;
 import org.springframework.stereotype.Service;
-
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Random;
 import java.util.UUID;
 
 @Service
 public class PaymentServiceImpl implements PaymentService{
 
-    private PaymentRepostitory paymentRepostitory;
+    private final PaymentRepostitory paymentRepostitory;
     private final OrderRepository orderRepository;
+    private final CampainRepository campainRepository;
+    private final CampainProductRepository campainProductRepository;
+
     public PaymentServiceImpl(PaymentRepostitory paymentRepostitory,
-                              OrderRepository orderRepository)
+                              OrderRepository orderRepository, CampainRepository campainRepository, CampainProductRepository campainProductRepository)
     {
         this.paymentRepostitory = paymentRepostitory;
         this.orderRepository = orderRepository;
+        this.campainRepository = campainRepository;
+        this.campainProductRepository = campainProductRepository;
     }
-
     @Override
     public void paymentcallback(Paymentcallback paymentcallback) {
-
         //1. Validate request
         if (paymentcallback == null ) {
             throw new IllegalArgumentException("Invalid payment request");
@@ -43,26 +45,42 @@ public class PaymentServiceImpl implements PaymentService{
             throw new IllegalArgumentException("Amount must be greater than zero");
         }
         //2. Find payment by transaction code
-        System.out.println("transactionCode = " + paymentcallback.getTransactionCode());
         Payment payment = paymentRepostitory.paymentbytransaction(paymentcallback.getTransactionCode());
-        System.out.println("payment = " + payment);
         if (payment == null) {
             throw new IllegalArgumentException("Payment not found");
         }
-        System.out.println("payment.orderId = " + payment.getOrderId());
-
-        System.out.println("START find order");
         //3. Validate amount
         if (paymentcallback.getAmount().compareTo(payment.getAmount()) != 0) {
             throw new IllegalArgumentException("Invalid payment amount");
         }
-        //4. Update payment
-        paymentRepostitory.updatepayment(paymentcallback.getTransactionCode());
+
         //5. Find order
         Order order = orderRepository.getorderbyId(payment.getOrderId());
-        System.out.println("order = " + order);
         if(order == null) {
             throw new IllegalArgumentException("Order not found");
+        }
+
+        // 5. Prevent duplicate callback from deducting stock twice
+        if (payment.getStatus() == PaymentStatus.PAYMENT_SUCCESS.getCode()) {
+            return;
+        }
+        //4. Update payment
+        paymentRepostitory.updatepayment(paymentcallback.getTransactionCode());
+
+        List<Itemorderdetail> orderItems = orderRepository.getOrderItemsByOrderId1(payment.getOrderId());
+
+        // 7. Deduct stock for the purchased SKU in Campaign
+        for (Itemorderdetail item : orderItems) {
+
+            // Process each item
+            int updatedRows =  campainProductRepository.deductStock(item.getCampaignId(),
+                    item.getSkuId(), item.getQuantity());
+
+            if (updatedRows == 0) {
+                throw new IllegalStateException(
+                        "SKU not found or insufficient campaign stock"
+                );
+            }
         }
 
         //6. update orrder
@@ -93,10 +111,10 @@ public class PaymentServiceImpl implements PaymentService{
         LocalDateTime expiredTime = createdTime.plusMinutes(15);
         System.out.println("orderId = " + paymentRequest.getOrderIds());
 
-      payment.setOrderId(paymentRequest.getOrderIds());
-       payment.setStatus("PENDING");
-       payment.setTransactionCode(transactionCode);
-       payment.setAmount(paymentRequest.getTotalPayment());
+        payment.setOrderId(paymentRequest.getOrderIds());
+        payment.setStatus("PENDING");
+        payment.setTransactionCode(transactionCode);
+        payment.setAmount(paymentRequest.getTotalPayment());
         paymentRepostitory.save(payment);
         PaymentResponse payment1= new PaymentResponse();
 

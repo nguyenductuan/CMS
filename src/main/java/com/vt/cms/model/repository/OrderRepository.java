@@ -2,6 +2,7 @@ package com.vt.cms.model.repository;
 
 import com.vt.cms.model.dto.ItemDto;
 import com.vt.cms.model.dto.OrdersRequest;
+import com.vt.cms.model.dto.order.Itemorderdetail;
 import com.vt.cms.model.entity.Order;
 import com.vt.cms.model.resp.OrderItemResponse;
 import com.vt.cms.model.resp.OrderResponse;
@@ -21,7 +22,8 @@ public interface OrderRepository {
     List<OrderItemResponse> getItemsByOrderId(long orderId);
     List<ItemDto> getOrderItemsByOrderId(long orderId);
     void save(Order order);
-
+    // Thanh toan
+    List<Itemorderdetail> getOrderItemsByOrderId1(long orderId);
     void cancelOrder(Order order);
 
     long countorder();

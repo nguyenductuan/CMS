@@ -10,8 +10,10 @@ public class Itemorderdetail {
     private Integer productId;
     private String productName;
     private BigDecimal price;
+    private Integer campaignId;
+    private Integer stockCampaign;
     private String skuCode;
-    private String skuId;
+    private Integer skuId;
     private String jsonImages;
     private String priceCampaign;
     private BigDecimal priceDiscountCampaign;

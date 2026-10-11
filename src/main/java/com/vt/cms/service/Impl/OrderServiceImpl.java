@@ -2,6 +2,7 @@ package com.vt.cms.service.Impl;
 
 import com.vt.cms.Exception.BusinessException;
 import com.vt.cms.model.dto.*;
+import com.vt.cms.model.dto.order.Itemorderdetail;
 import com.vt.cms.model.dto.page.PageInfo;
 import com.vt.cms.model.dto.page.PagingResponse;
 import com.vt.cms.model.entity.Order;
@@ -30,6 +31,7 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @Service
 public class OrderServiceImpl implements OrderService {
@@ -65,7 +67,6 @@ public class OrderServiceImpl implements OrderService {
         // Lấy danh sách item của order
         List<ItemDto> orderItems = orderRepository.getOrderItemsByOrderId(orderId);
         order.setOrderItems(orderItems);
-        System.out.println("Order ID: " + order);
         return order;
     }
 
