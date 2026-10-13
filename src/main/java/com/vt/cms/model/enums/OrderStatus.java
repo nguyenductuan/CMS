@@ -8,6 +8,7 @@ public enum OrderStatus {
     SHIPPING("SHIPPING", "Đang giao hàng"),
     DELIVERED("DELIVERED", "Shipper giao thành công"),
     RECEIVED("RECEIVED", "Khách hàng đã nhận hàng"),
+    COMPLETED("COMPLETED", "Đã hoàn thành"),
     CANCELLED("CANCELLED", "Đã hủy"),
     FAILED("FAILED", "Thất bại");
 
