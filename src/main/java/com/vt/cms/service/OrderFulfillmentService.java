@@ -83,12 +83,12 @@ public class OrderFulfillmentService {
             throw new IllegalArgumentException("Không xác định được người nhận hàng");
         }
         int rows = orderRepository.confirmReceived(orderId, OrderStatus.DELIVERED.name(),
-                OrderStatus.RECEIVED.name(), LocalDateTime.now(), customerId);
+                OrderStatus.COMPLETED.name(), LocalDateTime.now(), customerId);
         if (rows != 1) {
             log.warn("Receive confirmation rejected. orderId={}, customerId={}", orderId, customerId);
             throw new IllegalStateException("Chỉ có thể xác nhận nhận hàng khi shipper đã giao thành công");
         }
-        log.info("Customer confirmed order received. orderId={}, customerId={}", orderId, customerId);
+        log.info("Customer confirmed order received; order completed. orderId={}, customerId={}", orderId, customerId);
     }
 
     private Order requireOrder(Integer orderId) {
