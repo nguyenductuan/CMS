@@ -66,7 +66,13 @@ public class PaymentServiceImpl implements PaymentService{
 
         // 5. Prevent duplicate callback from deducting stock twice
         if (PaymentStatus.PAYMENT_SUCCESS.getCode().equals(payment.getStatus()) || "SUCCESS".equalsIgnoreCase(payment.getStatus())) {
+            log.info("Duplicate payment callback ignored. orderId={}, transactionCode={}", payment.getOrderId(), paymentcallback.getTransactionCode());
             return;
+        }
+        if (order.getOrder_status() != OrderStatus.WAIT_PAYMENT) {
+            log.warn("Payment callback rejected because order is not awaiting payment. orderId={}, status={}",
+                    order.getId(), order.getOrder_status());
+            throw new IllegalStateException("Đơn hàng không ở trạng thái chờ thanh toán");
         }
         //4. Update payment
         paymentRepostitory.updatepayment(paymentcallback.getTransactionCode());
