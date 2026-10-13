@@ -25,6 +25,10 @@ public enum MessageCode {
             "SKU_NOT_FOUND",
             "SKU không tồn tại"
     ),
+    SKU_NOT_ACTIVE(
+            "SKU_NOT_ACTIVE",
+            "SKU không ở trạng thái ACTIVE"
+    ),
     PRICE_NOT_FOUND_SKU(
             "PRICE_NOT_FOUND_SKU",
             "Giá sản phẩm không tồn tại"
@@ -32,6 +36,12 @@ public enum MessageCode {
     STOCK_NOT_ENOUGH(
             "STOCK_NOT_ENOUGH",
             "Số lượng sản phẩm trong kho không đủ"
+    ),
+    STOCK_INVALID(
+            "STOCK_INVALID","Số lượng tồn kho không hợp lệ"
+    ),
+    STOCK_INSUFFICIENT(
+            " STOCK_INSUFFICIENT", "Số lượng tồn kho không đủ"
     ),
     INVALID_QUANTITY(
             "INVALID_QUANTITY",

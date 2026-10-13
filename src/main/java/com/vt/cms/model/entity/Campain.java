@@ -2,6 +2,7 @@ package com.vt.cms.model.entity;
 
 import lombok.Data;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 @Data
 public class Campain {
@@ -12,12 +13,12 @@ public class Campain {
     private LocalDateTime updatedAt;
     private String status;
     private String updatedBy;
-    private Integer discount;
+    private BigDecimal discount;
     private LocalDateTime endTime;
     private String name;
     private LocalDateTime startTime;
     private Integer totalStock;
     private Long productId;
     private String description;
-    private Integer salesCommission;
+//    private Integer salesCommission;
 }
