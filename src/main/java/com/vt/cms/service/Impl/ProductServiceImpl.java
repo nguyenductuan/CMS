@@ -3,7 +3,6 @@ package com.vt.cms.service.Impl;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.vt.cms.mapper.Modelmapper;
 import com.vt.cms.model.dto.OrdersRequest;
 import com.vt.cms.model.dto.CreateProductRequest;
 import com.vt.cms.model.dto.page.PageInfo;
@@ -21,7 +20,6 @@ import com.vt.cms.model.resp.SkuResponse;
 import com.vt.cms.service.ProductService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.mapstruct.factory.Mappers;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import java.math.BigDecimal;
@@ -38,7 +36,6 @@ import java.util.List;
 @Slf4j
 public class ProductServiceImpl implements ProductService {
 
-    private final Modelmapper modelMapper = Mappers.getMapper(Modelmapper.class);
     private final ProductRepository productRepository;
     private final ObjectMapper objectMapper;
     private final ProductSkuRepository productSkuRepository;
