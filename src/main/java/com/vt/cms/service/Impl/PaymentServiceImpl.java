@@ -10,6 +10,8 @@ import com.vt.cms.model.repository.*;
 import com.vt.cms.model.resp.PaymentResponse;
 import com.vt.cms.service.PaymentService;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import lombok.extern.slf4j.Slf4j;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -17,6 +19,7 @@ import java.util.Random;
 import java.util.UUID;
 
 @Service
+@Slf4j
 public class PaymentServiceImpl implements PaymentService{
 
     private final PaymentRepostitory paymentRepostitory;
@@ -33,6 +36,7 @@ public class PaymentServiceImpl implements PaymentService{
         this.campainProductRepository = campainProductRepository;
     }
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public void paymentcallback(Paymentcallback paymentcallback) {
         //1. Validate request
         if (paymentcallback == null ) {
@@ -61,7 +65,7 @@ public class PaymentServiceImpl implements PaymentService{
         }
 
         // 5. Prevent duplicate callback from deducting stock twice
-        if (payment.getStatus() == PaymentStatus.PAYMENT_SUCCESS.getCode()) {
+        if (PaymentStatus.PAYMENT_SUCCESS.getCode().equals(payment.getStatus()) || "SUCCESS".equalsIgnoreCase(payment.getStatus())) {
             return;
         }
         //4. Update payment
@@ -84,10 +88,11 @@ public class PaymentServiceImpl implements PaymentService{
         }
 
         //6. update orrder
-        order.setOrder_status(OrderStatus.PREPARING);
+        order.setOrder_status(OrderStatus.PAID);
         order.setUpdatedAt(LocalDateTime.now());
         order.setUpdated_by("SYSTEM");
-        orderRepository.save((order));
+        orderRepository.save(order);
+        log.info("Payment confirmed. orderId={}, transactionCode={}, amount={}", payment.getOrderId(), paymentcallback.getTransactionCode(), paymentcallback.getAmount());
     }
 
     @Override
@@ -109,7 +114,7 @@ public class PaymentServiceImpl implements PaymentService{
 
         LocalDateTime createdTime = LocalDateTime.now();
         LocalDateTime expiredTime = createdTime.plusMinutes(15);
-        System.out.println("orderId = " + paymentRequest.getOrderIds());
+        log.info("Creating mock payment. orderId={}, amount={}", paymentRequest.getOrderIds(), paymentRequest.getTotalPayment());
 
         payment.setOrderId(paymentRequest.getOrderIds());
         payment.setStatus("PENDING");
