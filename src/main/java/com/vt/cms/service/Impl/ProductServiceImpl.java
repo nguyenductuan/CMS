@@ -156,19 +156,14 @@ public class ProductServiceImpl implements ProductService {
             }
         }
     }
-
     @Override
     public ProductResponse detail(Integer product_id) {
-
         Product product = productRepository.detailProduct(product_id);
         if (product == null || "true".equalsIgnoreCase(product.getIs_deleted())) {
             log.warn("Product detail not found. productId={}", product_id);
             throw new IllegalArgumentException("Không tìm thấy sản phẩm: " + product_id);
         }
-
-        ProductResponse response =
-                new ProductResponse();
-
+        ProductResponse response = new ProductResponse();
         response.setId(product.getId());
         response.setName(product.getName());
         response.setDescription(product.getDescription());
@@ -177,64 +172,19 @@ public class ProductServiceImpl implements ProductService {
         response.setIs_deleted(product.getIs_deleted());
         response.setCreated_by(product.getCreated_by());
         log.debug("Loaded product detail. productId={}", product_id);
-        // =========================
-        // ATTRIBUTES
-        // =========================
+        // ========================= ATTRIBUTES =========================
+        response.setAttributes(parseJson(product.getJson_attributes(), new TypeReference<List<AttributeRequest>>() {}));
+        response.setAttributes_name(product.getJson_attributes_name());
 
-        response.setAttributes(
-                parseJson(
-                        product.getJson_attributes(),
-                        new TypeReference<List<AttributeRequest>>() {}
-                )
-        );
-
-        response.setAttributes_name(
-                product.getJson_attributes_name()
-        );
-
-        // =========================
-        // TYPE PRODUCTS
-        // =========================
-
-        response.setType_products(
-                parseJson(
-                        product.getType_products(),
-                        new TypeReference<List<TypeProductRequest>>() {}
-                )
-        );
-
-        response.setType_products_name(
-                product.getType_products_name()
-        );
-
-        // =========================
-        // IMAGES
-        // =========================
-
-        response.setImages(
-                parseJson(
-                        product.getJson_images(),
-                        new TypeReference<List<ImageRequest>>() {}
-                )
-        );
-
-        // =========================
-        // MEDIAS
-        // =========================
-
-        response.setMedias(
-                parseJson(
-                        product.getJson_medias(),
-                        new TypeReference<List<MediaRequest>>() {}
-                )
-        );
-        // =========================
-        // SKU
-        // =========================
-
-        List<Product_Sku> productSkus =
-                productSkuRepository.findByProductId(product_id);
-
+        // =========================TYPE PRODUCTS=========================
+        response.setType_products(parseJson(product.getType_products(),new TypeReference<List<TypeProductRequest>>() {}));
+        response.setType_products_name(product.getType_products_name());
+        // ======================== IMAGES =========================
+        response.setImages(parseJson(product.getJson_images(),new TypeReference<List<ImageRequest>>() {}));
+        // ========================= MEDIAS =========================
+        response.setMedias(parseJson(product.getJson_medias(),new TypeReference<List<MediaRequest>>() {}));
+        // ========================= SKU =========================
+        List<Product_Sku> productSkus = productSkuRepository.findByProductId(product_id);
         List<SkuRequest> skus = productSkus.stream()
                 .map(sku -> {
                     SkuRequest request = new SkuRequest();
@@ -257,7 +207,6 @@ public class ProductServiceImpl implements ProductService {
         response.setSkus(skus);
         return response;
     }
-
     private <T> List<T> parseJson(String json, TypeReference<List<T>> typeReference) {
         if (json == null || json.trim().isEmpty()) {
             return new ArrayList<>();
@@ -295,7 +244,6 @@ public class ProductServiceImpl implements ProductService {
         mergeSkus(id, request.getSkus());
         log.info("Update product completed. productId={}, requestedSkuCount={}", id, request.getSkus().size());
     }
-
     @Override
     //Danh sách sản phẩm
     public BaseResponse<PagingResponse<List<ProductResponse>>> listproduct(OrdersRequest request) {
