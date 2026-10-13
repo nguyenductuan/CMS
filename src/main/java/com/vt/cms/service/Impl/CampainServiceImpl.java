@@ -339,19 +339,19 @@ public class CampainServiceImpl implements CampainService {
         return campaignProduct;
     }
     @Override
-    public void updatestatus(Integer campain_id, String status) {
+    public void updatestatus(Integer campain_id, CampainStatus status) {
         //Kiểm tra campain có tồn tại và không bị xóa
         Campain campain = campainRepository.getCampainById(campain_id);
         if (campain.getStatus() != CampainStatus.PENDING_APPROVAL){
             throw  new BusinessException(MessageCode.CAMPAIN_STATUS_INVALID);
         }
         //  chỉ được chuyển từ PENDING_APPROVAL → APPROVED hoặc PENDING_APPROVAL → REJECTED
-        if (status != CampainStatus.APPROVED.getMessage() || status != CampainStatus.REJECTED.getMessage())
+        if (status != CampainStatus.APPROVED || status != CampainStatus.REJECTED)
         {
             throw  new BusinessException(MessageCode.CAMPAIN_STATUS_INVALID);
         }
         // Cập nhật campain
-        campainRepository.savecampain(campain);
+        campainRepository.updatestatus(campain_id,status);
     }
     @Override
     public void getlist() {

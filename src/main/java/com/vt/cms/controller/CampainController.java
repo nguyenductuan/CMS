@@ -1,6 +1,7 @@
 package com.vt.cms.controller;
 
 import com.vt.cms.model.dto.CreatedCampainRequest;
+import com.vt.cms.model.enums.CampainStatus;
 import com.vt.cms.model.resp.APIRessponse;
 import com.vt.cms.service.CampainService;
 
@@ -35,7 +36,7 @@ public class CampainController {
     //Thay đổi trạng thái chiến dịch(Duyệt, kết thúc chiến dịch)
     @PutMapping("/status/{id}/{status}")
     public ResponseEntity<APIRessponse> updateCampain(   @PathVariable("id") Integer campain_id,
-                                                         @PathVariable("status") String status) {
+                                                         @PathVariable("status") CampainStatus status) {
         campainService.updatestatus(campain_id, status);
         return  ResponseEntity.ok(new APIRessponse(200,"Cập nhật trạng thái thành công"));
     }

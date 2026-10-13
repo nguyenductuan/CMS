@@ -25,11 +25,11 @@
         FROM campaign
         WHERE id = #{campain_id}
     </select>
-<!--    <update id="updatestatus">-->
-<!--        UPDATE campaign-->
-<!--        SET status = #{status}-->
-<!--        WHERE id = #{campain_id}-->
-<!--    </update>-->
+    <update id="updatestatus">
+        UPDATE campaign
+        SET status = #{status}
+        WHERE id = #{campain_id}
+    </update>
 
 
     <insert id="savecampain" parameterType="com.vt.cms.model.entity.Campain"
