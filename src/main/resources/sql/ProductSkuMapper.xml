@@ -157,4 +157,22 @@
         SET is_deleted = 'true', updated_at = NOW(), updated_by = 'SYSTEM'
         WHERE product_id = #{productId} AND is_deleted = 'false'
     </update>
+    <update id="updateByProductIdAndSkuCode">
+        UPDATE product_sku
+        SET height_cm = #{sku.height_cm},
+            width_cm = #{sku.width_cm},
+            length_cm = #{sku.length_cm},
+            weight_gram = #{sku.weight_gram},
+            type_product = #{sku.type_product},
+            stock = #{sku.stock},
+            status = #{sku.status},
+            price = #{sku.price},
+            image_url = #{sku.image_url},
+            attribute = #{sku.attribute},
+            updated_at = #{sku.updated_at},
+            updated_by = #{sku.updated_by}
+        WHERE product_id = #{sku.product_id}
+          AND sku_code = #{sku.sku_code}
+          AND is_deleted = 'false'
+    </update>
 </mapper>
