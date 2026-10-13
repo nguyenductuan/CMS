@@ -196,7 +196,12 @@
                status, json_attributes_name, type_products_name, type_products,
                cancel_at, cancel_by, approve_by, approved_time
         FROM products
-        WHERE id = #{productId} AND is_deleted = 'false'
+        WHERE id = #{productId}
+          AND is_deleted = 'false'
+          AND NOT EXISTS (
+              SELECT 1 FROM campain_product cp
+              WHERE cp.product_id = products.id AND cp.is_deleted = 'false'
+          )
     </select>
 
     <select id="getProductById" resultType="com.vt.cms.model.entity.Product">
@@ -209,22 +214,38 @@
 
     <update id="updateProduct">
         UPDATE products
-        SET name = #{product.name}, description = #{product.description}, status = #{product.status},
+        SET name = #{product.name}, description = #{product.description},
             json_images = #{product.json_images}, json_medias = #{product.json_medias},
             json_attributes = #{product.json_attributes}, json_attributes_name = #{product.json_attributes_name},
             type_products = #{product.type_products}, type_products_name = #{product.type_products_name},
             updated_at = #{product.updated_at}, updated_by = #{product.updated_by}
         WHERE id = #{id} AND is_deleted = 'false'
+          AND COALESCE(status, '') <> 'APPROVAL'
     </update>
 
-    <select id="listproduct" resultMap="ProductResultMap">
-        SELECT *
+    <select id="listproduct" resultType="com.vt.cms.model.resp.ProductResponse">
+        SELECT id, name, description, created_at, created_by, is_deleted, status
         FROM products
-        LIMIT #{pageSize}
+        WHERE is_deleted = 'false'
+        <if test="status != null and status != ''">
+            AND status = #{status}
+        </if>
+        <if test="keyword != null and keyword.trim() != ''">
+            AND LOWER(name) LIKE CONCAT('%', LOWER(#{keyword}), '%')
+        </if>
+        ORDER BY created_at DESC, id DESC
+        LIMIT #{pageSize} OFFSET #{offset}
     </select>
-    <select id="countproduct">
+    <select id="countproduct" resultType="int">
         SELECT COUNT(id)
         FROM products
+        WHERE is_deleted = 'false'
+        <if test="status != null and status != ''">
+            AND status = #{status}
+        </if>
+        <if test="keyword != null and keyword.trim() != ''">
+            AND LOWER(name) LIKE CONCAT('%', LOWER(#{keyword}), '%')
+        </if>
     </select>
     <insert id="insertproduct" parameterType="com.vt.cms.model.entity.Product"
             useGeneratedKeys="true"
@@ -256,13 +277,12 @@
     </insert>
 
 
-    <update id="editstatusproduct" parameterType="com.vt.cms.model.entity.Product">
+    <update id="editstatusproduct">
         UPDATE products
-        SET status       = #{status},
-            updated_at   = #{updated_at},
-            approved_time= #{approved_time},
-            approve_by   = #{approve_by}
-        WHERE id = #{id}
+        SET status = #{status}, updated_at = #{updated_at},
+            approved_time = #{approved_time}, approve_by = #{approve_by}
+        WHERE id = #{id} AND is_deleted = 'false'
+          AND COALESCE(status, '') <> 'APPROVAL'
     </update>
 
     <update id="deleteproduct">
