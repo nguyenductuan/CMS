@@ -115,7 +115,17 @@
     </select>
 
     <select id="getorderbyId" resultType="com.vt.cms.model.entity.Order">
-        SELECT *
+        SELECT id, total, productweight, productlength, productwidth, productheight,
+               payment_status AS paymentStatus, created_at AS createdAt,
+               deliveredAt AS deliveredAt, cancel_at, sub_order_status, expected_delivery,
+               created_by, canceled_by AS cancelled_by, notecancel, order_status,
+               updated_at AS updatedAt, updated_by, expected_delivery AS expectedDelivery,
+               delivery_latitude AS DeliveryLatitude, delivery_longitude AS DeliveryLongitude,
+               warehouse_code AS warehouseCode, shipping_provider AS shippingProvider,
+               tracking_number AS trackingNumber, shipper_code AS shipperCode,
+               shipper_name AS shipperName, shipper_phone AS shipperPhone,
+               shipped_at AS shippedAt, carrier_delivered_at AS carrierDeliveredAt,
+               customer_received_at AS customerReceivedAt
         FROM orders
         WHERE id = #{orderId}
     </select>
