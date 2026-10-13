@@ -291,7 +291,7 @@ public class ProductServiceImpl implements ProductService {
     @Transactional(rollbackFor = Exception.class)
     public void deleteproduct(Integer product_id) {
         if (product_id == null || product_id <= 0) throw new IllegalArgumentException("ID sản phẩm không hợp lệ");
-        if (campainProductRepository.existsActiveAssociationByProductId(product_id)) {
+        if (campainProductRepository.existsAssociationByProductId(product_id)) {
             throw new IllegalStateException("Không thể xóa sản phẩm đã được thêm vào chiến dịch");
         }
         int rows = productRepository.deleteproduct(product_id);
