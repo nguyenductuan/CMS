@@ -190,11 +190,32 @@
     </select>
 
 
-    <select id="detailProduct" resultMap="ProductResultMap">
-        SELECT *
+    <select id="detailProduct" resultType="com.vt.cms.model.entity.Product">
+        SELECT id, name, created_at, created_by, is_deleted, updated_at, updated_by,
+               description, json_images, json_attributes, json_medias, price_display,
+               status, json_attributes_name, type_products_name, type_products,
+               cancel_at, cancel_by, approve_by, approved_time
         FROM products
-        WHERE id = #{id}
+        WHERE id = #{productId} AND is_deleted = 'false'
     </select>
+
+    <select id="getProductById" resultType="com.vt.cms.model.entity.Product">
+        SELECT id, name, created_at, created_by, is_deleted, updated_at, updated_by,
+               description, json_images, json_attributes, json_medias, price_display,
+               status, json_attributes_name, type_products_name, type_products,
+               cancel_at, cancel_by, approve_by, approved_time
+        FROM products WHERE id = #{id}
+    </select>
+
+    <update id="updateProduct">
+        UPDATE products
+        SET name = #{product.name}, description = #{product.description}, status = #{product.status},
+            json_images = #{product.json_images}, json_medias = #{product.json_medias},
+            json_attributes = #{product.json_attributes}, json_attributes_name = #{product.json_attributes_name},
+            type_products = #{product.type_products}, type_products_name = #{product.type_products_name},
+            updated_at = #{product.updated_at}, updated_by = #{product.updated_by}
+        WHERE id = #{id} AND is_deleted = 'false'
+    </update>
 
     <select id="listproduct" resultMap="ProductResultMap">
         SELECT *
@@ -255,10 +276,9 @@
         WHERE id = #{id}
     </update>
 
-    <update id="deleteproduct" parameterType="com.vt.cms.model.entity.Product">
-        UPDATE products
-        SET is_deleted = 'true'
-        WHERE id = #{id}
+    <update id="deleteproduct">
+        UPDATE products SET is_deleted = 'true', updated_at = NOW(), updated_by = 'SYSTEM'
+        WHERE id = #{productId} AND is_deleted = 'false'
     </update>
 
 
