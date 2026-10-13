@@ -9,4 +9,5 @@ public interface CampainService {
     void updatestatus(Integer campain_id, String status);
      void getlist();
      void deletecampain(Integer campainID);
+
 }

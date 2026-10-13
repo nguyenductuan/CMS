@@ -15,6 +15,7 @@ import com.vt.cms.model.repository.ProductSkuRepository;
 import com.vt.cms.service.CampainService;
 import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.scheduling.config.ScheduledTaskHolder;
 import org.springframework.stereotype.Service;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -33,15 +34,17 @@ public class CampainServiceImpl implements CampainService {
     private final CampainRepository campainRepository;
     private final CampainProductRepository campainProductRepository;
     private final ProductSkuRepository productSkuRepository;
+    private final ScheduledTaskHolder scheduledTaskHolder;
 
     public CampainServiceImpl(
             CampainRepository campainRepository,
             CampainProductRepository campainProductRepository,
-            ProductSkuRepository productSkuRepository) {
+            ProductSkuRepository productSkuRepository, ScheduledTaskHolder scheduledTaskHolder) {
 
         this.campainRepository = campainRepository;
         this.campainProductRepository = campainProductRepository;
         this.productSkuRepository = productSkuRepository;
+        this.scheduledTaskHolder = scheduledTaskHolder;
     }
 
     /**
@@ -180,21 +183,16 @@ public class CampainServiceImpl implements CampainService {
      */
     private Campain buildCampaign(CreatedCampainRequest request) {
         Campain campaign = new Campain();
-
         campaign.setName(request.getName());
         campaign.setDescription(request.getDescription());
         campaign.setStartTime(request.getStartTime());
         campaign.setEndTime(request.getEndTime());
         campaign.setDiscount(request.getDiscount());
         campaign.setTotalStock(request.getTotal_stock());
-
-        campaign.setStatus(
-                CampainStatus.PENDING_APPROVAL.getMessage()
-        );
+        campaign.setStatus(CampainStatus.PENDING_APPROVAL);
         campaign.setCreatedAt(LocalDateTime.now());
         campaign.setCreatedBy(SYSTEM_USER);
         campaign.setIsDeleted(NOT_DELETED);
-
         return campaign;
     }
 
@@ -341,7 +339,20 @@ public class CampainServiceImpl implements CampainService {
         return campaignProduct;
     }
     @Override
-    public void updatestatus(Integer campain_id, String status) {}
+    public void updatestatus(Integer campain_id, String status) {
+        //Kiểm tra campain có tồn tại và không bị xóa
+        Campain campain = campainRepository.getCampainById(campain_id);
+        if (campain.getStatus() != CampainStatus.PENDING_APPROVAL){
+            throw  new BusinessException(MessageCode.CAMPAIN_STATUS_INVALID);
+        }
+        //  chỉ được chuyển từ PENDING_APPROVAL → APPROVED hoặc PENDING_APPROVAL → REJECTED
+        if (status != CampainStatus.APPROVED.getMessage() || status != CampainStatus.REJECTED.getMessage())
+        {
+            throw  new BusinessException(MessageCode.CAMPAIN_STATUS_INVALID);
+        }
+        // Cập nhật campain
+        campainRepository.savecampain(campain);
+    }
     @Override
     public void getlist() {
         campainRepository.getlistcampain();

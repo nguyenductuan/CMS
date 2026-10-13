@@ -1,5 +1,8 @@
 package com.vt.cms.model.entity;
 
+import com.vt.cms.model.enums.CampainStatus;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import lombok.Data;
 
 import java.math.BigDecimal;
@@ -11,7 +14,8 @@ public class Campain {
     private String createdBy;
     private String isDeleted;
     private LocalDateTime updatedAt;
-    private String status;
+    @Enumerated(EnumType.STRING)
+    private CampainStatus status;
     private String updatedBy;
     private BigDecimal discount;
     private LocalDateTime endTime;

@@ -33,16 +33,18 @@ public class CampainController {
         return "Get campain successfully";
     }
     //Thay đổi trạng thái chiến dịch(Duyệt, kết thúc chiến dịch)
-    @PostMapping("/campainstatus")
-    public String updateCampain( @RequestBody Integer campain_id, String status) {
+    @PutMapping("/status/{id}/{status}")
+    public ResponseEntity<APIRessponse> updateCampain(   @PathVariable("id") Integer campain_id,
+                                                         @PathVariable("status") String status) {
         campainService.updatestatus(campain_id, status);
-        return "Campain updated successfully";
+        return  ResponseEntity.ok(new APIRessponse(200,"Cập nhật trạng thái thành công"));
     }
     // Xóa chiến dịch
     @DeleteMapping("/campain/{id}")
-    public String deleteCampain(Integer campainId) {
+    public ResponseEntity<APIRessponse> deleteCampain( @PathVariable("id") Integer campainId) {
       campainService.deletecampain(campainId);
-        return "Campain deleted successfully";
+      return ResponseEntity.ok(new APIRessponse(200,"Xóa chến dịch thành công"));
+
     }
 }
 

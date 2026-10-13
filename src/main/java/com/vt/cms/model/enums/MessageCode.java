@@ -47,6 +47,10 @@ public enum MessageCode {
             "INVALID_QUANTITY",
             "Số lượng sản phẩm không hợp lệ"
     ),
+    CAMPAIN_STATUS_INVALID (
+            "CAMPAIN_STATUS_INVALID",
+            "Trạng thái campain không hợp lệ"
+    ),
     PRODUCT_SKU_NOT_FOUND(
             "PRODUCT_SKU_NOT_FOUND",
             "SKU sản phẩm không tồn tại"

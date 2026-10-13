@@ -20,12 +20,17 @@
         <result column="description" property="description" jdbcType="VARCHAR"/>
 
     </resultMap>
-
-    <update id="savecampain1">
-        UPDATE campaign
-        SET status = #{status}
+    <select id="getCampainById" resultType="com.vt.cms.model.entity.Campain">
+        SELECT *
+        FROM campaign
         WHERE id = #{campain_id}
-    </update>
+    </select>
+<!--    <update id="updatestatus">-->
+<!--        UPDATE campaign-->
+<!--        SET status = #{status}-->
+<!--        WHERE id = #{campain_id}-->
+<!--    </update>-->
+
 
     <insert id="savecampain" parameterType="com.vt.cms.model.entity.Campain"
             useGeneratedKeys="true"
