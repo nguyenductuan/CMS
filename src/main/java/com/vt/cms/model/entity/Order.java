@@ -23,6 +23,15 @@ public class Order {
     private LocalDateTime cancel_at;
     private OrderStatus sub_order_status;
     private LocalDateTime expected_delivery;
+    private String warehouseCode;
+    private String shippingProvider;
+    private String trackingNumber;
+    private String shipperCode;
+    private String shipperName;
+    private String shipperPhone;
+    private LocalDateTime shippedAt;
+    private LocalDateTime carrierDeliveredAt;
+    private LocalDateTime customerReceivedAt;
 
     private  String created_by;
     private String cancelled_by;

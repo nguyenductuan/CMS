@@ -3,10 +3,12 @@ package com.vt.cms.model.enums;
 public enum OrderStatus {
     WAIT_PAYMENT("WAIT_PAYMENT", "Chờ thanh toán"),
     PAID("CONFIRMED", "Đã thanh toán"),
-    WAITING_FOR_DELIVERY(" WAITING_FOR_DELIVERY", "Chờ chuẩn bị lấy hàng"),
-    PREPARING(" PREPARING", "Đã chuẩn bị hàng"),
+    WAITING_FOR_DELIVERY("WAITING_FOR_DELIVERY", "Chờ chuẩn bị lấy hàng"),
+    PREPARING("PREPARING", "Đã chuẩn bị hàng"),
     SHIPPING("SHIPPING", "Đang giao hàng"),
-    DELIVERED("DELIVERED", "Đã giao"),
+    DELIVERED("DELIVERED", "Shipper giao thành công"),
+    RECEIVED("RECEIVED", "Khách hàng đã nhận hàng"),
+    COMPLETED("COMPLETED", "Đã hoàn thành"),
     CANCELLED("CANCELLED", "Đã hủy"),
     FAILED("FAILED", "Thất bại");
 

@@ -115,7 +115,16 @@
     </select>
 
     <select id="getorderbyId" resultType="com.vt.cms.model.entity.Order">
-        SELECT *
+        SELECT *,
+               warehouse_code AS warehouseCode,
+               shipping_provider AS shippingProvider,
+               tracking_number AS trackingNumber,
+               shipper_code AS shipperCode,
+               shipper_name AS shipperName,
+               shipper_phone AS shipperPhone,
+               shipped_at AS shippedAt,
+               carrier_delivered_at AS carrierDeliveredAt,
+               customer_received_at AS customerReceivedAt
         FROM orders
         WHERE id = #{orderId}
     </select>
@@ -151,4 +160,62 @@
         LIMIT #{pageSize}
             OFFSET #{offset}
     </select>
+
+    <update id="selectWarehouse">
+        UPDATE orders
+        SET warehouse_code = #{warehouseCode},
+            order_status = 'PREPARING',
+            updated_at = #{updatedAt},
+            updated_by = #{updatedBy}
+        WHERE id = #{orderId}
+          AND order_status = 'PAID'
+    </update>
+
+    <update id="assignShipper">
+        UPDATE orders
+        SET order_status = #{nextStatus},
+            shipping_provider = #{provider},
+            tracking_number = #{trackingNumber},
+            shipper_code = #{shipperCode},
+            shipper_name = #{shipperName},
+            shipper_phone = #{shipperPhone},
+            shipped_at = #{updatedAt},
+            updated_at = #{updatedAt},
+            updated_by = #{updatedBy}
+        WHERE id = #{orderId}
+          AND order_status = #{expectedStatus}
+          AND warehouse_code IS NOT NULL
+    </update>
+
+    <update id="markDeliverySuccessful">
+        UPDATE orders
+        SET order_status = #{nextStatus},
+            carrier_delivered_at = #{deliveredAt},
+            updated_at = #{deliveredAt},
+            updated_by = #{updatedBy}
+        WHERE id = #{orderId}
+          AND tracking_number = #{trackingNumber}
+          AND order_status = #{expectedStatus}
+    </update>
+
+    <update id="confirmReceived">
+        UPDATE orders
+        SET order_status = #{nextStatus},
+            customer_received_at = #{receivedAt},
+            updated_at = #{receivedAt},
+            updated_by = #{updatedBy}
+        WHERE id = #{orderId}
+          AND order_status = #{expectedStatus}
+    </update>
+
+    <update id="completeDeliveredOrdersOlderThan">
+        UPDATE orders
+        SET order_status = 'COMPLETED',
+            customer_received_at = COALESCE(customer_received_at, #{completedAt}),
+            updated_at = #{completedAt},
+            updated_by = #{updatedBy}
+        WHERE order_status = 'DELIVERED'
+          AND carrier_delivered_at IS NOT NULL
+          AND carrier_delivered_at &lt;= #{cutoff}
+    </update>
 </mapper>
