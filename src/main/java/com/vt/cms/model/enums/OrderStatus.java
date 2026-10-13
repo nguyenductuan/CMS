@@ -6,7 +6,8 @@ public enum OrderStatus {
     WAITING_FOR_DELIVERY(" WAITING_FOR_DELIVERY", "Chờ chuẩn bị lấy hàng"),
     PREPARING(" PREPARING", "Đã chuẩn bị hàng"),
     SHIPPING("SHIPPING", "Đang giao hàng"),
-    DELIVERED("DELIVERED", "Đã giao"),
+    DELIVERED("DELIVERED", "Shipper giao thành công"),
+    RECEIVED("RECEIVED", "Khách hàng đã nhận hàng"),
     CANCELLED("CANCELLED", "Đã hủy"),
     FAILED("FAILED", "Thất bại");
 
