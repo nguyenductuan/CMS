@@ -151,4 +151,51 @@
         LIMIT #{pageSize}
             OFFSET #{offset}
     </select>
+
+    <update id="selectWarehouse">
+        UPDATE orders
+        SET warehouse_code = #{warehouseCode},
+            order_status = 'PREPARING',
+            updated_at = #{updatedAt},
+            updated_by = #{updatedBy}
+        WHERE id = #{orderId}
+          AND order_status = 'PAID'
+    </update>
+
+    <update id="assignShipper">
+        UPDATE orders
+        SET order_status = #{nextStatus},
+            shipping_provider = #{provider},
+            tracking_number = #{trackingNumber},
+            shipper_code = #{shipperCode},
+            shipper_name = #{shipperName},
+            shipper_phone = #{shipperPhone},
+            shipped_at = #{updatedAt},
+            updated_at = #{updatedAt},
+            updated_by = #{updatedBy}
+        WHERE id = #{orderId}
+          AND order_status = #{expectedStatus}
+          AND warehouse_code IS NOT NULL
+    </update>
+
+    <update id="markDeliverySuccessful">
+        UPDATE orders
+        SET order_status = #{nextStatus},
+            carrier_delivered_at = #{deliveredAt},
+            updated_at = #{deliveredAt},
+            updated_by = #{updatedBy}
+        WHERE id = #{orderId}
+          AND tracking_number = #{trackingNumber}
+          AND order_status = #{expectedStatus}
+    </update>
+
+    <update id="confirmReceived">
+        UPDATE orders
+        SET order_status = #{nextStatus},
+            customer_received_at = #{receivedAt},
+            updated_at = #{receivedAt},
+            updated_by = #{updatedBy}
+        WHERE id = #{orderId}
+          AND order_status = #{expectedStatus}
+    </update>
 </mapper>
