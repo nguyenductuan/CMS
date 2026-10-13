@@ -24,6 +24,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import java.math.BigDecimal;
 import java.util.HashSet;
+import java.util.Map;
+import java.util.HashMap;
 import java.util.Set;
 
 import java.time.LocalDateTime;
@@ -92,6 +94,40 @@ public class ProductServiceImpl implements ProductService {
             if (!codes.add(sku.getSku_code().trim())) throw new IllegalArgumentException("Mã SKU bị trùng trong request: " + sku.getSku_code());
             if (sku.getPrice() == null || sku.getPrice().compareTo(BigDecimal.ZERO) <= 0) throw new IllegalArgumentException("Giá SKU phải lớn hơn 0: " + sku.getSku_code());
             if (sku.getStock() == null || sku.getStock() < 0) throw new IllegalArgumentException("Tồn kho SKU phải >= 0: " + sku.getSku_code());
+        }
+    }
+
+    private void mergeSkus(Integer productId, List<SkuRequest> requests) {
+        Map<String, Product_Sku> existingByCode = new HashMap<>();
+        for (Product_Sku existingSku : productSkuRepository.findByProductId(productId)) {
+            if (existingSku.getSku_code() != null) existingByCode.put(existingSku.getSku_code(), existingSku);
+        }
+        for (SkuRequest request : requests) {
+            Product_Sku existingSku = existingByCode.get(request.getSku_code().trim());
+            if (existingSku == null) {
+                saveSkus(productId, List.of(request));
+                continue;
+            }
+            Product_Sku sku = new Product_Sku();
+            sku.setProduct_id(productId);
+            sku.setSku_code(request.getSku_code().trim());
+            sku.setHeight_cm(request.getHeight_cm());
+            sku.setWidth_cm(request.getWidth_cm());
+            sku.setLength_cm(request.getLength_cm());
+            sku.setWeight_gram(request.getWeight_gram());
+            sku.setType_product(request.getType_product());
+            sku.setStock(request.getStock());
+            sku.setStatus(request.getStatus());
+            sku.setPrice(request.getPrice());
+            sku.setImage_url(request.getImage_url());
+            sku.setAttribute(request.getAttribute());
+            sku.setUpdated_at(LocalDateTime.now());
+            sku.setUpdated_by("SYSTEM");
+            int rows = productSkuRepository.updateByProductIdAndSkuCode(sku);
+            if (rows != 1) {
+                log.error("Update SKU failed. productId={}, skuCode={}, rows={}", productId, sku.getSku_code(), rows);
+                throw new IllegalStateException("Không thể cập nhật SKU: " + sku.getSku_code());
+            }
         }
     }
 
@@ -255,9 +291,9 @@ public class ProductServiceImpl implements ProductService {
             log.error("Update product failed. productId={}, rows={}", id, rows);
             throw new IllegalStateException("Không thể cập nhật sản phẩm");
         }
-        productSkuRepository.softDeleteByProductId(id);
-        saveSkus(id, request.getSkus());
-        log.info("Update product completed. productId={}, skuCount={}", id, request.getSkus().size());
+        // Merge SKU theo sku_code để không vô tình xóa SKU đang được campaign tham chiếu.
+        mergeSkus(id, request.getSkus());
+        log.info("Update product completed. productId={}, requestedSkuCount={}", id, request.getSkus().size());
     }
 
     @Override
