@@ -57,4 +57,9 @@ public interface OrderRepository {
     void cancelOrder(Order order);
 
     long countorder();
+
+    int completeDeliveredOrdersOlderThan(
+            @Param("cutoff") java.time.LocalDateTime cutoff,
+            @Param("completedAt") java.time.LocalDateTime completedAt,
+            @Param("updatedBy") String updatedBy);
 }
