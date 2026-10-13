@@ -207,4 +207,15 @@
         WHERE id = #{orderId}
           AND order_status = #{expectedStatus}
     </update>
+
+    <update id="completeDeliveredOrdersOlderThan">
+        UPDATE orders
+        SET order_status = 'COMPLETED',
+            customer_received_at = COALESCE(customer_received_at, #{completedAt}),
+            updated_at = #{completedAt},
+            updated_by = #{updatedBy}
+        WHERE order_status = 'DELIVERED'
+          AND carrier_delivered_at IS NOT NULL
+          AND carrier_delivered_at &lt;= #{cutoff}
+    </update>
 </mapper>
