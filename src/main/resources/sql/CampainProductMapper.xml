@@ -60,10 +60,10 @@
                )
     </insert>
 
-    <select id="existsActiveAssociationByProductId" resultType="boolean">
+    <select id="existsAssociationByProductId" resultType="boolean">
         SELECT EXISTS (
             SELECT 1 FROM campain_product
-            WHERE product_id = #{productId} AND is_deleted = 'false'
+            WHERE product_id = #{productId}
         )
     </select>
 
