@@ -286,7 +286,7 @@
           AND is_deleted = 'false'
           AND NOT EXISTS (
               SELECT 1 FROM campain_product cp
-              WHERE cp.product_id = products.id AND cp.is_deleted = 'false'
+              WHERE cp.product_id = products.id
           )
     </update>
 
