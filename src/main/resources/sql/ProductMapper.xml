@@ -196,12 +196,7 @@
                status, json_attributes_name, type_products_name, type_products,
                cancel_at, cancel_by, approve_by, approved_time
         FROM products
-        WHERE id = #{productId}
-          AND is_deleted = 'false'
-          AND NOT EXISTS (
-              SELECT 1 FROM campain_product cp
-              WHERE cp.product_id = products.id AND cp.is_deleted = 'false'
-          )
+        WHERE id = #{productId} AND is_deleted = 'false'
     </select>
 
     <select id="getProductById" resultType="com.vt.cms.model.entity.Product">
@@ -287,7 +282,12 @@
 
     <update id="deleteproduct">
         UPDATE products SET is_deleted = 'true', updated_at = NOW(), updated_by = 'SYSTEM'
-        WHERE id = #{productId} AND is_deleted = 'false'
+        WHERE id = #{productId}
+          AND is_deleted = 'false'
+          AND NOT EXISTS (
+              SELECT 1 FROM campain_product cp
+              WHERE cp.product_id = products.id AND cp.is_deleted = 'false'
+          )
     </update>
 
 
