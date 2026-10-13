@@ -16,14 +16,18 @@ public interface ProductRepository {
 
     List<ProductResponse> listproduct(OrdersRequest request);
 
-    int countproduct();
+    int countproduct(OrdersRequest request);
 
     int insertproduct(Product product);
 
     int updateProduct(@Param("product") Product product, @Param("id") Integer id);
     Product getProductById(@Param("id") Integer id);
 
-    void editstatusproduct(Integer id, String status, LocalDateTime updated_at, String approve_by, LocalDateTime approved_time);
+    int editstatusproduct(@Param("id") Integer id,
+                          @Param("status") String status,
+                          @Param("updated_at") LocalDateTime updated_at,
+                          @Param("approve_by") String approve_by,
+                          @Param("approved_time") LocalDateTime approved_time);
 
     int deleteproduct(@Param("productId") Integer productId);
 

@@ -12,6 +12,7 @@ import com.vt.cms.model.entity.Product;
 import com.vt.cms.model.entity.ProductDetail;
 import com.vt.cms.model.entity.Product_Sku;
 import com.vt.cms.model.repository.ProductRepository;
+import com.vt.cms.model.repository.CampainProductRepository;
 import com.vt.cms.model.repository.ProductSkuRepository;
 import com.vt.cms.model.resp.BaseResponse;
 import com.vt.cms.model.resp.ProductDetailResponse;
@@ -39,6 +40,7 @@ import java.util.List;
 public class ProductServiceImpl implements ProductService {
 
     private final ProductRepository productRepository;
+    private final CampainProductRepository campainProductRepository;
     private final ObjectMapper objectMapper;
     private final ProductSkuRepository productSkuRepository;
 
@@ -61,7 +63,8 @@ public class ProductServiceImpl implements ProductService {
         Product product = new Product();
         product.setName(request.getName().trim());
         product.setDescription(request.getDescription());
-        product.setStatus(request.getStatus());
+        // Trạng thái do server quản lý; client không được tự tạo sản phẩm đã duyệt.
+        product.setStatus("PENDING_APPROVAL");
         product.setIs_deleted("false");
         product.setCreated_at(LocalDateTime.now());
         product.setCreated_by("SYSTEM");
@@ -232,7 +235,11 @@ public class ProductServiceImpl implements ProductService {
             log.warn("Update product rejected: not found. productId={}", id);
             throw new IllegalArgumentException("Không tìm thấy sản phẩm: " + id);
         }
+        if ("APPROVAL".equalsIgnoreCase(existing.getStatus())) {
+            throw new IllegalStateException("Không thể sửa sản phẩm đã được duyệt");
+        }
         Product update = buildProduct(request);
+        update.setStatus(existing.getStatus());
         update.setUpdated_at(LocalDateTime.now());
         update.setUpdated_by("SYSTEM");
         int rows = productRepository.updateProduct(update, id);
@@ -247,8 +254,11 @@ public class ProductServiceImpl implements ProductService {
     @Override
     //Danh sách sản phẩm
     public BaseResponse<PagingResponse<List<ProductResponse>>> listproduct(OrdersRequest request) {
+        if (request == null) throw new IllegalArgumentException("Thông tin phân trang không được để trống");
+        if (request.getPageNo() == null || request.getPageNo() < 0) throw new IllegalArgumentException("pageNo phải >= 0");
+        if (request.getPageSize() == null || request.getPageSize() < 1 || request.getPageSize() > 100) throw new IllegalArgumentException("pageSize phải nằm trong khoảng 1..100");
         List<ProductResponse> product = productRepository.listproduct(request);
-        long totalCount = productRepository.countproduct();
+        long totalCount = productRepository.countproduct(request);
         long totalpage = (long) Math.ceil((double) totalCount / request.getPageSize());
         // page info
         PageInfo pageInfo = new PageInfo();
@@ -269,16 +279,21 @@ public class ProductServiceImpl implements ProductService {
     @Override
     //Cập nhật trạng thái sp
     public void editstatusproduct(Integer product_id) {
-        var updated_at = LocalDateTime.now();
-        String status = "APPROVAL";
-        String approve_by = "SYSTEM";
-        var approved_time = LocalDateTime.now();
-        productRepository.editstatusproduct(product_id, status, updated_at, approve_by, approved_time);
+        if (product_id == null || product_id <= 0) throw new IllegalArgumentException("ID sản phẩm không hợp lệ");
+        Product existing = productRepository.getProductById(product_id);
+        if (existing == null || "true".equalsIgnoreCase(existing.getIs_deleted())) throw new IllegalArgumentException("Không tìm thấy sản phẩm: " + product_id);
+        if ("APPROVAL".equalsIgnoreCase(existing.getStatus())) throw new IllegalStateException("Sản phẩm đã được duyệt trước đó");
+        LocalDateTime now = LocalDateTime.now();
+        int rows = productRepository.editstatusproduct(product_id, "APPROVAL", now, "SYSTEM", now);
+        if (rows != 1) throw new IllegalStateException("Không thể duyệt sản phẩm; trạng thái có thể đã thay đổi");
     }
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void deleteproduct(Integer product_id) {
         if (product_id == null || product_id <= 0) throw new IllegalArgumentException("ID sản phẩm không hợp lệ");
+        if (campainProductRepository.existsAssociationByProductId(product_id)) {
+            throw new IllegalStateException("Không thể xóa sản phẩm đã được thêm vào chiến dịch");
+        }
         int rows = productRepository.deleteproduct(product_id);
         if (rows != 1) {
             log.warn("Delete product rejected: not found/already deleted. productId={}, rows={}", product_id, rows);
