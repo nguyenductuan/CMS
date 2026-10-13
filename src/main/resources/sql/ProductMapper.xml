@@ -255,17 +255,6 @@
                 #{is_deleted})
     </insert>
 
-    <!--    <update id="upload" parameterType="com.vt.cms.model.entity.Product">-->
-    <!--        UPDATE product-->
-    <!--        SET name        = #{product.name},-->
-    <!--            price       = #{product.price},-->
-    <!--            stock       = #{product.stock},-->
-    <!--            description = #{product.description},-->
-    <!--            image       = #{product.image},-->
-    <!--            updated_at  = #{product.updatedAt}-->
-    <!--        WHERE id = #{id}-->
-
-    <!--    </update>-->
 
     <update id="editstatusproduct" parameterType="com.vt.cms.model.entity.Product">
         UPDATE products
