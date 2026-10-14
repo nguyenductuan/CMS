@@ -31,7 +31,11 @@
         WHERE id = #{campain_id}
     </update>
 
-
+    <delete id="deletecampain">
+        UPDATE campaign
+        SET is_deleted = "false"
+        WHERE id = #{campain_id}
+    </delete>
     <insert id="savecampain" parameterType="com.vt.cms.model.entity.Campain"
             useGeneratedKeys="true"
             keyProperty="campainid">
