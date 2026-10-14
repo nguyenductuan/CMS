@@ -3,11 +3,13 @@ package com.vt.cms.service.Impl;
 import com.vt.cms.Exception.BusinessException;
 import com.vt.cms.model.dto.*;
 import com.vt.cms.model.entity.ProductDetail;
+import com.vt.cms.model.entity.Shipping;
 import com.vt.cms.model.enums.MessageCode;
 import com.vt.cms.model.repository.ProductRepository;
 import com.vt.cms.model.resp.SkuResponse;
 import com.vt.cms.service.CheckoutService;
 import com.vt.cms.service.PriceService;
+import com.vt.cms.service.ShippingService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
