@@ -37,6 +37,12 @@ public class ProductController {
         productService.editstatusproduct(product_id);
         return ResponseEntity.ok(new APIRessponse(200,"Duyệt sản phẩm thành công"));
     }
+    // Từ chối sản phẩm đang chờ duyệt
+    @PutMapping("reject/{product_id}")
+    public ResponseEntity<APIRessponse> rejectProduct(@PathVariable Integer product_id) {
+        productService.rejectProduct(product_id);
+        return ResponseEntity.ok(new APIRessponse(200, "Từ chối sản phẩm thành công"));
+    }
     // Chi tiết sp
     @GetMapping("detail/{product_id}")
     public ResponseEntity<APIRessponse> product_detail(@PathVariable Integer product_id) {
