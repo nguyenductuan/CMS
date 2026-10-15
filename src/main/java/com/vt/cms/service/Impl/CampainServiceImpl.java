@@ -13,16 +13,14 @@ import com.vt.cms.model.repository.CampainProductRepository;
 import com.vt.cms.model.repository.CampainRepository;
 import com.vt.cms.model.repository.ProductSkuRepository;
 import com.vt.cms.service.CampainService;
+import com.vt.cms.service.validation.CampaignRequestValidator;
 import com.vt.cms.model.resp.CampainResponse;
 import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.config.ScheduledTaskHolder;
 import org.springframework.stereotype.Service;
-import java.math.BigDecimal;
 import java.time.LocalDateTime;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 @Slf4j
 @Service
@@ -36,6 +34,7 @@ public class CampainServiceImpl implements CampainService {
     private final CampainProductRepository campainProductRepository;
     private final ProductSkuRepository productSkuRepository;
     private final ScheduledTaskHolder scheduledTaskHolder;
+    private final CampaignRequestValidator campaignRequestValidator;
 
     public CampainServiceImpl(
             CampainRepository campainRepository,
@@ -59,7 +58,7 @@ public class CampainServiceImpl implements CampainService {
         log.info("Start creating campaign");
 
         // 1. Kiểm tra dữ liệu đầu vào trước khi ghi DB.
-        validateRequest(request);
+        campaignRequestValidator.validate(request);
 
         // 2. Tạo entity campaign từ request.
         Campain campaign = buildCampaign(request);
@@ -100,93 +99,6 @@ public class CampainServiceImpl implements CampainService {
     /**
      * Kiểm tra các dữ liệu bắt buộc trước khi bắt đầu ghi dữ liệu.
      */
-    private void validateRequest(CreatedCampainRequest request) {
-        if (request == null) {
-            throw new IllegalArgumentException("Request is required");
-        }
-
-        if (request.getName() == null || request.getName().isBlank()) {
-            throw new IllegalArgumentException("Tên chiến dịch không được để trống");
-        }
-
-        if (request.getTotal_stock() == null || request.getTotal_stock() < 0) {
-            throw new IllegalArgumentException("Tổng tồn kho chiến dịch phải >= 0");
-        }
-
-        if (request.getStartTime() == null || request.getEndTime() == null) {
-            throw new IllegalArgumentException(
-                    "Start time and end time are required"
-            );
-        }
-
-        // Cho phép startTime bằng endTime theo quy tắc nghiệp vụ hiện tại.
-        if (request.getStartTime().isAfter(request.getEndTime())) {
-            throw new IllegalArgumentException(
-                    "Start time must be before or equal to end time"
-            );
-        }
-
-        validateDiscount(request.getDiscount());
-
-        if (request.getProducts() == null || request.getProducts().isEmpty()) {
-            throw new IllegalArgumentException(
-                    "Campaign must contain at least one product"
-            );
-        }
-
-        // Không cho phép cùng một SKU xuất hiện nhiều lần trong request.
-        Set<Integer> requestedSkuIds = new HashSet<>();
-
-        for (CampainProductRequest product : request.getProducts()) {
-            if (product == null || product.getProductid() <= 0) {
-                throw new IllegalArgumentException(
-                        "Product ID must be valid"
-                );
-            }
-
-            if (product.getSkus() == null || product.getSkus().isEmpty()) {
-                throw new IllegalArgumentException(
-                        "Each campaign product must contain at least one SKU"
-                );
-            }
-
-            for (CampainProductSku sku : product.getSkus()) {
-                if (sku == null || sku.getSkuId() == null) {
-                    throw new IllegalArgumentException(
-                            "SKU ID is required"
-                    );
-                }
-
-                if (!requestedSkuIds.add(sku.getSkuId())) {
-                    throw new IllegalArgumentException(
-                            "Duplicate SKU ID: " + sku.getSkuId()
-                    );
-                }
-            }
-        }
-    }
-
-    /**
-     * Discount phải là số nguyên và không vượt quá 100%.
-     */
-    private void validateDiscount(BigDecimal discount) {
-        if (discount == null) {
-            throw new IllegalArgumentException("Discount is required");
-        }
-
-        if (discount.stripTrailingZeros().scale() > 0) {
-            throw new IllegalArgumentException(
-                    "Discount must be an integer"
-            );
-        }
-
-        if (discount.compareTo(BigDecimal.ZERO) < 0 || discount.compareTo(BigDecimal.valueOf(100)) > 0) {
-            throw new IllegalArgumentException(
-                    "Discount must not exceed 100%"
-            );
-        }
-    }
-
     /**
      * Chuyển dữ liệu request thành entity campaign.
      */
