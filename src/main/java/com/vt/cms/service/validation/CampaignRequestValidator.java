@@ -22,7 +22,7 @@ public class CampaignRequestValidator {
 
         Set<Integer> requestedSkuIds = new HashSet<>();
         for (CampainProductRequest product : request.getProducts()) {
-            if (product == null || product.getProductid() == null || product.getProductid() <= 0) throw new IllegalArgumentException("Product ID must be valid");
+            if (product == null || product.getProductid() <= 0) throw new IllegalArgumentException("Product ID must be valid");
             if (product.getSkus() == null || product.getSkus().isEmpty()) throw new IllegalArgumentException("Each campaign product must contain at least one SKU");
             for (CampainProductSku sku : product.getSkus()) {
                 if (sku == null || sku.getSkuId() == null) throw new IllegalArgumentException("SKU ID is required");
