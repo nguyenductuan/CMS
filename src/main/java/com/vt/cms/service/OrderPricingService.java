@@ -26,7 +26,7 @@ public class OrderPricingService {
             price = sku.getPrice();
         }
 
-        if (price == null || price.compareTo(BigDecimal.ZERO) < 0) {
+        if (price == null || price.compareTo(BigDecimal.ZERO) <= 0) {
             throw new BusinessException(MessageCode.INVALID_PRICE);
         }
 
@@ -34,7 +34,7 @@ public class OrderPricingService {
     }
 
     public BigDecimal calculateLineTotal(BigDecimal unitPrice, int quantity) {
-        if (unitPrice == null || unitPrice.compareTo(BigDecimal.ZERO) < 0) {
+        if (unitPrice == null || unitPrice.compareTo(BigDecimal.ZERO) <= 0) {
             throw new BusinessException(MessageCode.INVALID_PRICE);
         }
         if (quantity <= 0) {
