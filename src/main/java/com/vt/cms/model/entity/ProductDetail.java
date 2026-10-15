@@ -41,6 +41,10 @@ public class ProductDetail {
 
     private String campaignStatus;
 
+    private String campaignName;
+    private String campaignDescription;
+    private BigDecimal campaignDiscount;
+
 
 
     private LocalDateTime campaignStartAt;
