@@ -3,7 +3,6 @@ package com.vt.cms.service.Impl;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.vt.cms.mapper.Modelmapper;
 import com.vt.cms.model.dto.OrdersRequest;
 import com.vt.cms.model.dto.CreateProductRequest;
 import com.vt.cms.model.dto.page.PageInfo;
@@ -13,6 +12,7 @@ import com.vt.cms.model.entity.Product;
 import com.vt.cms.model.entity.ProductDetail;
 import com.vt.cms.model.entity.Product_Sku;
 import com.vt.cms.model.repository.ProductRepository;
+import com.vt.cms.model.repository.CampainProductRepository;
 import com.vt.cms.model.repository.ProductSkuRepository;
 import com.vt.cms.model.resp.BaseResponse;
 import com.vt.cms.model.resp.ProductDetailResponse;
@@ -21,77 +21,176 @@ import com.vt.cms.model.resp.SkuResponse;
 import com.vt.cms.service.ProductService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.mapstruct.factory.Mappers;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import java.math.BigDecimal;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.HashMap;
+import java.util.Set;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
 @Slf4j
 public class ProductServiceImpl implements ProductService {
 
-    private final Modelmapper modelMapper = Mappers.getMapper(Modelmapper.class);
     private final ProductRepository productRepository;
+    private final CampainProductRepository campainProductRepository;
     private final ObjectMapper objectMapper;
     private final ProductSkuRepository productSkuRepository;
 
     @Override
-    //Thêm mới sp
-    public void addproduct(CreateProductRequest createProductRequest) {
+    @Transactional(rollbackFor = Exception.class)
+    public void addproduct(CreateProductRequest request) {
+        validateProductRequest(request);
+        log.info("Create product started. name={}, skuCount={}", request.getName(), request.getSkus().size());
+        Product product = buildProduct(request);
+        int rows = productRepository.insertproduct(product);
+        if (rows != 1 || product.getId() == null) {
+            log.error("Insert product failed. name={}, rows={}, generatedId={}", request.getName(), rows, product.getId());
+            throw new IllegalStateException("Không thể tạo sản phẩm");
+        }
+        saveSkus(product.getId(), request.getSkus());
+        log.info("Create product completed. productId={}, skuCount={}", product.getId(), request.getSkus().size());
+    }
+
+    private Product buildProduct(CreateProductRequest request) {
         Product product = new Product();
-        product.setName(createProductRequest.getName());
-        product.setDescription(createProductRequest.getDescription());
-        product.setStatus(createProductRequest.getStatus());
+        product.setName(request.getName().trim());
+        product.setDescription(request.getDescription());
+        // Trạng thái do server quản lý; client không được tự tạo sản phẩm đã duyệt.
+        product.setStatus("PENDING_APPROVAL");
         product.setIs_deleted("false");
         product.setCreated_at(LocalDateTime.now());
-        product.setCreated_by("SYSTEMS");
-        try{
-            product.setType_products(objectMapper.writeValueAsString(createProductRequest.getType_products()));
-            product.setJson_attributes(objectMapper.writeValueAsString(createProductRequest.getAttributes()));
-            product.setJson_medias(objectMapper.writeValueAsString(createProductRequest.getMedias()));
-            product.setJson_images(objectMapper.writeValueAsString(createProductRequest.getImages()));
+        product.setCreated_by("SYSTEM");
+        product.setType_products(toJson(request.getType_products()));
+        product.setJson_attributes(toJson(request.getAttributes()));
+        product.setJson_medias(toJson(request.getMedias()));
+        product.setJson_images(toJson(request.getImages()));
+        product.setJson_attributes_name(request.getAttributes_name());
+        product.setType_products_name(request.getType_products_name());
+        return product;
+    }
+
+    private String toJson(Object value) {
+        try {
+            return objectMapper.writeValueAsString(value == null ? List.of() : value);
+        } catch (JsonProcessingException e) {
+            log.error("Cannot serialize product data to JSON", e);
+            throw new IllegalArgumentException("Dữ liệu sản phẩm không thể chuyển đổi sang JSON", e);
         }
-        catch (JsonProcessingException e) {
-            throw new RuntimeException("Cannot convert to JSON", e);
+    }
+
+    private void validateProductRequest(CreateProductRequest request) {
+        if (request == null) throw new IllegalArgumentException("Thông tin sản phẩm không được để trống");
+        if (request.getName() == null || request.getName().isBlank()) throw new IllegalArgumentException("Tên sản phẩm không được để trống");
+        if (request.getSkus() == null || request.getSkus().isEmpty()) throw new IllegalArgumentException("Sản phẩm phải có ít nhất một SKU");
+        Set<String> codes = new HashSet<>();
+        for (SkuRequest sku : request.getSkus()) {
+            if (sku == null) throw new IllegalArgumentException("Thông tin SKU không được để trống");
+            // Sinh ma SKU tai server neu client khong gui.
+            if (sku.getSku_code() == null || sku.getSku_code().isBlank()) {
+                sku.setSku_code("SKU-" + UUID.randomUUID().toString().replace("-", "").substring(0, 20).toUpperCase());
+            } else {
+                sku.setSku_code(sku.getSku_code().trim());
+            }
+            if (!codes.add(sku.getSku_code())) throw new IllegalArgumentException("Mã SKU bị trùng trong request: " + sku.getSku_code());
+            if (sku.getPrice() == null || sku.getPrice().compareTo(BigDecimal.ZERO) <= 0) throw new IllegalArgumentException("Giá SKU phải lớn hơn 0: " + sku.getSku_code());
+            if (sku.getStock() == null || sku.getStock() < 0) throw new IllegalArgumentException("Tồn kho SKU phải >= 0: " + sku.getSku_code());
+            if (sku.getImage_url() == null || sku.getImage_url().isBlank()) throw new IllegalArgumentException("Ảnh SKU không được để trống: " + sku.getSku_code());
+            validateNonNegativeDimension(sku.getWeight_gram(), "khối lượng", sku.getSku_code());
+            validateNonNegativeDimension(sku.getLength_cm(), "chiều dài", sku.getSku_code());
+            validateNonNegativeDimension(sku.getWidth_cm(), "chiều rộng", sku.getSku_code());
+            validateNonNegativeDimension(sku.getHeight_cm(), "chiều cao", sku.getSku_code());
         }
+    }
 
-        product.setJson_attributes_name(createProductRequest.getAttributes_name());
-        product.setType_products_name(createProductRequest.getType_products_name());
-        productRepository.insertproduct(product);
+    private void validateNonNegativeDimension(String value, String label, String skuCode) {
+        if (value == null || value.isBlank()) {
+            throw new IllegalArgumentException("Thiếu " + label + " SKU: " + skuCode);
+        }
+        try {
+            if (new BigDecimal(value).compareTo(BigDecimal.ZERO) < 0) {
+                throw new IllegalArgumentException(label + " SKU phải >= 0: " + skuCode);
+            }
+        } catch (NumberFormatException ex) {
+            throw new IllegalArgumentException(label + " SKU không hợp lệ: " + skuCode, ex);
+        }
+    }
 
-        Product_Sku productSku = new Product_Sku();
-        for (SkuRequest skuRequest : createProductRequest.getSkus()){
-            productSku.setProduct_id(product.getId());
-            productSku.setHeight_cm(skuRequest.getHeight_cm());
-            productSku.setWidth_cm(skuRequest.getWidth_cm());
-            productSku.setLength_cm(skuRequest.getLength_cm());
-            productSku.setWeight_gram(skuRequest.getWeight_gram());
-            productSku.setType_product(skuRequest.getType_product());
-            productSku.setStock(skuRequest.getStock());
-            productSku.setStatus(skuRequest.getStatus());
-            productSku.setSku_code(skuRequest.getSku_code());
-            productSku.setPrice(skuRequest.getPrice());
-            productSku.setImage_url(skuRequest.getImage_url());
-            productSku.setAttribute(skuRequest.getAttribute());
-            productSku.setCreated_by("SYSTEM");
-            productSku.setIs_deleted("false");
+    private void mergeSkus(Integer productId, List<SkuRequest> requests) {
+        Map<String, Product_Sku> existingByCode = new HashMap<>();
+        for (Product_Sku existingSku : productSkuRepository.findByProductId(productId)) {
+            if (existingSku.getSku_code() != null) existingByCode.put(existingSku.getSku_code(), existingSku);
+        }
+        for (SkuRequest request : requests) {
+            Product_Sku existingSku = existingByCode.get(request.getSku_code().trim());
+            if (existingSku == null) {
+                saveSkus(productId, List.of(request));
+                continue;
+            }
+            Product_Sku sku = new Product_Sku();
+            sku.setProduct_id(productId);
+            sku.setSku_code(request.getSku_code().trim());
+            sku.setHeight_cm(request.getHeight_cm());
+            sku.setWidth_cm(request.getWidth_cm());
+            sku.setLength_cm(request.getLength_cm());
+            sku.setWeight_gram(request.getWeight_gram());
+            sku.setType_product(request.getType_product());
+            sku.setStock(request.getStock());
+            sku.setStatus(request.getStatus());
+            sku.setPrice(request.getPrice());
+            sku.setImage_url(request.getImage_url());
+            sku.setAttribute(request.getAttribute());
+            sku.setUpdated_at(LocalDateTime.now());
+            sku.setUpdated_by("SYSTEM");
+            int rows = productSkuRepository.updateByProductIdAndSkuCode(sku);
+            if (rows != 1) {
+                log.error("Update SKU failed. productId={}, skuCode={}, rows={}", productId, sku.getSku_code(), rows);
+                throw new IllegalStateException("Không thể cập nhật SKU: " + sku.getSku_code());
+            }
+        }
+    }
 
-            productSku.setCreated_at(LocalDateTime.now());
-            productSkuRepository.inserproductsku(productSku);
+    private void saveSkus(Integer productId, List<SkuRequest> requests) {
+        for (SkuRequest request : requests) {
+            Product_Sku sku = new Product_Sku();
+            sku.setProduct_id(productId);
+            sku.setHeight_cm(request.getHeight_cm());
+            sku.setWidth_cm(request.getWidth_cm());
+            sku.setLength_cm(request.getLength_cm());
+            sku.setWeight_gram(request.getWeight_gram());
+            sku.setType_product(request.getType_product());
+            sku.setStock(request.getStock());
+            sku.setStatus(request.getStatus());
+            sku.setSku_code(request.getSku_code().trim());
+            sku.setPrice(request.getPrice());
+            sku.setImage_url(request.getImage_url());
+            sku.setAttribute(request.getAttribute());
+            sku.setCreated_by("SYSTEM");
+            sku.setIs_deleted("false");
+            sku.setCreated_at(LocalDateTime.now());
+            int rows = productSkuRepository.inserproductsku(sku);
+            if (rows != 1) {
+                log.error("Insert SKU failed. productId={}, skuCode={}, rows={}", productId, sku.getSku_code(), rows);
+                throw new IllegalStateException("Không thể lưu SKU: " + sku.getSku_code());
+            }
         }
     }
     @Override
     public ProductResponse detail(Integer product_id) {
-
         Product product = productRepository.detailProduct(product_id);
-
-        ProductResponse response =
-                new ProductResponse();
-
+        if (product == null || "true".equalsIgnoreCase(product.getIs_deleted())) {
+            log.warn("Product detail not found. productId={}", product_id);
+            throw new IllegalArgumentException("Không tìm thấy sản phẩm: " + product_id);
+        }
+        ProductResponse response = new ProductResponse();
         response.setId(product.getId());
         response.setName(product.getName());
         response.setDescription(product.getDescription());
@@ -99,66 +198,20 @@ public class ProductServiceImpl implements ProductService {
         response.setCreated_at(product.getCreated_at());
         response.setIs_deleted(product.getIs_deleted());
         response.setCreated_by(product.getCreated_by());
-        System.out.println("product = " + product);
-        System.out.println("json_attributes = " + product.getJson_attributes());
-        // =========================
-        // ATTRIBUTES
-        // =========================
+        log.debug("Loaded product detail. productId={}", product_id);
+        // ========================= ATTRIBUTES =========================
+        response.setAttributes(parseJson(product.getJson_attributes(), new TypeReference<List<AttributeRequest>>() {}));
+        response.setAttributes_name(product.getJson_attributes_name());
 
-        response.setAttributes(
-                parseJson(
-                        product.getJson_attributes(),
-                        new TypeReference<List<AttributeRequest>>() {}
-                )
-        );
-
-        response.setAttributes_name(
-                product.getJson_attributes_name()
-        );
-
-        // =========================
-        // TYPE PRODUCTS
-        // =========================
-
-        response.setType_products(
-                parseJson(
-                        product.getType_products(),
-                        new TypeReference<List<TypeProductRequest>>() {}
-                )
-        );
-
-        response.setType_products_name(
-                product.getType_products_name()
-        );
-
-        // =========================
-        // IMAGES
-        // =========================
-
-        response.setImages(
-                parseJson(
-                        product.getJson_images(),
-                        new TypeReference<List<ImageRequest>>() {}
-                )
-        );
-
-        // =========================
-        // MEDIAS
-        // =========================
-
-        response.setMedias(
-                parseJson(
-                        product.getJson_medias(),
-                        new TypeReference<List<MediaRequest>>() {}
-                )
-        );
-        // =========================
-        // SKU
-        // =========================
-
-        List<Product_Sku> productSkus =
-                productSkuRepository.findByProductId(product_id);
-
+        // =========================TYPE PRODUCTS=========================
+        response.setType_products(parseJson(product.getType_products(),new TypeReference<List<TypeProductRequest>>() {}));
+        response.setType_products_name(product.getType_products_name());
+        // ======================== IMAGES =========================
+        response.setImages(parseJson(product.getJson_images(),new TypeReference<List<ImageRequest>>() {}));
+        // ========================= MEDIAS =========================
+        response.setMedias(parseJson(product.getJson_medias(),new TypeReference<List<MediaRequest>>() {}));
+        // ========================= SKU =========================
+        List<Product_Sku> productSkus = productSkuRepository.findByProductId(product_id);
         List<SkuRequest> skus = productSkus.stream()
                 .map(sku -> {
                     SkuRequest request = new SkuRequest();
@@ -181,7 +234,6 @@ public class ProductServiceImpl implements ProductService {
         response.setSkus(skus);
         return response;
     }
-
     private <T> List<T> parseJson(String json, TypeReference<List<T>> typeReference) {
         if (json == null || json.trim().isEmpty()) {
             return new ArrayList<>();
@@ -198,26 +250,40 @@ public class ProductServiceImpl implements ProductService {
         }
     }
     @Override
-    public void editproduct(Integer id, CreateProductRequest createProductRequest) {
-//        ProductResponse product = productRepository.detailProduct(id);
-//        if (product == null) {
-//            throw new RuntimeException("Không tìm thâý sản phẩm"); // cần response trả về 200
-//        }
-//        Product product1 = new Product();
-//        product1.setName(productRequest.getProductName());
-//        product1.setStock(productRequest.getStock());
-//        product1.setDescription(productRequest.getProductDescription());
-//        product1.setPrice_display(productRequest.getProductPrice());
-//        product1.setUpdatedAt(LocalDateTime.now());
-//        product1.setImage(productRequest.getProductimage());
-//        productRepository.upload(product1, id);
+    @Transactional(rollbackFor = Exception.class)
+    public void editproduct(Integer id, CreateProductRequest request) {
+        if (id == null || id <= 0) throw new IllegalArgumentException("ID sản phẩm không hợp lệ");
+        validateProductRequest(request);
+        Product existing = productRepository.getProductById(id);
+        if (existing == null || "true".equalsIgnoreCase(existing.getIs_deleted())) {
+            log.warn("Update product rejected: not found. productId={}", id);
+            throw new IllegalArgumentException("Không tìm thấy sản phẩm: " + id);
+        }
+        if (!"PENDING_APPROVAL".equalsIgnoreCase(existing.getStatus())
+                && !"REJECTED".equalsIgnoreCase(existing.getStatus())) {
+            throw new IllegalStateException("Chỉ được sửa sản phẩm đang chờ duyệt hoặc đã bị từ chối");
+        }
+        Product update = buildProduct(request);
+        update.setStatus("PENDING_APPROVAL");
+        update.setUpdated_at(LocalDateTime.now());
+        update.setUpdated_by("SYSTEM");
+        int rows = productRepository.updateProduct(update, id);
+        if (rows != 1) {
+            log.error("Update product failed. productId={}, rows={}", id, rows);
+            throw new IllegalStateException("Không thể cập nhật sản phẩm");
+        }
+        // Merge SKU theo sku_code để không vô tình xóa SKU đang được campaign tham chiếu.
+        mergeSkus(id, request.getSkus());
+        log.info("Update product completed. productId={}, requestedSkuCount={}", id, request.getSkus().size());
     }
-
     @Override
     //Danh sách sản phẩm
     public BaseResponse<PagingResponse<List<ProductResponse>>> listproduct(OrdersRequest request) {
+        if (request == null) throw new IllegalArgumentException("Thông tin phân trang không được để trống");
+        if (request.getPageNo() == null || request.getPageNo() < 0) throw new IllegalArgumentException("pageNo phải >= 0");
+        if (request.getPageSize() == null || request.getPageSize() < 1 || request.getPageSize() > 100) throw new IllegalArgumentException("pageSize phải nằm trong khoảng 1..100");
         List<ProductResponse> product = productRepository.listproduct(request);
-        long totalCount = productRepository.countproduct();
+        long totalCount = productRepository.countproduct(request);
         long totalpage = (long) Math.ceil((double) totalCount / request.getPageSize());
         // page info
         PageInfo pageInfo = new PageInfo();
@@ -238,16 +304,54 @@ public class ProductServiceImpl implements ProductService {
     @Override
     //Cập nhật trạng thái sp
     public void editstatusproduct(Integer product_id) {
-        var updated_at = LocalDateTime.now();
-        String status = "APPROVAL";
-        String approve_by = "SYSTEM";
-        var approved_time = LocalDateTime.now();
-        productRepository.editstatusproduct(product_id, status, updated_at, approve_by, approved_time);
+        if (product_id == null || product_id <= 0) throw new IllegalArgumentException("ID sản phẩm không hợp lệ");
+        Product existing = productRepository.getProductById(product_id);
+        if (existing == null || "true".equalsIgnoreCase(existing.getIs_deleted())) throw new IllegalArgumentException("Không tìm thấy sản phẩm: " + product_id);
+        if (!"PENDING_APPROVAL".equalsIgnoreCase(existing.getStatus())) {
+            throw new IllegalStateException("Chỉ sản phẩm đang chờ duyệt mới được duyệt");
+        }
+        LocalDateTime now = LocalDateTime.now();
+        int rows = productRepository.editstatusproduct(product_id, "APPROVED", now, "SYSTEM", now);
+        if (rows != 1) throw new IllegalStateException("Không thể duyệt sản phẩm; trạng thái có thể đã thay đổi");
     }
     @Override
-    //Xóa sp
+    @Transactional(rollbackFor = Exception.class)
+    public void rejectProduct(Integer product_id) {
+        if (product_id == null || product_id <= 0) throw new IllegalArgumentException("ID sản phẩm không hợp lệ");
+        Product existing = productRepository.getProductById(product_id);
+        if (existing == null || "true".equalsIgnoreCase(existing.getIs_deleted())) {
+            throw new IllegalArgumentException("Không tìm thấy sản phẩm: " + product_id);
+        }
+        if (!"PENDING_APPROVAL".equalsIgnoreCase(existing.getStatus())) {
+            throw new IllegalStateException("Chỉ sản phẩm đang chờ duyệt mới được từ chối");
+        }
+        LocalDateTime now = LocalDateTime.now();
+        int rows = productRepository.editstatusproduct(product_id, "REJECTED", now, "SYSTEM", now);
+        if (rows != 1) throw new IllegalStateException("Không thể từ chối sản phẩm; trạng thái có thể đã thay đổi");
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
     public void deleteproduct(Integer product_id) {
-        productRepository.deleteproduct(product_id);
+        if (product_id == null || product_id <= 0) throw new IllegalArgumentException("ID sản phẩm không hợp lệ");
+        Product existing = productRepository.getProductById(product_id);
+        if (existing == null || "true".equalsIgnoreCase(existing.getIs_deleted())) {
+            throw new IllegalArgumentException("Không tìm thấy sản phẩm: " + product_id);
+        }
+        if (!"PENDING_APPROVAL".equalsIgnoreCase(existing.getStatus())
+                && !"REJECTED".equalsIgnoreCase(existing.getStatus())) {
+            throw new IllegalStateException("Chỉ được xóa sản phẩm đang chờ duyệt hoặc đã bị từ chối");
+        }
+        if (campainProductRepository.existsAssociationByProductId(product_id)) {
+            throw new IllegalStateException("Không thể xóa sản phẩm đã được thêm vào chiến dịch");
+        }
+        int rows = productRepository.deleteproduct(product_id);
+        if (rows != 1) {
+            log.warn("Delete product rejected: not found/already deleted. productId={}, rows={}", product_id, rows);
+            throw new IllegalArgumentException("Không tìm thấy sản phẩm hoặc sản phẩm đã bị xóa: " + product_id);
+        }
+        int skuRows = productSkuRepository.softDeleteByProductId(product_id);
+        log.info("Delete product completed. productId={}, deletedSkuCount={}", product_id, skuRows);
     }
     @Override
     public ProductDetailResponse product_detail(Integer product_id, Integer campaign_id) {

@@ -1,71 +1,69 @@
 package com.vt.cms.service.Impl;
 
 import com.vt.cms.Exception.BusinessException;
-import com.vt.cms.model.dto.OrderItemRequest;
-import com.vt.cms.model.dto.OrderRequest;
-import com.vt.cms.model.dto.OrdersRequest;
-import com.vt.cms.model.dto.SkuOrderRequest;
+import com.vt.cms.model.dto.*;
 import com.vt.cms.model.dto.page.PageInfo;
 import com.vt.cms.model.dto.page.PagingResponse;
-import com.vt.cms.model.entity.*;
+import com.vt.cms.model.entity.Order;
+import com.vt.cms.model.entity.OrderItem;
+import com.vt.cms.model.entity.ProductDetail;
 import com.vt.cms.model.enums.MessageCode;
 import com.vt.cms.model.enums.OrderStatus;
-import com.vt.cms.model.enums.TrackingStatus;
-import com.vt.cms.model.repository.*;
-import com.vt.cms.model.resp.*;
-import com.vt.cms.service.OrderService;
-import com.vt.cms.service.PriceService;
-import org.springframework.stereotype.Service;
+import com.vt.cms.model.repository.OrderItemRepository;
+import com.vt.cms.model.repository.OrderRepository;
+import com.vt.cms.model.repository.ProductRepository;
+import com.vt.cms.model.resp.BaseResponse;
 
+import com.vt.cms.model.resp.OrderCreateResponse;
+import com.vt.cms.model.resp.OrderItemResponse;
+import com.vt.cms.model.resp.OrderResponse;
+import com.vt.cms.model.resp.SkuResponse;
+import com.vt.cms.service.InventoryService;
+import com.vt.cms.service.OrderPricingService;
+import com.vt.cms.service.OrderService;
+import jakarta.transaction.Transactional;
+import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.UUID;
-import java.util.function.Function;
-import java.util.stream.Collectors;
 
 @Service
-
 public class OrderServiceImpl implements OrderService {
 
-    private ProductRepository productRepository;
-    private OrderItemRepository orderItemRepository;
-    private ShippingRepository shippingRepository;
-    private OrderTrackingRepository orderTrackingRepository;
-    private OrderRepository orderRepository;
-    private PriceService priceService;
+    private final ProductRepository productRepository;
+    private final OrderItemRepository orderItemRepository;
+    private final OrderRepository orderRepository;
+    private final InventoryService inventoryService;
+    private final OrderPricingService orderPricingService;
+    private final ShippingFeeService shippingFeeService;
 
-
-    public OrderServiceImpl(OrderRepository orderRepository,
-                            OrderTrackingRepository orderTrackingRepository,
-                            ProductRepository productRepository,
-                            OrderItemRepository orderItemRepository,
-                            ShippingRepository shippingRepository,
-                            PriceService priceService
-
-                            ) {
+    public OrderServiceImpl(
+            OrderRepository orderRepository,
+            ProductRepository productRepository,
+            OrderItemRepository orderItemRepository,
+            InventoryService inventoryService,
+            OrderPricingService orderPricingService,
+            ShippingFeeService shippingFeeService) {
         this.orderRepository = orderRepository;
         this.productRepository = productRepository;
         this.orderItemRepository = orderItemRepository;
-        this.shippingRepository = shippingRepository;
-        this.orderTrackingRepository = orderTrackingRepository;
-        this.priceService = priceService;
-
-
+        this.inventoryService = inventoryService;
+        this.orderPricingService = orderPricingService;
+        this.shippingFeeService = shippingFeeService;
     }
 
     @Override
     public OrderResponse getdetailorder(long orderId) {
-        // 1. Lấy order
-        OrderResponse order = orderRepository.getorderbyid(orderId);
+         OrderResponse order = orderRepository.getorderbyid(orderId);
         if (order == null) {
             throw new RuntimeException("Order not found");
         }
-
+        // Lấy danh sách item của order
+        List<ItemDto> orderItems = orderRepository.getOrderItemsByOrderId(orderId);
+        order.setOrderItems(orderItems);
         return order;
     }
 
@@ -75,180 +73,146 @@ public class OrderServiceImpl implements OrderService {
         order.setId(orderId);
         order.setOrder_status(OrderStatus.CANCELLED);
         order.setNotecancel(notecancel);
-        order.setCancelAt(LocalDateTime.now());
+        order.setUpdatedAt(LocalDateTime.now());
+        order.setCancelled_by("SYSTEM");
         orderRepository.cancelOrder(order);
     }
+
     @Override
     public BaseResponse<PagingResponse<List<OrderResponse>>> getorderlist(OrdersRequest request) {
-        List<OrderResponse> order = orderRepository.getOrder(request);
-        for (OrderResponse o : order) {
-            List<OrderItemResponse> items1 = orderRepository.getItemsByOrderId(o.getOrderId());
-           // o.setOrderItems(items1);
+        List<OrderResponse> orders = orderRepository.getOrder(request);
+        for (OrderResponse order : orders) {
+            List<OrderItemResponse> items = orderRepository.getItemsByOrderId(order.getOrderId());
+
+            // Map OrderItemResponse sang ItemDto
+            List<ItemDto> itemDtos = items.stream()
+                    .map(item -> {
+                        ItemDto dto = new ItemDto();
+                        // Đổi tên getter/setter theo class thực tế của bạn
+                        dto.setProductId(item.getProductId());
+                        dto.setProductName(item.getProductName());
+
+                        dto.setCampaignId(item.getCampaignId());
+                        dto.setPrice_campain(item.getPriceCampain());
+                        dto.setPrice_discount(item.getPriceDiscount());
+                        dto.setQuantity(item.getQuantity());
+                        return dto;
+                    })
+                    .toList();
+            // Gắn danh sách item vào order
+            order.setOrderItems(itemDtos);
         }
         long totalCount = orderRepository.countorder();
-        long totalpage = totalCount / (request.getPageSize());
+        long pageSize = request.getPageSize();
+        long totalPage = pageSize > 0
+                ? (totalCount + pageSize - 1) / pageSize
+                : 0;
 
-
-        // page info
         PageInfo pageInfo = new PageInfo();
         pageInfo.setPageNo(request.getPageNo());
         pageInfo.setPageSize(request.getPageSize());
         pageInfo.setTotalCount(totalCount);
-        pageInfo.setTotalPage(totalpage);
+        pageInfo.setTotalPage(totalPage);
 
-        // paging response
         PagingResponse<List<OrderResponse>> pagingResponse = new PagingResponse<>();
-
         pagingResponse.setPageInfo(pageInfo);
-        pagingResponse.setData(order);
+        pagingResponse.setData(orders);
 
-        // base response
         BaseResponse<PagingResponse<List<OrderResponse>>> response = new BaseResponse<>();
-
-        response.setMessage("Successful!");
+        response.setMessage("Thành công");
         response.setData(pagingResponse);
-
         return response;
-
     }
-    @Override
-    public OrderCreateResponse createOrder(OrderRequest request) {
 
-        if (request.getOrder() == null || request.getOrder().isEmpty()) {
-            throw new RuntimeException("Order is empty");
+    /**
+     * Coordinates the create-order use case. The participating repository writes
+     * must use the same transaction manager/data source for atomic persistence.
+     */
+    @Override
+    @Transactional
+    public OrderCreateResponse createOrder(OrderRequest request) {
+        if (request == null || request.getOrder() == null || request.getOrder().isEmpty()) {
+            throw new BusinessException(MessageCode.INVALID_ORDER);
         }
-//
-//        if (request.getShipping() == null || request.getShipping().isEmpty()) {
-//            throw new RuntimeException("Shipping information is required");
-//        }
-        BigDecimal totalAmount = BigDecimal.ZERO;
-        BigDecimal priceshipping = null;
+
+        BigDecimal productTotal = BigDecimal.ZERO;
+        BigDecimal shippingTotal = BigDecimal.ZERO;
         List<OrderItem> orderItems = new ArrayList<>();
 
-        // ==========================================
-        // 1. Lấy sản phẩm + SKU và tính tiền sản phẩm //
-        // =========================
+        for (OrderItemRequest itemRequest : request.getOrder()) {
+            if (itemRequest == null || itemRequest.getProductId() == null
+                    || itemRequest.getItem() == null || itemRequest.getItem().isEmpty()) {
+                throw new BusinessException(MessageCode.INVALID_ORDER);
+            }
 
-        for (OrderItemRequest orderItemRequest : request.getOrder()) {
-            Integer productId = orderItemRequest.getProductId();
-            Integer campainID= orderItemRequest.getCampainId();
-            ProductDetail product = productRepository.getproduct1(productId,campainID);
+            ProductDetail product = productRepository.getproduct1(
+                    itemRequest.getProductId(),
+                    itemRequest.getCampainId());
 
             if (product == null) {
                 throw new BusinessException(MessageCode.PRODUCT_NOT_FOUND);
-
             }
-            // Chuyển List SKU -> Map để lookup O(1)
-            Map<Integer, SkuResponse> skuMap = product.getSkus()
-                    .stream()
-                    .collect(Collectors.toMap(
-                            SkuResponse::getId,
-                            Function.identity()
-                    ));
 
+            Map<Integer, SkuResponse> skuById =
+                    inventoryService.validateRequestedItems(product, itemRequest.getItem());
 
-            // Duyệt các SKU trong order
-            for (SkuOrderRequest item : orderItemRequest.getItem()) {
-                SkuResponse sku = skuMap.get(item.getSkuId());
+            for (SkuOrderRequest requestedSku : itemRequest.getItem()) {
+                SkuResponse sku = skuById.get(requestedSku.getSkuId());
+                BigDecimal unitPrice = orderPricingService.getUnitPrice(sku);
+                BigDecimal lineTotal = orderPricingService.calculateLineTotal(
+                        unitPrice,
+                        requestedSku.getQuantity());
 
-                if (sku == null) {
-                    throw new BusinessException(MessageCode.SKU_NOT_FOUND);
-                }
+                productTotal = productTotal.add(lineTotal);
 
-                // ==========================================
-                // 3. Check stock
-                // ==========================================
-                if (sku.getStock() < item.getQuantity()) {
-                    throw  new BusinessException(MessageCode.STOCK_NOT_ENOUGH);
-
-                }
-
-                // Kiểm tra số lượng
-                if (item.getQuantity() == null || item.getQuantity() <= 0)
-                {
-                    throw new BusinessException(MessageCode.INVALID_QUANTITY);
-                }
-                // ==========================================
-                // 4. Lấy giá
-                // ==========================================
-                BigDecimal price = sku.getPriceDiscountCampaign();
-                if (price == null)
-                {
-                    // Xem lại hàm này
-                    price = sku.getPrice();
-                }
-                if (price == null)
-                {
-                    throw new BusinessException(MessageCode.PRICE_NOT_FOUND_SKU);
-                }
-
-                // Tính tiền SKU
-                BigDecimal itemAmount = priceService.calculateItemPrice( price, item.getQuantity() );
-                totalAmount = totalAmount.add(itemAmount);
-                // ==========================================
-                // 6. Chuẩn bị OrderItem
-                // ==========================================
                 OrderItem orderItem = new OrderItem();
-
-                orderItem.setSku_id(item.getSkuId());
-                orderItem.setQuantity(item.getQuantity());
-                orderItem.setPrice(price);
-                orderItem.setTotal_price(itemAmount);
+                orderItem.setSku_id(requestedSku.getSkuId());
+                orderItem.setQuantity(requestedSku.getQuantity());
+                orderItem.setPrice(unitPrice);
+                orderItem.setTotal_price(lineTotal);
+                orderItem.setProduct_id(product.getId());
                 orderItems.add(orderItem);
             }
-            Shipping shipping = shippingRepository.detailShipping(orderItemRequest.getShipping_service_code());
-            priceshipping = shipping.getFee();
-        }
-        // ==========================================
-        // 3. Tính tổng tiền
-        // ==========================================
-        //Lấy thng tin phuwong thức vận chuyển  request gửi lên
 
-        BigDecimal totalAmountt = totalAmount.add(priceshipping);
-        //     2. Tạo order
+            // Preserves the current behavior: one shipping fee per request group.
+            // Confirm this rule with the business before changing fee aggregation.
+            shippingTotal = shippingTotal.add(
+                    shippingFeeService.calculateFee(itemRequest.getShipping_service_code()));
+        }
+
+        BigDecimal grandTotal = productTotal.add(shippingTotal);
         Order order = new Order();
-        order.setTotal(totalAmountt);
+        order.setTotal(grandTotal);
         order.setOrder_status(OrderStatus.WAIT_PAYMENT);
         order.setCreatedAt(LocalDateTime.now());
-       // order.setExpectedDelivery(LocalDateTime.now().plusDays(2));
-        orderRepository.insertorder(order);
+        order.setExpectedDelivery(getEstimatedDeliveryTime());
+        order.setCreated_by("SYSTEM");
+
+
+        int insertedOrders = orderRepository.insertorder(order);
+        if (insertedOrders <= 0 || order.getId() == null) {
+            throw new BusinessException(MessageCode.INVALID_ORDER);
+        }
 
         for (OrderItem orderItem : orderItems) {
             orderItem.setOrder_id(order.getId());
         }
-        // ==========================================
-        // 11. Batch insert OrderItem
-        // ==========================================
-        orderItemRepository.insertorderitems(orderItems);
 
-//       Integer orderid = order.getId();
-//        OrderTracking tracking = new OrderTracking();
-//        tracking.setOrderId(orderid);
-//        tracking.setStatusCode(TrackingStatus.WAITING_PAYMENT.getCode());
-//        tracking.setTitle(TrackingStatus.WAITING_PAYMENT.getDescription());
-//        orderTrackingRepository.insertordertracking(tracking);
-//       // Thêm vào bảng payment
-//        Payment payment = new Payment();
-//        payment.setOrderId(orderid);
-//        payment.setStatus("WAITING_PAYMENT");
-//        payment.setAmount(totalAmount);
-//        payment.setTrancactioncode( LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMddHHmmss")) +
-//                "-" +
-//                UUID.randomUUID().toString()
-//                        .replace("-", "")
-//                        .substring(0, 8)
-//                        .toUpperCase());
+        int insertedItems = orderItemRepository.insertorderitems(orderItems);
+        if (insertedItems <= 0) {
+            throw new BusinessException(MessageCode.INVALID_ORDER);
+        }
 
-
-        //paymentRepostitory.insertpayment(payment);
-        OrderCreateResponse orderCreateResponse = new OrderCreateResponse();
-        orderCreateResponse.setOrderId(order.getId());
-        orderCreateResponse.setTotal_payment(totalAmountt);
-        orderCreateResponse.setPayment_method("QR Code");
-        return orderCreateResponse;
-
+        OrderCreateResponse response = new OrderCreateResponse();
+        response.setOrderId(order.getId());
+        response.setTotal_payment(grandTotal);
+        // Kept for backward compatibility. This does not mean a payment was created.
+        response.setPayment_method("QR Code");
+        return response;
     }
+    //Hàm tính thời gian giao hàng
     public LocalDateTime getEstimatedDeliveryTime() {
-        return LocalDateTime.now().plusDays(2);
+
+        return LocalDateTime.now().plusDays(7); // Example: 7 days from now
     }
 }

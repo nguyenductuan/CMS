@@ -22,25 +22,25 @@ public class OrderController {
     public OrderController(OrderService orderService) {
         this.orderService = orderService;
     }
-
+    //Hàm lấy danh sách order
     @GetMapping("order-list")
-    public BaseResponse<PagingResponse<List<OrderResponse>>> orderlist(
-            @ModelAttribute OrdersRequest request) {
+    public BaseResponse<PagingResponse<List<OrderResponse>>> orderlist(@ModelAttribute OrdersRequest request) {
         return orderService.getorderlist(request);
     }
-
+    // Ham tao order
     @PostMapping("/order")
     public ResponseEntity<APIRessponse>  order(@RequestBody OrderRequest orderRequest) {
         OrderCreateResponse orderCreateResponse =   orderService.createOrder(orderRequest);
         return ResponseEntity.ok(new APIRessponse(200, Order.ORDER_SUCCESS.getMessage(), orderCreateResponse));
 
     }
+    // Ham huy order
     @PostMapping("cancelorder/{orderId}")
     public ResponseEntity<APIRessponse> cancelorder(@PathVariable Integer orderId, String notecancel) {
         orderService.cancelOrder(orderId, notecancel);
         return ResponseEntity.ok(new APIRessponse(200, Order.ORDER_CANCEL.getMessage()));
     }
-
+    // Hàm chi tiết order
     @GetMapping("/order/{id}")
     public OrderResponse order(@PathVariable long id) {
         return orderService.getdetailorder(id);

@@ -20,11 +20,26 @@ public class Order {
     private OrderStatus paymentStatus;
     private LocalDateTime createdAt;
     private LocalDateTime deliveredAt;
-    private LocalDateTime cancelAt;
-    private OrderStatus substatus;
+    private LocalDateTime cancel_at;
+    private OrderStatus sub_order_status;
+    private LocalDateTime expected_delivery;
+    private String warehouseCode;
+    private String shippingProvider;
+    private String trackingNumber;
+    private String shipperCode;
+    private String shipperName;
+    private String shipperPhone;
+    private LocalDateTime shippedAt;
+    private LocalDateTime carrierDeliveredAt;
+    private LocalDateTime customerReceivedAt;
+
+    private  String created_by;
+    private String cancelled_by;
     private String notecancel;
     @Enumerated(EnumType.STRING)
     private OrderStatus order_status;
+    private LocalDateTime updatedAt;
+    private String updated_by;
     private List<OrderItem> orderItems;
     private LocalDateTime expectedDelivery;
     private  Double DeliveryLatitude;

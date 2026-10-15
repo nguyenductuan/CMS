@@ -1,8 +1,6 @@
 package com.vt.cms.mapper;
 
 import com.vt.cms.model.entity.Cart;
-import com.vt.cms.model.entity.Product;
-import com.vt.cms.model.entity.Shipping;
 import com.vt.cms.model.entity.User;
 import com.vt.cms.model.resp.*;
 import org.mapstruct.Mapper;

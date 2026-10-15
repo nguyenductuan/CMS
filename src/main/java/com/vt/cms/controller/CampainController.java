@@ -1,6 +1,7 @@
 package com.vt.cms.controller;
 
 import com.vt.cms.model.dto.CreatedCampainRequest;
+import com.vt.cms.model.enums.CampainStatus;
 import com.vt.cms.model.resp.APIRessponse;
 import com.vt.cms.service.CampainService;
 
@@ -28,21 +29,22 @@ public class CampainController {
     }
     // Lấy danh sách chiến dịch: cờ xử lý, Đang diễn ra, Săp diễn ra, Đã kết thúc
     @GetMapping("/campain")
-    public String getCampain() {
-        campainService.getlist();
-        return "Get campain successfully";
+    public ResponseEntity<APIRessponse> getCampain() {
+        return ResponseEntity.ok(new APIRessponse(200, "Lấy danh sách chiến dịch thành công", campainService.getlist()));
     }
     //Thay đổi trạng thái chiến dịch(Duyệt, kết thúc chiến dịch)
-    @PostMapping("/campainstatus")
-    public String updateCampain( @RequestBody Integer campain_id, String status) {
+    @PutMapping("/status/{id}/{status}")
+    public ResponseEntity<APIRessponse> updateCampain(   @PathVariable("id") Integer campain_id,
+                                                         @PathVariable("status") CampainStatus status) {
         campainService.updatestatus(campain_id, status);
-        return "Campain updated successfully";
+        return  ResponseEntity.ok(new APIRessponse(200,"Cập nhật trạng thái thành công"));
     }
     // Xóa chiến dịch
     @DeleteMapping("/campain/{id}")
-    public String deleteCampain(Integer campainId) {
+    public ResponseEntity<APIRessponse> deleteCampain( @PathVariable("id") Integer campainId) {
       campainService.deletecampain(campainId);
-        return "Campain deleted successfully";
+      return ResponseEntity.ok(new APIRessponse(200,"Xóa chến dịch thành công"));
+
     }
 }
 

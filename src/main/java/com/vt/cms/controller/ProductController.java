@@ -33,9 +33,15 @@ public class ProductController {
     //Duyệt sản phẩm
     @PutMapping("approve/{product_id}")
     public ResponseEntity<APIRessponse> approvedProduct(@PathVariable Integer product_id){
-        log.info("Duyệt sản phẩm:", product_id);
+        log.info("Request approve product. productId={}", product_id);
         productService.editstatusproduct(product_id);
         return ResponseEntity.ok(new APIRessponse(200,"Duyệt sản phẩm thành công"));
+    }
+    // Từ chối sản phẩm đang chờ duyệt
+    @PutMapping("reject/{product_id}")
+    public ResponseEntity<APIRessponse> rejectProduct(@PathVariable Integer product_id) {
+        productService.rejectProduct(product_id);
+        return ResponseEntity.ok(new APIRessponse(200, "Từ chối sản phẩm thành công"));
     }
     // Chi tiết sp
     @GetMapping("detail/{product_id}")
@@ -51,8 +57,10 @@ public class ProductController {
     }
     //Sửa sản phẩm
     @PutMapping("editproduct/{id}")
-    public void editproduct(@PathVariable Integer id, CreateProductRequest createProductRequest) {
+    public ResponseEntity<APIRessponse> editproduct(@PathVariable Integer id, @Valid @RequestBody CreateProductRequest createProductRequest) {
+        log.info("Request update product. productId={}", id);
         productService.editproduct(id, createProductRequest);
+        return ResponseEntity.ok(new APIRessponse(200, "Cập nhật sản phẩm thành công"));
     }
     //Xóa sản phẩm
     @DeleteMapping("deleteproduct/{product_id}")

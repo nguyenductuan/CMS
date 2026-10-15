@@ -3,7 +3,7 @@ package com.vt.cms.model.enums;
 public enum Order {
     ORDER_SUCCESS(
             "ORDER_SUCCESS",
-            "Đặt hàng thành công"
+            "Thành công"
     ),
     ORDER_CANCEL(
             "ORDER_CANCEL",

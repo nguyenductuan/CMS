@@ -1,14 +1,10 @@
 package com.vt.cms.service.Impl;
 
-import com.vt.cms.mapper.Modelmapper;
 import com.vt.cms.model.entity.Shipping;
 import com.vt.cms.model.repository.ShippingRepository;
-import com.vt.cms.model.resp.ShippingResponse;
 import com.vt.cms.service.ShippingService;
-import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.mapstruct.factory.Mappers;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -16,22 +12,11 @@ import java.util.List;
 @Service
 @RequiredArgsConstructor
 @Slf4j
-public class ShippingServiceImpl implements ShippingService {
-    private final ShippingRepository shippingRepository;
-    private final Modelmapper modelMapper = Mappers.getMapper(Modelmapper.class);
-
-    @Transactional
+public class ShippingServiceImpl implements ShippingService{
+private final ShippingRepository shippingRepository;
     @Override
     public List<Shipping> getShipping() {
-        return modelMapper.convertShipping(shippingRepository.getShipping());
-
+       shippingRepository.getShipping();
+        return List.of();
     }
-
-    @Override
-    public ShippingResponse getDetailshipping(String id) {
-
-        return modelMapper.convertShippingId(shippingRepository.detailShipping(id));
-    }
-
-
 }

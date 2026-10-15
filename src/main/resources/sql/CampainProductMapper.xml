@@ -60,4 +60,20 @@
                )
     </insert>
 
+    <select id="existsAssociationByProductId" resultType="boolean">
+        SELECT EXISTS (
+            SELECT 1 FROM campain_product
+            WHERE product_id = #{productId}
+        )
+    </select>
+
+    <update id="deductStock" >
+        UPDATE campain_product
+        SET stock_campaign = stock_campaign - #{quantity}
+        WHERE campaign_id = #{campainId}
+          AND sku_id = #{SkuId}
+          AND stock_campaign >= #{quantity};
+    </update>
+
+
 </mapper>

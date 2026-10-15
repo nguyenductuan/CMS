@@ -6,9 +6,12 @@
         <id column="id" property="id" jdbcType="OTHER"/>
         <result column="total" property="total" jdbcType="OTHER"/>
         <result column="order_status" property="order_status" jdbcType="OTHER"/>
+        <result column="sub_order_status" property="sub_order_status" jdbcType="OTHER"/>
+
         <result column="deliveredAt" property="deliveredAt" jdbcType="OTHER"/>
-        <result column="cancelAt" property="cancelAt" jdbcType="OTHER"/>
+        <result column="cancel_at" property="cancel_at" jdbcType="OTHER"/>
         <result column="notecancel" property="notecancel" jdbcType="OTHER"/>
+        <result column="created_by" property="created_by" jdbcType="OTHER"/>
         <result column="created_at" property="createdAt" jdbcType="OTHER"/>
         <result column="expected_delivery" property="expectedDelivery" jdbcType="OTHER"/>
 
@@ -18,8 +21,8 @@
     <insert id="insertorder" parameterType="com.vt.cms.model.entity.Order"
             useGeneratedKeys="true"
             keyProperty="id">
-        INSERT INTO orders (total, order_status, created_at)
-        VALUES (#{total}, #{order_status}, #{createdAt})
+        INSERT INTO orders (total, order_status, created_at, 	expected_delivery,	created_by)
+        VALUES (#{total}, #{order_status}, #{createdAt}, #{expectedDelivery}, #{created_by})
     </insert>
 
     <select id="getdetailById"
@@ -41,51 +44,178 @@
 
     <update id="save">
         UPDATE orders
-        SET status      = #{status},
-            substatus   = #{substatus},
-            deliveredAt = #{deliveredAt}
+        SET order_status = #{order_status},
+            updated_at = #{updatedAt},
+            updated_by = #{updated_by}
         WHERE id = #{id}
     </update>
     <update id="cancelOrder">
         UPDATE orders
-        SET status     = #{status},
+        SET order_status = #{order_status},
             notecancel = #{notecancel},
-            cancelAt   = #{cancelAt}
+            cancel_at  = #{cancel_at},
+            updated_at = #{updatedAt},
+            canceled_by = #{canceled_by}
         WHERE id = #{id}
     </update>
+    <select id="getOrderItemsByOrderId"
+            parameterType="long"
+            resultType="com.vt.cms.model.dto.order.Itemorderdetail">
+        SELECT
+            p.id as productId,
+            p.name as productName,
+            oi.price,
+            cp.campaign_id as campaignId,
+            cp.stock_campaign as stockCampaign,
+            s.sku_code AS skuCode,
+            s.id AS skuId,
+            p.json_images as jsonImages,
+            cp.price as priceCampaign,
+            cp.price_discount as priceDiscountCampaign,
+            oi.quantity
+        FROM order_item oi
+                 JOIN products p ON p.id = oi.product_id
+                 LEFT JOIN product_sku s ON s.id = oi.sku_id
+                 LEFT JOIN campain_product cp ON cp.product_id = oi.product_id AND cp.sku_id = oi.sku_id
+        WHERE oi.order_id = #{orderId}
+    </select>
+
+    <select id="getOrderItemsByOrderId1"
+            parameterType="long"
+            resultType="com.vt.cms.model.dto.order.Itemorderdetail">
+        SELECT
+            p.id as productId,
+            p.name as productName,
+            oi.price,
+            cp.campaign_id as campaignId,
+            cp.stock_campaign as stockCampaign,
+            s.sku_code AS skuCode,
+            s.id AS skuId,
+            p.json_images as jsonImages,
+            cp.price as priceCampaign,
+            cp.price_discount as priceDiscountCampaign,
+            oi.quantity
+        FROM order_item oi
+                 JOIN products p ON p.id = oi.product_id
+                 LEFT JOIN product_sku s ON s.id = oi.sku_id
+                 LEFT JOIN campain_product cp ON cp.product_id = oi.product_id AND cp.sku_id = oi.sku_id
+        WHERE oi.order_id = #{orderId}
+    </select>
 
     <select id="getorderbyid" resultType="com.vt.cms.model.resp.OrderResponse">
-        SELECT id               as orderid,
-               status           as orderStatus,
-               total            as total,
-               created_at       as ordercreated,
-               notecancel       as notecancel,
-               cancelAt         as cancelAt,
-               expecteddelivery as expecteddelivery
+        SELECT
+            id AS orderId,
+            order_status AS order_status,
+            created_at AS order_date,
+            total AS total,
+            expected_delivery AS expected_delivery,
+            created_by AS createdBy
         FROM orders
         WHERE id = #{orderId}
     </select>
 
+    <select id="getorderbyId" resultType="com.vt.cms.model.entity.Order">
+        SELECT *,
+               warehouse_code AS warehouseCode,
+               shipping_provider AS shippingProvider,
+               tracking_number AS trackingNumber,
+               shipper_code AS shipperCode,
+               shipper_name AS shipperName,
+               shipper_phone AS shipperPhone,
+               shipped_at AS shippedAt,
+               carrier_delivered_at AS carrierDeliveredAt,
+               customer_received_at AS customerReceivedAt
+        FROM orders
+        WHERE id = #{orderId}
+    </select>
     <!-- Query 2: Items -->
     <select id="getItemsByOrderId" resultType="com.vt.cms.model.resp.OrderItemResponse">
-        SELECT oi.product_id as productId,
-               p.name        as productName,
-               oi.price      as price,
-               oi.quantity
-
+        SELECT
+            oi.product_id AS productId,
+            p.name AS productName,
+            oi.quantity AS quantity,
+            cp.price AS priceCampain,
+            cp.campaign_id AS campaignId,
+            cp.stock_campaign AS stockCampain,
+            cp.price_discount AS priceDiscount
         FROM order_item oi
-                 LEFT JOIN product p ON oi.product_id = p.id
+                 LEFT JOIN products p
+                           ON oi.product_id = p.id
+                 LEFT JOIN campain_product cp
+                           ON cp.product_id = p.id
         WHERE oi.order_id = #{orderId}
     </select>
 
 
     <select id="getOrder" resultType="com.vt.cms.model.resp.OrderResponse">
-        SELECT id               as order_Id,
-               total            as total,
-               created_at       as ordercreated,
-               status           as orderStatus,
-               expecteddelivery as expecteddelivery
-        FROM orders LIMIT #{pageSize}
-        OFFSET #{offset}
+        SELECT
+            o.id AS orderId,
+            o.order_status AS orderStatus,
+            o.total AS total,
+            o.created_at AS orderDate,
+            o.expected_delivery AS expectedDelivery,
+            o.created_by AS createdBy
+        FROM orders o
+        ORDER BY o.created_at DESC
+        LIMIT #{pageSize}
+            OFFSET #{offset}
     </select>
+
+    <update id="selectWarehouse">
+        UPDATE orders
+        SET warehouse_code = #{warehouseCode},
+            order_status = 'PREPARING',
+            updated_at = #{updatedAt},
+            updated_by = #{updatedBy}
+        WHERE id = #{orderId}
+          AND order_status = 'PAID'
+    </update>
+
+    <update id="assignShipper">
+        UPDATE orders
+        SET order_status = #{nextStatus},
+            shipping_provider = #{provider},
+            tracking_number = #{trackingNumber},
+            shipper_code = #{shipperCode},
+            shipper_name = #{shipperName},
+            shipper_phone = #{shipperPhone},
+            shipped_at = #{updatedAt},
+            updated_at = #{updatedAt},
+            updated_by = #{updatedBy}
+        WHERE id = #{orderId}
+          AND order_status = #{expectedStatus}
+          AND warehouse_code IS NOT NULL
+    </update>
+
+    <update id="markDeliverySuccessful">
+        UPDATE orders
+        SET order_status = #{nextStatus},
+            carrier_delivered_at = #{deliveredAt},
+            updated_at = #{deliveredAt},
+            updated_by = #{updatedBy}
+        WHERE id = #{orderId}
+          AND tracking_number = #{trackingNumber}
+          AND order_status = #{expectedStatus}
+    </update>
+
+    <update id="confirmReceived">
+        UPDATE orders
+        SET order_status = #{nextStatus},
+            customer_received_at = #{receivedAt},
+            updated_at = #{receivedAt},
+            updated_by = #{updatedBy}
+        WHERE id = #{orderId}
+          AND order_status = #{expectedStatus}
+    </update>
+
+    <update id="completeDeliveredOrdersOlderThan">
+        UPDATE orders
+        SET order_status = 'COMPLETED',
+            customer_received_at = COALESCE(customer_received_at, #{completedAt}),
+            updated_at = #{completedAt},
+            updated_by = #{updatedBy}
+        WHERE order_status = 'DELIVERED'
+          AND carrier_delivered_at IS NOT NULL
+          AND carrier_delivered_at &lt;= #{cutoff}
+    </update>
 </mapper>
