@@ -13,6 +13,7 @@ import com.vt.cms.model.repository.CampainProductRepository;
 import com.vt.cms.model.repository.CampainRepository;
 import com.vt.cms.model.repository.ProductSkuRepository;
 import com.vt.cms.service.CampainService;
+import com.vt.cms.model.resp.CampainResponse;
 import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.config.ScheduledTaskHolder;
@@ -340,22 +341,23 @@ public class CampainServiceImpl implements CampainService {
     }
     @Override
     public void updatestatus(Integer campain_id, CampainStatus status) {
-        //Kiểm tra campain có tồn tại và không bị xóa
-        Campain campain = campainRepository.getCampainById(campain_id);
-        if (campain.getStatus() != CampainStatus.PENDING_APPROVAL){
-            throw  new BusinessException(MessageCode.CAMPAIN_STATUS_INVALID);
+        if (campain_id == null || campain_id <= 0 || status == null) {
+            throw new IllegalArgumentException("Campaign ID và trạng thái là bắt buộc");
         }
-        //  chỉ được chuyển từ PENDING_APPROVAL → APPROVED hoặc PENDING_APPROVAL → REJECTED
-        if (status != CampainStatus.APPROVED || status != CampainStatus.REJECTED)
-        {
-            throw  new BusinessException(MessageCode.CAMPAIN_STATUS_INVALID);
+        Campain campaign = campainRepository.getCampainById(campain_id);
+        if (campaign == null || "true".equalsIgnoreCase(campaign.getIsDeleted())) {
+            throw new IllegalArgumentException("Không tìm thấy chiến dịch: " + campain_id);
         }
-        // Cập nhật campain
-        campainRepository.updatestatus(campain_id,status);
+        if (campaign.getStatus() != CampainStatus.PENDING_APPROVAL
+                || (status != CampainStatus.APPROVED && status != CampainStatus.REJECTED)) {
+            throw new BusinessException(MessageCode.CAMPAIN_STATUS_INVALID);
+        }
+        int rows = campainRepository.updatestatus(campain_id, status);
+        if (rows != 1) throw new BusinessException(MessageCode.CAMPAIN_STATUS_INVALID);
     }
     @Override
-    public void getlist() {
-        campainRepository.getlistcampain();
+    public List<CampainResponse> getlist() {
+        return campainRepository.getlistcampain();
     }
 
     @Override
