@@ -4,10 +4,10 @@ import com.vt.cms.model.dto.AddCartRequest;
 import com.vt.cms.model.dto.DeleteRequest;
 import com.vt.cms.model.entity.Cart;
 import com.vt.cms.model.entity.CartItem;
+import com.vt.cms.model.entity.Product;
 import com.vt.cms.model.repository.CartItemRepository;
 import com.vt.cms.model.repository.CartRepository;
 import com.vt.cms.model.repository.ProductRepository;
-import com.vt.cms.model.resp.ProductResponse;
 import com.vt.cms.service.CartService;
 import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
@@ -59,7 +59,7 @@ public class CartServiceImpl implements CartService {
     public void addToCart(AddCartRequest request) {
         validateAddToCart(request);
 
-        ProductResponse product = productRepository.detailProduct(request.getProductId());
+        Product product = productRepository.detailProduct(request.getProductId());
         if (product == null) {
             throw new IllegalArgumentException("Sản phẩm không tồn tại");
         }
@@ -77,7 +77,7 @@ public class CartServiceImpl implements CartService {
         CartItem existingItem = cartItemRepository.findByProductIDAndCart(
                 cart.getId(), request.getProductId());
         int existingQuantity = existingItem == null ? 0 : existingItem.getQuantity();
-        validateQuantity(existingQuantity, request.getQuantity(), product.getStock());
+        validateQuantity(existingQuantity, request.getQuantity());
 
         if (existingItem == null) {
             CartItem newItem = new CartItem();
@@ -85,24 +85,25 @@ public class CartServiceImpl implements CartService {
             newItem.setProductId(request.getProductId());
             newItem.setQuantity(request.getQuantity());
             newItem.setProductName(product.getName());
-            newItem.setProductPrice(product.getPrice());
+            newItem.setProductPrice(product.getPrice_display() == null
+                    ? null : java.math.BigDecimal.valueOf(product.getPrice_display()));
             cartItemRepository.insertCartItem(newItem);
             return;
         }
 
         existingItem.setQuantity(existingQuantity + request.getQuantity());
         existingItem.setProductName(product.getName());
-        existingItem.setProductPrice(product.getPrice());
+        existingItem.setProductPrice(product.getPrice_display() == null
+                ? null : java.math.BigDecimal.valueOf(product.getPrice_display()));
         cartItemRepository.updateCartItem(existingItem);
     }
 
-    private void validateQuantity(int existingQuantity, int requestedQuantity, Integer stock) {
+    private void validateQuantity(int existingQuantity, int requestedQuantity) {
         if (requestedQuantity <= 0) {
             throw new IllegalArgumentException("Số lượng sản phẩm phải lớn hơn 0");
         }
-        if (stock == null || stock < 0 || existingQuantity + requestedQuantity > stock) {
-            throw new IllegalArgumentException(
-                    "Số lượng sản phẩm trong giỏ hàng không được vượt quá số lượng tồn kho");
+        if ((long) existingQuantity + requestedQuantity > Integer.MAX_VALUE) {
+            throw new IllegalArgumentException("Số lượng sản phẩm vượt giới hạn cho phép");
         }
     }
 
