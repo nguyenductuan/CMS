@@ -84,7 +84,7 @@ public class PaymentServiceImpl implements PaymentService {
         // Atomic/idempotent stock updates should be enforced by the repository/database.
         for (Itemorderdetail item : orderItems) {
             if (item == null || item.getCampaignId() == null || item.getSkuId() == null
-                    || item.getQuantity() == null || item.getQuantity() <= 0) {
+                    || item.getQuantity() <= 0) {
                 throw new IllegalStateException("Chi tiết đơn hàng không hợp lệ");
             }
             int updatedRows = campainProductRepository.deductStock(
