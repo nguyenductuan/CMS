@@ -29,9 +29,8 @@ public class CampainController {
     }
     // Lấy danh sách chiến dịch: cờ xử lý, Đang diễn ra, Săp diễn ra, Đã kết thúc
     @GetMapping("/campain")
-    public String getCampain() {
-        campainService.getlist();
-        return "Get campain successfully";
+    public ResponseEntity<APIRessponse> getCampain() {
+        return ResponseEntity.ok(new APIRessponse(200, "Lấy danh sách chiến dịch thành công", campainService.getlist()));
     }
     //Thay đổi trạng thái chiến dịch(Duyệt, kết thúc chiến dịch)
     @PutMapping("/status/{id}/{status}")
