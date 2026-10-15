@@ -12,11 +12,12 @@ import java.util.List;
 @Service
 @RequiredArgsConstructor
 @Slf4j
-public class ShippingServiceImpl implements ShippingService{
-private final ShippingRepository shippingRepository;
+public class ShippingServiceImpl implements ShippingService {
+    private final ShippingRepository shippingRepository;
+
     @Override
     public List<Shipping> getShipping() {
-       shippingRepository.getShipping();
-        return List.of();
+        List<Shipping> shippingMethods = shippingRepository.getShipping();
+        return shippingMethods == null ? List.of() : shippingMethods;
     }
 }
