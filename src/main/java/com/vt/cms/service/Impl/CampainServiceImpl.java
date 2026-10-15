@@ -14,6 +14,7 @@ import com.vt.cms.model.repository.CampainRepository;
 import com.vt.cms.model.repository.ProductSkuRepository;
 import com.vt.cms.service.CampainService;
 import com.vt.cms.service.validation.CampaignRequestValidator;
+import com.vt.cms.service.mapper.CampaignEntityMapper;
 import com.vt.cms.model.resp.CampainResponse;
 import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
@@ -35,18 +36,21 @@ public class CampainServiceImpl implements CampainService {
     private final ProductSkuRepository productSkuRepository;
     private final ScheduledTaskHolder scheduledTaskHolder;
     private final CampaignRequestValidator campaignRequestValidator;
+    private final CampaignEntityMapper campaignEntityMapper;
 
     public CampainServiceImpl(
             CampainRepository campainRepository,
             CampainProductRepository campainProductRepository,
             ProductSkuRepository productSkuRepository, ScheduledTaskHolder scheduledTaskHolder,
-            CampaignRequestValidator campaignRequestValidator) {
+            CampaignRequestValidator campaignRequestValidator,
+            CampaignEntityMapper campaignEntityMapper) {
 
         this.campainRepository = campainRepository;
         this.campainProductRepository = campainProductRepository;
         this.productSkuRepository = productSkuRepository;
         this.scheduledTaskHolder = scheduledTaskHolder;
         this.campaignRequestValidator = campaignRequestValidator;
+        this.campaignEntityMapper = campaignEntityMapper;
     }
 
     /**
@@ -63,7 +67,7 @@ public class CampainServiceImpl implements CampainService {
         campaignRequestValidator.validate(request);
 
         // 2. Tạo entity campaign từ request.
-        Campain campaign = buildCampaign(request);
+        Campain campaign = campaignEntityMapper.toNewCampaign(request);
 
         // 3. Lưu campaign trước để lấy ID cho bảng chi tiết.
         campainRepository.savecampain(campaign);
@@ -96,24 +100,6 @@ public class CampainServiceImpl implements CampainService {
                 campaignId,
                 savedSkuCount
         );
-    }
-
-    /**
-     * Chuyển dữ liệu request thành entity campaign.
-     */
-    private Campain buildCampaign(CreatedCampainRequest request) {
-        Campain campaign = new Campain();
-        campaign.setName(request.getName());
-        campaign.setDescription(request.getDescription());
-        campaign.setStartTime(request.getStartTime());
-        campaign.setEndTime(request.getEndTime());
-        campaign.setDiscount(request.getDiscount());
-        campaign.setTotalStock(request.getTotal_stock());
-        campaign.setStatus(CampainStatus.PENDING_APPROVAL);
-        campaign.setCreatedAt(LocalDateTime.now());
-        campaign.setCreatedBy(SYSTEM_USER);
-        campaign.setIsDeleted(NOT_DELETED);
-        return campaign;
     }
 
     /**
