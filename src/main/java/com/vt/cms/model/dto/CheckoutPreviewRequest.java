@@ -6,4 +6,5 @@ import java.util.List;
 @Data
 public class CheckoutPreviewRequest {
     private List<ItemRequest> items;
+    private String shippingServiceCode;
 }
