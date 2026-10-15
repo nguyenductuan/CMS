@@ -19,21 +19,18 @@ import com.vt.cms.model.resp.ProductDetailResponse;
 import com.vt.cms.model.resp.ProductResponse;
 import com.vt.cms.model.resp.SkuResponse;
 import com.vt.cms.service.ProductService;
+import com.vt.cms.service.validation.ProductRequestValidator;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import java.math.BigDecimal;
-import java.util.HashSet;
 import java.util.Map;
 import java.util.HashMap;
-import java.util.Set;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
-import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -44,11 +41,12 @@ public class ProductServiceImpl implements ProductService {
     private final CampainProductRepository campainProductRepository;
     private final ObjectMapper objectMapper;
     private final ProductSkuRepository productSkuRepository;
+    private final ProductRequestValidator productRequestValidator;
 
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void addproduct(CreateProductRequest request) {
-        validateProductRequest(request);
+        productRequestValidator.validate(request);
         log.info("Create product started. name={}, skuCount={}", request.getName(), request.getSkus().size());
         Product product = buildProduct(request);
         int rows = productRepository.insertproduct(product);
@@ -84,43 +82,6 @@ public class ProductServiceImpl implements ProductService {
         } catch (JsonProcessingException e) {
             log.error("Cannot serialize product data to JSON", e);
             throw new IllegalArgumentException("Dữ liệu sản phẩm không thể chuyển đổi sang JSON", e);
-        }
-    }
-
-    private void validateProductRequest(CreateProductRequest request) {
-        if (request == null) throw new IllegalArgumentException("Thông tin sản phẩm không được để trống");
-        if (request.getName() == null || request.getName().isBlank()) throw new IllegalArgumentException("Tên sản phẩm không được để trống");
-        if (request.getSkus() == null || request.getSkus().isEmpty()) throw new IllegalArgumentException("Sản phẩm phải có ít nhất một SKU");
-        Set<String> codes = new HashSet<>();
-        for (SkuRequest sku : request.getSkus()) {
-            if (sku == null) throw new IllegalArgumentException("Thông tin SKU không được để trống");
-            // Sinh ma SKU tai server neu client khong gui.
-            if (sku.getSku_code() == null || sku.getSku_code().isBlank()) {
-                sku.setSku_code("SKU-" + UUID.randomUUID().toString().replace("-", "").substring(0, 20).toUpperCase());
-            } else {
-                sku.setSku_code(sku.getSku_code().trim());
-            }
-            if (!codes.add(sku.getSku_code())) throw new IllegalArgumentException("Mã SKU bị trùng trong request: " + sku.getSku_code());
-            if (sku.getPrice() == null || sku.getPrice().compareTo(BigDecimal.ZERO) <= 0) throw new IllegalArgumentException("Giá SKU phải lớn hơn 0: " + sku.getSku_code());
-            if (sku.getStock() == null || sku.getStock() < 0) throw new IllegalArgumentException("Tồn kho SKU phải >= 0: " + sku.getSku_code());
-            if (sku.getImage_url() == null || sku.getImage_url().isBlank()) throw new IllegalArgumentException("Ảnh SKU không được để trống: " + sku.getSku_code());
-            validateNonNegativeDimension(sku.getWeight_gram(), "khối lượng", sku.getSku_code());
-            validateNonNegativeDimension(sku.getLength_cm(), "chiều dài", sku.getSku_code());
-            validateNonNegativeDimension(sku.getWidth_cm(), "chiều rộng", sku.getSku_code());
-            validateNonNegativeDimension(sku.getHeight_cm(), "chiều cao", sku.getSku_code());
-        }
-    }
-
-    private void validateNonNegativeDimension(String value, String label, String skuCode) {
-        if (value == null || value.isBlank()) {
-            throw new IllegalArgumentException("Thiếu " + label + " SKU: " + skuCode);
-        }
-        try {
-            if (new BigDecimal(value).compareTo(BigDecimal.ZERO) < 0) {
-                throw new IllegalArgumentException(label + " SKU phải >= 0: " + skuCode);
-            }
-        } catch (NumberFormatException ex) {
-            throw new IllegalArgumentException(label + " SKU không hợp lệ: " + skuCode, ex);
         }
     }
 
@@ -251,7 +212,7 @@ public class ProductServiceImpl implements ProductService {
     @Transactional(rollbackFor = Exception.class)
     public void editproduct(Integer id, CreateProductRequest request) {
         if (id == null || id <= 0) throw new IllegalArgumentException("ID sản phẩm không hợp lệ");
-        validateProductRequest(request);
+        productRequestValidator.validate(request);
         Product existing = productRepository.getProductById(id);
         if (existing == null || "true".equalsIgnoreCase(existing.getIs_deleted())) {
             log.warn("Update product rejected: not found. productId={}", id);
