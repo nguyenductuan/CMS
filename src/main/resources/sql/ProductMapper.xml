@@ -277,7 +277,8 @@
 
     <update id="editstatusproduct">
         UPDATE products
-        SET status = #{status},
+        <set>
+            status = #{status},
             updated_at = #{updated_at},
             updated_by = #{approve_by},
             <if test="status == 'APPROVED'">
@@ -288,7 +289,7 @@
                 cancel_at = #{approved_time},
                 cancel_by = #{approve_by},
             </if>
-            id = id
+        </set>
         WHERE id = #{id}
           AND is_deleted = 'false'
           AND status = 'PENDING_APPROVAL'
