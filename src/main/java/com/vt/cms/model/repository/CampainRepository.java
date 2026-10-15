@@ -12,6 +12,6 @@ public interface CampainRepository {
   int  updatestatus (Integer campainId, CampainStatus status);
    Campain getCampainById(Integer campain_id);
   List<CampainResponse> getlistcampain();
-    Campain deletecampain(Integer campainID );
+    int deletecampain(Integer campainID );
 
 }
