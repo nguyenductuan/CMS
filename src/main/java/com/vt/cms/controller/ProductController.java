@@ -49,6 +49,14 @@ public class ProductController {
         ProductResponse response=  productService.detail(product_id);
        return ResponseEntity.ok(new APIRessponse(200,"Thành công", response));
     }
+    // Chi tiết sản phẩm trong chiến dịch
+    @GetMapping("campaign/{campaign_id}/product/{product_id}")
+    public ResponseEntity<APIRessponse> campaignProductDetail(
+            @PathVariable Integer campaign_id, @PathVariable Integer product_id) {
+        var response = productService.product_detail(campaign_id, product_id);
+        if (response == null) return ResponseEntity.notFound().build();
+        return ResponseEntity.ok(new APIRessponse(200, "Lấy chi tiết sản phẩm trong chiến dịch thành công", response));
+    }
     // Thêm mới sản phẩm
     @PostMapping("addproduct")
     public ResponseEntity<APIRessponse> addproduct(  @Valid @RequestBody CreateProductRequest createProductRequest) {
