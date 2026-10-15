@@ -196,6 +196,7 @@ public class ProductServiceImpl implements ProductService {
         response.setDescription(product.getDescription());
         response.setStatus(product.getStatus());
         response.setCreated_at(product.getCreated_at());
+        response.setUpdated_at(product.getUpdated_at());
         response.setIs_deleted(product.getIs_deleted());
         response.setCreated_by(product.getCreated_by());
         log.debug("Loaded product detail. productId={}", product_id);
