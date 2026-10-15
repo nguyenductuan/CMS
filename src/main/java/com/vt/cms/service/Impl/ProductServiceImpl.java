@@ -368,6 +368,10 @@ public class ProductServiceImpl implements ProductService {
         response.setDescription(product.getDescription());
         response.setCampaignStartAt(product.getCampaignStartAt());
         response.setCampaignId(product.getCampaignId());
+        response.setCampaignCode(product.getCampaignId() == null ? null : "CMP-" + product.getCampaignId());
+        response.setCampaignName(product.getCampaignName());
+        response.setCampaignDescription(product.getCampaignDescription());
+        response.setCampaignDiscount(product.getCampaignDiscount());
         response.setPriceCampaign(product.getPriceCampaign());
 
         response.setStatus(product.getStatus());
