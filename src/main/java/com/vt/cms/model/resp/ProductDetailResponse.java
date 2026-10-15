@@ -19,6 +19,10 @@ public class ProductDetailResponse {
     private LocalDateTime updateAt;
     private LocalDateTime approvedTime;
     private String campaignStatus;
+    private String campaignCode;
+    private String campaignName;
+    private String campaignDescription;
+    private BigDecimal campaignDiscount;
     private String attributesName;
     private String typeProductsName;
     private List<SkuResponse> skus;
