@@ -1,6 +1,7 @@
 package com.vt.cms.Exception;
 
 import com.vt.cms.model.resp.APIRessponse;
+import com.vt.cms.Exception.BusinessException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -37,6 +38,13 @@ public class GlobalExceptionHandler {
         log.info("Request rejected: {}", ex.getMessage());
         return ResponseEntity.badRequest()
                 .body(new APIRessponse(400, ex.getMessage(), null));
+    }
+
+    @ExceptionHandler(BusinessException.class)
+    public ResponseEntity<APIRessponse> handleBusinessException(BusinessException ex) {
+        log.info("Business rule rejected: code={}, message={}", ex.getCode(), ex.getMessage());
+        return ResponseEntity.status(HttpStatus.CONFLICT)
+                .body(new APIRessponse(409, ex.getMessage(), Map.of("code", ex.getCode())));
     }
 
     @ExceptionHandler(IllegalStateException.class)
