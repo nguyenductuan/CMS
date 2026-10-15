@@ -362,6 +362,8 @@ public class CampainServiceImpl implements CampainService {
 
     @Override
     public void deletecampain(Integer campainID) {
-        campainRepository.deletecampain(campainID);
+        if (campainID == null || campainID <= 0) throw new IllegalArgumentException("Campaign ID không hợp lệ");
+        int rows = campainRepository.deletecampain(campainID);
+        if (rows != 1) throw new IllegalStateException("Không thể xóa chiến dịch: chiến dịch không tồn tại hoặc trạng thái không cho phép");
     }
 }
