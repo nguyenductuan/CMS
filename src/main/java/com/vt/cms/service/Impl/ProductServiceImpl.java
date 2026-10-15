@@ -50,7 +50,7 @@ public class ProductServiceImpl implements ProductService {
     public void addproduct(CreateProductRequest request) {
         productRequestValidator.validate(request);
         log.info("Create product started. name={}, skuCount={}", request.getName(), request.getSkus().size());
-        Product product = buildProduct(request);
+        Product product = productEntityMapper.toNewProduct(request);
         int rows = productRepository.insertproduct(product);
         if (rows != 1 || product.getId() == null) {
             log.error("Insert product failed. name={}, rows={}, generatedId={}", request.getName(), rows, product.getId());
