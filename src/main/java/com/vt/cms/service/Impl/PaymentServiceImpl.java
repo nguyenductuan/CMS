@@ -19,6 +19,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Random;
 import java.util.UUID;
 
 @Service
@@ -115,7 +116,7 @@ public class PaymentServiceImpl implements PaymentService {
             throw new IllegalArgumentException("Thông tin tạo thanh toán không hợp lệ");
         }
 
-        String paymentId = UUID.randomUUID().toString();
+        String paymentId = String.valueOf(System.currentTimeMillis() + new Random().nextInt(100000));
         String transactionCode = "VPO" + UUID.randomUUID().toString()
                 .replace("-", "").substring(0, 13).toUpperCase();
 
