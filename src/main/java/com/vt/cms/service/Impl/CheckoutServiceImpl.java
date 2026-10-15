@@ -8,7 +8,7 @@ import com.vt.cms.model.enums.MessageCode;
 import com.vt.cms.model.repository.ProductRepository;
 import com.vt.cms.model.resp.SkuResponse;
 import com.vt.cms.service.CheckoutService;
-import com.vt.cms.service.PriceService;
+import com.vt.cms.service.OrderPricingService;
 import com.vt.cms.service.ShippingService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -23,12 +23,12 @@ public class CheckoutServiceImpl implements CheckoutService {
 
     private final ShippingService shippingService;
     private final ProductRepository productRepository;
-    private final PriceService priceService;
+    private final OrderPricingService orderPricingService;
 
-    public CheckoutServiceImpl(ShippingService shippingService, ProductRepository productRepository, PriceService priceService) {
+    public CheckoutServiceImpl(ShippingService shippingService, ProductRepository productRepository, OrderPricingService orderPricingService) {
         this.shippingService = shippingService;
         this.productRepository = productRepository;
-        this.priceService = priceService;
+        this.orderPricingService = orderPricingService;
     }
 
     @Override
@@ -41,7 +41,7 @@ public class CheckoutServiceImpl implements CheckoutService {
         BigDecimal totalprice = BigDecimal.ZERO;
         for (ItemRequest itemRequest : request.getItems()) {
             ItemDto itemDto = processItem(itemRequest);
-            BigDecimal subtotal = priceService.calculateItemPrice(itemDto.getPrice_discount(), itemDto.getQuantity());
+            BigDecimal subtotal = orderPricingService.calculateLineTotal(itemDto.getPrice_discount(), itemDto.getQuantity());
             totalprice = totalprice.add(subtotal);
             iteemDtos.add(itemDto);
         }
@@ -69,11 +69,11 @@ public class CheckoutServiceImpl implements CheckoutService {
     private void validateRequest(CheckoutPreviewRequest request) {
 
         if (request == null) {
-            throw new RuntimeException("Request không được null");
+            throw new BusinessException(MessageCode.INVALID_ORDER);
         }
 
         if (request.getItems() == null || request.getItems().isEmpty()) {
-            throw new RuntimeException("Danh sách sản phẩm không được để trống");
+            throw new BusinessException(MessageCode.INVALID_ORDER);
         }
     }
 
@@ -87,7 +87,7 @@ public class CheckoutServiceImpl implements CheckoutService {
         ProductDetail product = productRepository.getproduct1(itemRequest.getProductId(), itemRequest.getCampainId());
 
         if (product == null) {
-            throw new RuntimeException("Sản phẩm không tồn tại");
+            throw new BusinessException(MessageCode.PRODUCT_NOT_FOUND);
         }
 
         // Tìm SKU mà người dùng chọn
@@ -101,7 +101,8 @@ public class CheckoutServiceImpl implements CheckoutService {
        itemDTO.setCampaignId(itemRequest.getCampainId());
         itemDTO.setProductName(product.getName());
         itemDTO.setPrice_campain(sku.getPrice());
-        itemDTO.setPrice_discount(sku.getPriceDiscountCampaign() != null ? sku.getPriceDiscountCampaign() : sku.getPrice());
+        itemDTO.setPrice_discount(orderPricingService.getUnitPrice(sku));
+        if (itemRequest.getQuantity() <= 0) throw new BusinessException(MessageCode.INVALID_QUANTITY);
         itemDTO.setQuantity(itemRequest.getQuantity());
        itemDTO.setStock(sku.getStock());
         return itemDTO;
