@@ -3,22 +3,22 @@
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.vt.cms.model.repository.ShippingRepository">
     <resultMap id="ShippingResultMap" type="com.vt.cms.model.entity.Shipping">
-        <id column="id" property="id" jdbcType="OTHER"/>
-        <result column="service_code" property="service_code" jdbcType="VARCHAR"/>
-        <result column="service_name" property="service_name" jdbcType="VARCHAR"/>
-        <result column="fee" property="fee" jdbcType="OTHER"/>
+        <id column="id" property="id"/>
+        <result column="service_code" property="service_code"/>
+        <result column="service_name" property="service_name"/>
+        <result column="fee" property="fee"/>
     </resultMap>
 
     <select id="getShipping" resultMap="ShippingResultMap">
-        SELECT *
+        SELECT id, service_code, service_name, fee
         FROM shipping
-    </select>
-    
-    <select id="detailShipping" resultMap="ShippingResultMap">
-        SELECT *
-        FROM shipping
-        where service_code = #{service_code}
+        ORDER BY id
     </select>
 
-
+    <select id="getShippingByCode" resultMap="ShippingResultMap">
+        SELECT id, service_code, service_name, fee
+        FROM shipping
+        WHERE service_code = #{serviceCode}
+        LIMIT 1
+    </select>
 </mapper>
