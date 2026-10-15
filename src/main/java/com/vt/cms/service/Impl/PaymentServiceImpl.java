@@ -63,6 +63,10 @@ public class PaymentServiceImpl implements PaymentService {
         if (order == null) {
             throw new IllegalArgumentException("Không tìm thấy đơn hàng");
         }
+        if (order.getTotal() == null
+                || paymentcallback.getAmount().compareTo(order.getTotal()) != 0) {
+            throw new IllegalArgumentException("Số tiền callback không khớp tổng tiền đơn hàng");
+        }
 
         String paymentStatus = payment.getStatus();
         if (PaymentStatus.PAYMENT_SUCCESS.getCode().equalsIgnoreCase(paymentStatus)
@@ -114,6 +118,18 @@ public class PaymentServiceImpl implements PaymentService {
                 || paymentRequest.getTotalPayment() == null
                 || paymentRequest.getTotalPayment().compareTo(BigDecimal.ZERO) <= 0) {
             throw new IllegalArgumentException("Thông tin tạo thanh toán không hợp lệ");
+        }
+
+        Order order = orderRepository.getorderbyId(paymentRequest.getOrderIds());
+        if (order == null) {
+            throw new IllegalArgumentException("Không tìm thấy đơn hàng");
+        }
+        if (order.getOrder_status() != OrderStatus.WAIT_PAYMENT) {
+            throw new IllegalStateException("Đơn hàng không ở trạng thái chờ thanh toán");
+        }
+        if (order.getTotal() == null
+                || order.getTotal().compareTo(paymentRequest.getTotalPayment()) != 0) {
+            throw new IllegalArgumentException("Số tiền thanh toán không khớp tổng tiền đơn hàng");
         }
 
         String paymentId = String.valueOf(System.currentTimeMillis() + new Random().nextInt(100000));
