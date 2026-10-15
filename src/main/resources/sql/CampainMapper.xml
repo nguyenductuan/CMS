@@ -23,19 +23,42 @@
     <select id="getCampainById" resultType="com.vt.cms.model.entity.Campain">
         SELECT *
         FROM campaign
-        WHERE id = #{campain_id}
+        WHERE id = #{campain_id} AND is_deleted = 'false'
     </select>
     <update id="updatestatus">
         UPDATE campaign
-        SET status = #{status}
-        WHERE id = #{campain_id}
+        SET status = #{status}, updated_at = NOW(), updated_by = 'SYSTEM'
+        WHERE id = #{campain_id} AND is_deleted = 'false' AND status = 'PENDING_APPROVAL'
     </update>
 
     <delete id="deletecampain">
         UPDATE campaign
-        SET is_deleted = "false"
-        WHERE id = #{campain_id}
+        SET is_deleted = 'true', updated_at = NOW(), updated_by = 'SYSTEM'
+        WHERE id = #{campain_id} AND is_deleted = 'false'
+          AND status IN ('PENDING_APPROVAL', 'REJECTED')
     </delete>
+    <select id="getlistcampain" resultType="com.vt.cms.model.resp.CampainResponse">
+        SELECT c.id AS id,
+               CONCAT('CMP-', c.id) AS code,
+               c.name AS name,
+               c.description AS description,
+               c.start_time AS startTime,
+               c.end_time AS endTime,
+               c.status AS status,
+               c.discount AS discount,
+               COALESCE((
+                   SELECT GROUP_CONCAT(DISTINCT p.name ORDER BY p.name SEPARATOR ', ')
+                   FROM campain_product cp
+                   INNER JOIN products p ON p.id = cp.product_id
+                   WHERE cp.campaign_id = c.id
+                     AND cp.is_deleted = 'false'
+                     AND p.is_deleted = 'false'
+               ), '') AS products
+        FROM campaign c
+        WHERE c.is_deleted = 'false'
+        ORDER BY c.created_at DESC, c.id DESC
+    </select>
+
     <insert id="savecampain" parameterType="com.vt.cms.model.entity.Campain"
             useGeneratedKeys="true"
             keyProperty="campainid">
