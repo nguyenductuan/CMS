@@ -39,12 +39,14 @@ public class CampainServiceImpl implements CampainService {
     public CampainServiceImpl(
             CampainRepository campainRepository,
             CampainProductRepository campainProductRepository,
-            ProductSkuRepository productSkuRepository, ScheduledTaskHolder scheduledTaskHolder) {
+            ProductSkuRepository productSkuRepository, ScheduledTaskHolder scheduledTaskHolder,
+            CampaignRequestValidator campaignRequestValidator) {
 
         this.campainRepository = campainRepository;
         this.campainProductRepository = campainProductRepository;
         this.productSkuRepository = productSkuRepository;
         this.scheduledTaskHolder = scheduledTaskHolder;
+        this.campaignRequestValidator = campaignRequestValidator;
     }
 
     /**
@@ -96,9 +98,6 @@ public class CampainServiceImpl implements CampainService {
         );
     }
 
-    /**
-     * Kiểm tra các dữ liệu bắt buộc trước khi bắt đầu ghi dữ liệu.
-     */
     /**
      * Chuyển dữ liệu request thành entity campaign.
      */
