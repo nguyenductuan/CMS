@@ -135,19 +135,7 @@ public class ProductServiceImpl implements ProductService {
                 saveSkus(productId, List.of(request));
                 continue;
             }
-            Product_Sku sku = new Product_Sku();
-            sku.setProduct_id(productId);
-            sku.setSku_code(request.getSku_code().trim());
-            sku.setHeight_cm(request.getHeight_cm());
-            sku.setWidth_cm(request.getWidth_cm());
-            sku.setLength_cm(request.getLength_cm());
-            sku.setWeight_gram(request.getWeight_gram());
-            sku.setType_product(request.getType_product());
-            sku.setStock(request.getStock());
-            sku.setStatus(request.getStatus());
-            sku.setPrice(request.getPrice());
-            sku.setImage_url(request.getImage_url());
-            sku.setAttribute(request.getAttribute());
+            Product_Sku sku = mapSkuFields(productId, request);
             sku.setUpdated_at(LocalDateTime.now());
             sku.setUpdated_by("SYSTEM");
             int rows = productSkuRepository.updateByProductIdAndSkuCode(sku);
@@ -158,21 +146,30 @@ public class ProductServiceImpl implements ProductService {
         }
     }
 
+    /**
+     * Maps fields shared by SKU creation and update. Lifecycle/audit fields remain
+     * owned by the respective operation so updates do not reset creation metadata.
+     */
+    private Product_Sku mapSkuFields(Integer productId, SkuRequest request) {
+        Product_Sku sku = new Product_Sku();
+        sku.setProduct_id(productId);
+        sku.setSku_code(request.getSku_code().trim());
+        sku.setHeight_cm(request.getHeight_cm());
+        sku.setWidth_cm(request.getWidth_cm());
+        sku.setLength_cm(request.getLength_cm());
+        sku.setWeight_gram(request.getWeight_gram());
+        sku.setType_product(request.getType_product());
+        sku.setStock(request.getStock());
+        sku.setStatus(request.getStatus());
+        sku.setPrice(request.getPrice());
+        sku.setImage_url(request.getImage_url());
+        sku.setAttribute(request.getAttribute());
+        return sku;
+    }
+
     private void saveSkus(Integer productId, List<SkuRequest> requests) {
         for (SkuRequest request : requests) {
-            Product_Sku sku = new Product_Sku();
-            sku.setProduct_id(productId);
-            sku.setHeight_cm(request.getHeight_cm());
-            sku.setWidth_cm(request.getWidth_cm());
-            sku.setLength_cm(request.getLength_cm());
-            sku.setWeight_gram(request.getWeight_gram());
-            sku.setType_product(request.getType_product());
-            sku.setStock(request.getStock());
-            sku.setStatus(request.getStatus());
-            sku.setSku_code(request.getSku_code().trim());
-            sku.setPrice(request.getPrice());
-            sku.setImage_url(request.getImage_url());
-            sku.setAttribute(request.getAttribute());
+            Product_Sku sku = mapSkuFields(productId, request);
             sku.setCreated_by("SYSTEM");
             sku.setIs_deleted("false");
             sku.setCreated_at(LocalDateTime.now());
