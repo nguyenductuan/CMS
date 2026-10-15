@@ -6,7 +6,6 @@ import com.vt.cms.model.resp.APIRessponse;
 import com.vt.cms.service.CampainService;
 
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -16,7 +15,6 @@ import org.springframework.web.bind.annotation.*;
 
 //Thêm mới chiến dịch (1 campain nhiều sản phẩm)
 public class CampainController {
-    @Autowired
     private final CampainService campainService;
     public CampainController(CampainService campainService) {
         this.campainService = campainService ;
