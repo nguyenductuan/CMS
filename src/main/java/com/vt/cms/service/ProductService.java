@@ -20,6 +20,8 @@ public interface ProductService {
 
     void editstatusproduct(Integer product_id);
 
+    void rejectProduct(Integer product_id);
+
     void deleteproduct(Integer product_id);
 
     ProductDetailResponse product_detail(Integer campaign_id, Integer product_id);
