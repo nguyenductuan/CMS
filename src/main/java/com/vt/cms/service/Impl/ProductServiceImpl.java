@@ -316,6 +316,22 @@ public class ProductServiceImpl implements ProductService {
     }
     @Override
     @Transactional(rollbackFor = Exception.class)
+    public void rejectProduct(Integer product_id) {
+        if (product_id == null || product_id <= 0) throw new IllegalArgumentException("ID sản phẩm không hợp lệ");
+        Product existing = productRepository.getProductById(product_id);
+        if (existing == null || "true".equalsIgnoreCase(existing.getIs_deleted())) {
+            throw new IllegalArgumentException("Không tìm thấy sản phẩm: " + product_id);
+        }
+        if (!"PENDING_APPROVAL".equalsIgnoreCase(existing.getStatus())) {
+            throw new IllegalStateException("Chỉ sản phẩm đang chờ duyệt mới được từ chối");
+        }
+        LocalDateTime now = LocalDateTime.now();
+        int rows = productRepository.editstatusproduct(product_id, "REJECTED", now, "SYSTEM", now);
+        if (rows != 1) throw new IllegalStateException("Không thể từ chối sản phẩm; trạng thái có thể đã thay đổi");
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
     public void deleteproduct(Integer product_id) {
         if (product_id == null || product_id <= 0) throw new IllegalArgumentException("ID sản phẩm không hợp lệ");
         Product existing = productRepository.getProductById(product_id);
