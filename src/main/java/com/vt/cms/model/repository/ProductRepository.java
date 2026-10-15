@@ -16,7 +16,7 @@ public interface ProductRepository {
 
     List<ProductResponse> listproduct(OrdersRequest request);
 
-    int countproduct(OrdersRequest request);
+    long countproduct(OrdersRequest request);
 
     int insertproduct(Product product);
 
