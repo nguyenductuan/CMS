@@ -20,6 +20,7 @@ import com.vt.cms.model.resp.ProductResponse;
 import com.vt.cms.model.resp.SkuResponse;
 import com.vt.cms.service.ProductService;
 import com.vt.cms.service.validation.ProductRequestValidator;
+import com.vt.cms.service.mapper.ProductEntityMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -42,6 +43,7 @@ public class ProductServiceImpl implements ProductService {
     private final ObjectMapper objectMapper;
     private final ProductSkuRepository productSkuRepository;
     private final ProductRequestValidator productRequestValidator;
+    private final ProductEntityMapper productEntityMapper;
 
     @Override
     @Transactional(rollbackFor = Exception.class)
@@ -56,33 +58,6 @@ public class ProductServiceImpl implements ProductService {
         }
         saveSkus(product.getId(), request.getSkus());
         log.info("Create product completed. productId={}, skuCount={}", product.getId(), request.getSkus().size());
-    }
-
-    private Product buildProduct(CreateProductRequest request) {
-        Product product = new Product();
-        product.setName(request.getName().trim());
-        product.setDescription(request.getDescription());
-        // Trạng thái do server quản lý; client không được tự tạo sản phẩm đã duyệt.
-        product.setStatus("PENDING_APPROVAL");
-        product.setIs_deleted("false");
-        product.setCreated_at(LocalDateTime.now());
-        product.setCreated_by("SYSTEM");
-        product.setType_products(toJson(request.getType_products()));
-        product.setJson_attributes(toJson(request.getAttributes()));
-        product.setJson_medias(toJson(request.getMedias()));
-        product.setJson_images(toJson(request.getImages()));
-        product.setJson_attributes_name(request.getAttributes_name());
-        product.setType_products_name(request.getType_products_name());
-        return product;
-    }
-
-    private String toJson(Object value) {
-        try {
-            return objectMapper.writeValueAsString(value == null ? List.of() : value);
-        } catch (JsonProcessingException e) {
-            log.error("Cannot serialize product data to JSON", e);
-            throw new IllegalArgumentException("Dữ liệu sản phẩm không thể chuyển đổi sang JSON", e);
-        }
     }
 
     private void mergeSkus(Integer productId, List<SkuRequest> requests) {
@@ -222,7 +197,7 @@ public class ProductServiceImpl implements ProductService {
                 && !"REJECTED".equalsIgnoreCase(existing.getStatus())) {
             throw new IllegalStateException("Chỉ được sửa sản phẩm đang chờ duyệt hoặc đã bị từ chối");
         }
-        Product update = buildProduct(request);
+        Product update = productEntityMapper.toNewProduct(request);
         update.setStatus("PENDING_APPROVAL");
         update.setUpdated_at(LocalDateTime.now());
         update.setUpdated_by("SYSTEM");
