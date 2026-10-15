@@ -277,10 +277,21 @@
 
     <update id="editstatusproduct">
         UPDATE products
-        SET status = #{status}, updated_at = #{updated_at},
-            approved_time = #{approved_time}, approve_by = #{approve_by}
-        WHERE id = #{id} AND is_deleted = 'false'
-          AND COALESCE(status, '') <> 'APPROVAL'
+        SET status = #{status},
+            updated_at = #{updated_at},
+            updated_by = #{approve_by},
+            <if test="status == 'APPROVED'">
+                approved_time = #{approved_time},
+                approve_by = #{approve_by},
+            </if>
+            <if test="status == 'REJECTED'">
+                cancel_at = #{approved_time},
+                cancel_by = #{approve_by},
+            </if>
+            id = id
+        WHERE id = #{id}
+          AND is_deleted = 'false'
+          AND status = 'PENDING_APPROVAL'
     </update>
 
     <update id="deleteproduct">
