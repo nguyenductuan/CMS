@@ -103,6 +103,9 @@ public class CheckoutServiceImpl implements CheckoutService {
         itemDTO.setPrice_campain(sku.getPrice());
         itemDTO.setPrice_discount(orderPricingService.getUnitPrice(sku));
         if (itemRequest.getQuantity() <= 0) throw new BusinessException(MessageCode.INVALID_QUANTITY);
+        if (sku.getStock() == null || itemRequest.getQuantity() > sku.getStock()) {
+            throw new BusinessException(MessageCode.STOCK_NOT_ENOUGH);
+        }
         itemDTO.setQuantity(itemRequest.getQuantity());
        itemDTO.setStock(sku.getStock());
         return itemDTO;
