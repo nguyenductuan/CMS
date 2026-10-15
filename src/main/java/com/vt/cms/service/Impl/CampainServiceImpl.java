@@ -105,6 +105,14 @@ public class CampainServiceImpl implements CampainService {
             throw new IllegalArgumentException("Request is required");
         }
 
+        if (request.getName() == null || request.getName().isBlank()) {
+            throw new IllegalArgumentException("Tên chiến dịch không được để trống");
+        }
+
+        if (request.getTotal_stock() == null || request.getTotal_stock() < 0) {
+            throw new IllegalArgumentException("Tổng tồn kho chiến dịch phải >= 0");
+        }
+
         if (request.getStartTime() == null || request.getEndTime() == null) {
             throw new IllegalArgumentException(
                     "Start time and end time are required"
@@ -172,7 +180,7 @@ public class CampainServiceImpl implements CampainService {
             );
         }
 
-        if (discount.compareTo(BigDecimal.valueOf(100)) > 0) {
+        if (discount.compareTo(BigDecimal.ZERO) < 0 || discount.compareTo(BigDecimal.valueOf(100)) > 0) {
             throw new IllegalArgumentException(
                     "Discount must not exceed 100%"
             );
