@@ -51,6 +51,10 @@
                 property="campaignStatus"
                 jdbcType="VARCHAR"/>
 
+        <result column="campaign_name" property="campaignName" jdbcType="VARCHAR"/>
+        <result column="campaign_description" property="campaignDescription" jdbcType="VARCHAR"/>
+        <result column="campaign_discount" property="campaignDiscount" jdbcType="DECIMAL"/>
+
         <result column="sales_commission"
                 property="salesCommission"
                 jdbcType="DECIMAL"/>
@@ -132,6 +136,9 @@
                ========================= */
 
             c.status               AS campaign_status,
+            c.name                 AS campaign_name,
+            c.description          AS campaign_description,
+            c.discount             AS campaign_discount,
 
             c.start_time           AS campaign_start_at,
 
@@ -181,11 +188,9 @@
         FROM campaign c
 
                  INNER JOIN products p
-                            ON p.id = #{product_id}
-#                                 AND p.is_deleted = 'false'
+                            ON p.id = #{product_id} AND p.is_deleted = 'false'
 
-        WHERE c.id = #{campaign_id} ;
-#           and c.status='APPROVAL';
+        WHERE c.id = #{campaign_id} AND c.is_deleted = 'false';
 
     </select>
 
