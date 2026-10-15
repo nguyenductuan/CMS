@@ -22,6 +22,10 @@ public class ProductResponse {
     private String attributes_name;
 //    private String json_attributes_name;
     private LocalDateTime created_at;
+    private LocalDateTime updated_at;
+    private String first_image;
+    private Long sku_count;
+    private Long total_stock;
     private String created_by;
     private String 	is_deleted;
     private List<TypeProductRequest> type_products;
