@@ -10,6 +10,7 @@ import com.vt.cms.model.resp.SkuResponse;
 import com.vt.cms.service.CheckoutService;
 import com.vt.cms.service.OrderPricingService;
 import com.vt.cms.service.ShippingService;
+import com.vt.cms.service.ShippingFeeService;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
@@ -19,14 +20,14 @@ import java.util.Objects;
 
 @Service
 public class CheckoutServiceImpl implements CheckoutService {
-    private final ShippingService shippingService;
+    private final ShippingFeeService shippingFeeService;
     private final ProductRepository productRepository;
     private final OrderPricingService orderPricingService;
 
-    public CheckoutServiceImpl(ShippingService shippingService,
+    public CheckoutServiceImpl(ShippingFeeService shippingFeeService,
                                ProductRepository productRepository,
                                OrderPricingService orderPricingService) {
-        this.shippingService = shippingService;
+        this.shippingFeeService = shippingFeeService;
         this.productRepository = productRepository;
         this.orderPricingService = orderPricingService;
     }
@@ -44,14 +45,7 @@ public class CheckoutServiceImpl implements CheckoutService {
             items.add(item);
         }
 
-        List<Shipping> shippingMethods = shippingService.getShipping();
-        if (shippingMethods == null || shippingMethods.isEmpty()
-                || shippingMethods.get(0) == null || shippingMethods.get(0).getFee() == null) {
-            throw new BusinessException(MessageCode.SHIPPING_NOT_FOUND);
-        }
-
-        // Preserve existing API behavior: preview uses the first configured shipping fee.
-        BigDecimal shippingFee = shippingMethods.get(0).getFee();
+        BigDecimal shippingFee = shippingFeeService.calculateFee(request.getShippingServiceCode());
         CheckoutPreviewResponse response = new CheckoutPreviewResponse();
         response.setShipping_fee(shippingFee);
         response.setItems(items);
