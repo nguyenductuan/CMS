@@ -215,7 +215,7 @@
             type_products = #{product.type_products}, type_products_name = #{product.type_products_name},
             updated_at = #{product.updated_at}, updated_by = #{product.updated_by}
         WHERE id = #{id} AND is_deleted = 'false'
-          AND status = 'PENDING_APPROVAL'
+          AND status IN ('PENDING_APPROVAL', 'REJECTED')
     </update>
 
     <select id="listproduct" resultType="com.vt.cms.model.resp.ProductResponse">
