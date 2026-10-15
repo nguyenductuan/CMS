@@ -9,7 +9,6 @@ import com.vt.cms.model.resp.ProductResponse;
 import com.vt.cms.service.ProductService;
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -20,7 +19,6 @@ import java.util.List;
 @RequestMapping("v/product")
 
 public class ProductController {
-    @Autowired
     private final ProductService productService;
     public ProductController(ProductService productService) {
         this.productService = productService;
