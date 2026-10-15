@@ -33,6 +33,7 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -93,10 +94,33 @@ public class ProductServiceImpl implements ProductService {
         Set<String> codes = new HashSet<>();
         for (SkuRequest sku : request.getSkus()) {
             if (sku == null) throw new IllegalArgumentException("Thông tin SKU không được để trống");
-            if (sku.getSku_code() == null || sku.getSku_code().isBlank()) throw new IllegalArgumentException("Mã SKU không được để trống");
-            if (!codes.add(sku.getSku_code().trim())) throw new IllegalArgumentException("Mã SKU bị trùng trong request: " + sku.getSku_code());
+            // Sinh ma SKU tai server neu client khong gui.
+            if (sku.getSku_code() == null || sku.getSku_code().isBlank()) {
+                sku.setSku_code("SKU-" + UUID.randomUUID().toString().replace("-", "").substring(0, 20).toUpperCase());
+            } else {
+                sku.setSku_code(sku.getSku_code().trim());
+            }
+            if (!codes.add(sku.getSku_code())) throw new IllegalArgumentException("Mã SKU bị trùng trong request: " + sku.getSku_code());
             if (sku.getPrice() == null || sku.getPrice().compareTo(BigDecimal.ZERO) <= 0) throw new IllegalArgumentException("Giá SKU phải lớn hơn 0: " + sku.getSku_code());
             if (sku.getStock() == null || sku.getStock() < 0) throw new IllegalArgumentException("Tồn kho SKU phải >= 0: " + sku.getSku_code());
+            if (sku.getImage_url() == null || sku.getImage_url().isBlank()) throw new IllegalArgumentException("Ảnh SKU không được để trống: " + sku.getSku_code());
+            validateNonNegativeDimension(sku.getWeight_gram(), "khối lượng", sku.getSku_code());
+            validateNonNegativeDimension(sku.getLength_cm(), "chiều dài", sku.getSku_code());
+            validateNonNegativeDimension(sku.getWidth_cm(), "chiều rộng", sku.getSku_code());
+            validateNonNegativeDimension(sku.getHeight_cm(), "chiều cao", sku.getSku_code());
+        }
+    }
+
+    private void validateNonNegativeDimension(String value, String label, String skuCode) {
+        if (value == null || value.isBlank()) {
+            throw new IllegalArgumentException("Thiếu " + label + " SKU: " + skuCode);
+        }
+        try {
+            if (new BigDecimal(value).compareTo(BigDecimal.ZERO) < 0) {
+                throw new IllegalArgumentException(label + " SKU phải >= 0: " + skuCode);
+            }
+        } catch (NumberFormatException ex) {
+            throw new IllegalArgumentException(label + " SKU không hợp lệ: " + skuCode, ex);
         }
     }
 
@@ -235,11 +259,12 @@ public class ProductServiceImpl implements ProductService {
             log.warn("Update product rejected: not found. productId={}", id);
             throw new IllegalArgumentException("Không tìm thấy sản phẩm: " + id);
         }
-        if ("APPROVAL".equalsIgnoreCase(existing.getStatus())) {
-            throw new IllegalStateException("Không thể sửa sản phẩm đã được duyệt");
+        if (!"PENDING_APPROVAL".equalsIgnoreCase(existing.getStatus())
+                && !"REJECTED".equalsIgnoreCase(existing.getStatus())) {
+            throw new IllegalStateException("Chỉ được sửa sản phẩm đang chờ duyệt hoặc đã bị từ chối");
         }
         Product update = buildProduct(request);
-        update.setStatus(existing.getStatus());
+        update.setStatus("PENDING_APPROVAL");
         update.setUpdated_at(LocalDateTime.now());
         update.setUpdated_by("SYSTEM");
         int rows = productRepository.updateProduct(update, id);
@@ -282,15 +307,25 @@ public class ProductServiceImpl implements ProductService {
         if (product_id == null || product_id <= 0) throw new IllegalArgumentException("ID sản phẩm không hợp lệ");
         Product existing = productRepository.getProductById(product_id);
         if (existing == null || "true".equalsIgnoreCase(existing.getIs_deleted())) throw new IllegalArgumentException("Không tìm thấy sản phẩm: " + product_id);
-        if ("APPROVAL".equalsIgnoreCase(existing.getStatus())) throw new IllegalStateException("Sản phẩm đã được duyệt trước đó");
+        if (!"PENDING_APPROVAL".equalsIgnoreCase(existing.getStatus())) {
+            throw new IllegalStateException("Chỉ sản phẩm đang chờ duyệt mới được duyệt");
+        }
         LocalDateTime now = LocalDateTime.now();
-        int rows = productRepository.editstatusproduct(product_id, "APPROVAL", now, "SYSTEM", now);
+        int rows = productRepository.editstatusproduct(product_id, "APPROVED", now, "SYSTEM", now);
         if (rows != 1) throw new IllegalStateException("Không thể duyệt sản phẩm; trạng thái có thể đã thay đổi");
     }
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void deleteproduct(Integer product_id) {
         if (product_id == null || product_id <= 0) throw new IllegalArgumentException("ID sản phẩm không hợp lệ");
+        Product existing = productRepository.getProductById(product_id);
+        if (existing == null || "true".equalsIgnoreCase(existing.getIs_deleted())) {
+            throw new IllegalArgumentException("Không tìm thấy sản phẩm: " + product_id);
+        }
+        if (!"PENDING_APPROVAL".equalsIgnoreCase(existing.getStatus())
+                && !"REJECTED".equalsIgnoreCase(existing.getStatus())) {
+            throw new IllegalStateException("Chỉ được xóa sản phẩm đang chờ duyệt hoặc đã bị từ chối");
+        }
         if (campainProductRepository.existsAssociationByProductId(product_id)) {
             throw new IllegalStateException("Không thể xóa sản phẩm đã được thêm vào chiến dịch");
         }
