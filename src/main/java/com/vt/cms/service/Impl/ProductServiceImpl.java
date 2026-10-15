@@ -245,7 +245,7 @@ public class ProductServiceImpl implements ProductService {
 
         } catch (JsonProcessingException e) {
             throw new RuntimeException(
-                    "JSON sản phẩm không hợp lệ: " + json,
+                    "JSON sản phẩm không hợp lệ",
                     e
             );
         }
@@ -355,7 +355,7 @@ public class ProductServiceImpl implements ProductService {
         log.info("Delete product completed. productId={}, deletedSkuCount={}", product_id, skuRows);
     }
     @Override
-    public ProductDetailResponse product_detail(Integer product_id, Integer campaign_id) {
+    public ProductDetailResponse product_detail(Integer campaign_id, Integer product_id) {
         ProductDetail product = productRepository.getproduct1(product_id, campaign_id);
 
         if (product == null) {
