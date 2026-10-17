@@ -16,7 +16,7 @@ import java.util.List;
 
 @Slf4j
 @RestController
-@RequestMapping("v/product")
+@RequestMapping("v1/product")
 
 public class ProductController {
     private final ProductService productService;
@@ -47,19 +47,19 @@ public class ProductController {
         ProductResponse response=  productService.detail(product_id);
        return ResponseEntity.ok(new APIRessponse(200,"Thành công", response));
     }
-    // Chi tiết sản phẩm trong chiến dịch
-    @GetMapping("campaign/{campaign_id}/product/{product_id}")
-    public ResponseEntity<APIRessponse> campaignProductDetail(
-            @PathVariable Integer campaign_id, @PathVariable Integer product_id) {
-        var response = productService.product_detail(campaign_id, product_id);
-        if (response == null) return ResponseEntity.notFound().build();
-        return ResponseEntity.ok(new APIRessponse(200, "Lấy chi tiết sản phẩm trong chiến dịch thành công", response));
-    }
+
     // Thêm mới sản phẩm
     @PostMapping("addproduct")
     public ResponseEntity<APIRessponse> addproduct(  @Valid @RequestBody CreateProductRequest createProductRequest) {
         productService.addproduct(createProductRequest);
         return ResponseEntity.ok(new APIRessponse(200,"Thêm mới thành công"));
+    }
+
+    //Xóa sản phẩm
+    @DeleteMapping("deleteproduct/{product_id}")
+    public ResponseEntity<APIRessponse> deleteproduct(@PathVariable Integer product_id) {
+        productService.deleteproduct(product_id);
+        return ResponseEntity.ok(new APIRessponse(200, "Xóa sản phẩm thành công"));
     }
     //Sửa sản phẩm
     @PutMapping("editproduct/{id}")
@@ -67,11 +67,5 @@ public class ProductController {
         log.info("Request update product. productId={}", id);
         productService.editproduct(id, createProductRequest);
         return ResponseEntity.ok(new APIRessponse(200, "Cập nhật sản phẩm thành công"));
-    }
-    //Xóa sản phẩm
-    @DeleteMapping("deleteproduct/{product_id}")
-    public ResponseEntity<APIRessponse> deleteproduct(@PathVariable Integer product_id) {
-        productService.deleteproduct(product_id);
-        return ResponseEntity.ok(new APIRessponse(200, "Xóa sản phẩm thành công"));
     }
 }
