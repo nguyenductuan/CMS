@@ -1,5 +1,6 @@
 package com.vt.cms.model.resp;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.vt.cms.model.dto.product.*;
 import com.vt.cms.model.entity.Product;
@@ -15,23 +16,24 @@ public class ProductResponse {
     private  Integer id;
     private String name;
     private String description;
-    private Integer stock;
-    private List<ImageRequest> images;
-    private List<MediaRequest> medias;
-    private List<AttributeRequest> attributes;
-    private String attributes_name;
-//    private String json_attributes_name;
-    private LocalDateTime created_at;
-    private LocalDateTime updated_at;
-    private String first_image;
-    private Long sku_count;
-    private Long total_stock;
-    private String created_by;
-    private String 	is_deleted;
-    private List<TypeProductRequest> type_products;
-    private String type_products_name;
+//    private List<ImageRequest> Images;
+//    private List<MediaRequest> Medias;
+    @JsonIgnore
+    private String jsonAttributesRaw;
+    @JsonIgnore
+    private String typeProductsRaw;
+    private List<AttributeRequest> jsonAttributes;
+    private List<TypeProductRequest> typeProducts;
+    private String jsonAttributesName;
+    private LocalDateTime createdAt;
+    private LocalDateTime updatedAt;
+    private String jsonImages;
+    private String jsonMedias;
+//    private Long skuCount;
+    private Long totalStock;
+    private String createdBy;
+    private String 	isDeleted;
+    private String typeProductsName;
     private List<SkuRequest> skus;
     private String status;
-
-
 }

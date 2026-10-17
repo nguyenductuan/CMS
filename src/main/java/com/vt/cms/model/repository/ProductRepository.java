@@ -12,7 +12,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 @Mapper
 public interface ProductRepository {
-    Product detailProduct(@Param("productId") Integer productId);
+    ProductResponse  detailProduct(@Param("productId") Integer productId);
 
     List<ProductResponse> listproduct(OrdersRequest request);
 

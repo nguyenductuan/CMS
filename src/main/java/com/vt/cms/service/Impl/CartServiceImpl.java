@@ -8,6 +8,7 @@ import com.vt.cms.model.entity.Product;
 import com.vt.cms.model.repository.CartItemRepository;
 import com.vt.cms.model.repository.CartRepository;
 import com.vt.cms.model.repository.ProductRepository;
+import com.vt.cms.model.resp.ProductResponse;
 import com.vt.cms.service.CartService;
 import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
@@ -59,7 +60,7 @@ public class CartServiceImpl implements CartService {
     public void addToCart(AddCartRequest request) {
         validateAddToCart(request);
 
-        Product product = productRepository.detailProduct(request.getProductId());
+        ProductResponse product = productRepository.detailProduct(request.getProductId());
         if (product == null) {
             throw new IllegalArgumentException("Sản phẩm không tồn tại");
         }
@@ -85,16 +86,14 @@ public class CartServiceImpl implements CartService {
             newItem.setProductId(request.getProductId());
             newItem.setQuantity(request.getQuantity());
             newItem.setProductName(product.getName());
-            newItem.setProductPrice(product.getPrice_display() == null
-                    ? null : java.math.BigDecimal.valueOf(product.getPrice_display()));
+           // newItem.setProductPrice(product.getPrice_display() == null ? null : java.math.BigDecimal.valueOf(product.getPrice_display()));
             cartItemRepository.insertCartItem(newItem);
             return;
         }
 
         existingItem.setQuantity(existingQuantity + request.getQuantity());
         existingItem.setProductName(product.getName());
-        existingItem.setProductPrice(product.getPrice_display() == null
-                ? null : java.math.BigDecimal.valueOf(product.getPrice_display()));
+        //existingItem.setProductPrice(product.getPrice_display() == null? null : java.math.BigDecimal.valueOf(product.getPrice_display()));
         cartItemRepository.updateCartItem(existingItem);
     }
 

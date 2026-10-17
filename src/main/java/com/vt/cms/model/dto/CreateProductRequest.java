@@ -12,9 +12,7 @@ public class CreateProductRequest {
     @NotBlank(message = "Tên sản phẩm không được để trống")
     private String name;
     private String description;
-    private Integer productPrice;
-    private String productimage;
-    private Integer stock;
+//    private Integer stock;
     private List<ImageRequest> images;
     private List<MediaRequest> medias;
     private List<AttributeRequest> attributes;
