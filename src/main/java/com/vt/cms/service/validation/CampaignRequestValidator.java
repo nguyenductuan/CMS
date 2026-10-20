@@ -14,7 +14,7 @@ public class CampaignRequestValidator {
     public void validate(CreatedCampainRequest request) {
         if (request == null) throw new IllegalArgumentException("Request is required");
         if (request.getName() == null || request.getName().isBlank()) throw new IllegalArgumentException("Tên chiến dịch không được để trống");
-        if (request.getTotal_stock() == null || request.getTotal_stock() < 0) throw new IllegalArgumentException("Tổng tồn kho chiến dịch phải >= 0");
+        //if (request.getTotal_stock() == null || request.getTotal_stock() < 0) throw new IllegalArgumentException("Tổng tồn kho chiến dịch phải >= 0");
         if (request.getStartTime() == null || request.getEndTime() == null) throw new IllegalArgumentException("Start time and end time are required");
         if (request.getStartTime().isAfter(request.getEndTime())) throw new IllegalArgumentException("Start time must be before or equal to end time");
         validateDiscount(request.getDiscount());

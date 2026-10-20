@@ -16,7 +16,7 @@ public class CampaignEntityMapper {
         campaign.setStartTime(request.getStartTime());
         campaign.setEndTime(request.getEndTime());
         campaign.setDiscount(request.getDiscount());
-        campaign.setTotalStock(request.getTotal_stock());
+       // campaign.setTotalStock(request.getTotal_stock());
         campaign.setStatus(CampainStatus.PENDING_APPROVAL);
         campaign.setCreatedAt(LocalDateTime.now());
         campaign.setCreatedBy("SYSTEM");

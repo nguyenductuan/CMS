@@ -12,7 +12,7 @@ public class CreatedCampainRequest {
     private LocalDateTime endTime;
     private String description;
     private BigDecimal discount;
-    private Integer total_stock;
-    private Integer salesCommission;
+//    private Integer total_stock;
+//    private Integer salesCommission;
     private List<CampainProductRequest> products;
 }

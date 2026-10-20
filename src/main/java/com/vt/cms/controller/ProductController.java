@@ -61,7 +61,7 @@ public class ProductController {
         productService.deleteproduct(product_id);
         return ResponseEntity.ok(new APIRessponse(200, "Xóa sản phẩm thành công"));
     }
-    //Sửa sản phẩm
+    //Sửa sản phẩm ( còn hàm ửa chưa check)
     @PutMapping("editproduct/{id}")
     public ResponseEntity<APIRessponse> editproduct(@PathVariable Integer id, @Valid @RequestBody CreateProductRequest createProductRequest) {
         log.info("Request update product. productId={}", id);
