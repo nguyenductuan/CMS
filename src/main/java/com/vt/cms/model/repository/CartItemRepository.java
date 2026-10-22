@@ -2,20 +2,26 @@ package com.vt.cms.model.repository;
 
 import com.vt.cms.model.entity.CartItem;
 import org.apache.ibatis.annotations.Mapper;
+import org.apache.ibatis.annotations.Param;
 
 import java.util.List;
 
 @Mapper
 public interface CartItemRepository {
+
     int insertCartItem(CartItem cartItem);
 
-    CartItem findByProductIDAndCart(int cartId, int productId);
+    CartItem findBySkuAndCart(
+            @Param("cartId") int cartId,
+            @Param("skuId") int skuId);
 
-    void updateCartItem(CartItem cartItem);
+    int updateCartItem(CartItem cartItem);
 
-    List<CartItem> finByCartId(int cartId);
+    List<CartItem> finByCartId(@Param("cartId") int cartId);
 
-    int deleteProductCart(List<Integer> productIds, Integer cartId);
+    int deleteProductCart(
+            @Param("productIds") List<Integer> productIds,
+            @Param("cartId") Integer cartId);
 
-    int getCartItemCountById(int cartId);
+    int getCartItemCountById(@Param("cartId") int cartId);
 }

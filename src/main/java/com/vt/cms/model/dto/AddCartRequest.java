@@ -14,6 +14,10 @@ public class AddCartRequest {
     @Min(value = 1, message = "Product ID must be greater than zero")
     private Integer productId;
 
+    @NotNull(message = "SKU ID is required")
+    @Min(value = 1, message = "SKU ID must be greater than zero")
+    private Integer skuId;
+
     @NotNull(message = "Quantity is required")
     @Min(value = 1, message = "Quantity must be greater than or equal to 1")
     private Integer quantity;

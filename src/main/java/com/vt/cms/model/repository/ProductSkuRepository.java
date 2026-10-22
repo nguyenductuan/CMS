@@ -10,6 +10,7 @@ import java.util.List;
 public interface ProductSkuRepository {
     int inserproductsku(Product_Sku productSku);
     List<Product_Sku> findByProductId(Integer product_id);
+    Product_Sku findNotDeletedById(@Param("skuId") Integer skuId);
     int softDeleteByProductId(@Param("productId") Integer productId);
     int updateByProductIdAndSkuCode(@Param("sku") Product_Sku sku);
 }

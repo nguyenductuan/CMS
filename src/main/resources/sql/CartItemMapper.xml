@@ -2,65 +2,54 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.vt.cms.model.repository.CartItemRepository">
-    <resultMap id="CartItemResultMap" type="com.vt.cms.model.entity.CartItem">
-        <id column="id" property="id" jdbcType="OTHER"/>
-        <result column="cart_id" property="cartId" jdbcType="VARCHAR"/>
-        <result column="product_id" property="productId" jdbcType="INTEGER"/>
-        <result column="quantity" property="quantity" jdbcType="VARCHAR"/>
-        <result column="product_name" property="productName" jdbcType="VARCHAR"/>
-        <result column="product_price" property="productPrice" jdbcType="INTEGER"/>
 
+    <resultMap id="CartItemResultMap" type="com.vt.cms.model.entity.CartItem">
+        <id column="id" property="id" jdbcType="VARCHAR"/>
+        <result column="cart_id" property="cartId" jdbcType="INTEGER"/>
+        <result column="product_id" property="productId" jdbcType="INTEGER"/>
+        <result column="sku_id" property="skuId" jdbcType="INTEGER"/>
+        <result column="quantity" property="quantity" jdbcType="INTEGER"/>
+        <result column="product_name" property="productName" jdbcType="VARCHAR"/>
+        <result column="product_price" property="productPrice" jdbcType="DECIMAL"/>
     </resultMap>
 
-    <insert id="insertCartItem">
-        INSERT INTO cart_item (cart_id,
-                               product_id,
-                               quantity,
-                               product_name,
-                               product_price)
-        VALUES (#{cartId},
-                #{productId},
-                #{quantity},
-                #{productName},
-                #{productPrice})
+    <insert id="insertCartItem" parameterType="com.vt.cms.model.entity.CartItem">
+        INSERT INTO cart_item (cart_id, product_id, sku_id, quantity, product_name, product_price)
+        VALUES (#{cartId}, #{productId}, #{skuId}, #{quantity}, #{productName}, #{productPrice})
     </insert>
 
-    <select id="findByProductIDAndCart" resultMap="CartItemResultMap">
-        SELECT id,
-               cart_id,
-               product_id,
-               product_name,
-               product_price,
-               quantity
+    <select id="findBySkuAndCart" resultMap="CartItemResultMap">
+        SELECT id, cart_id, product_id, sku_id, product_name, product_price, quantity
         FROM cart_item
-        WHERE product_id = #{productId}
-          AND cart_id = #{cartId} LIMIT 1
-    </select>
-    <select id="finByCartId" resultMap="CartItemResultMap">
-        SELECT *
-        FROM cart_item
-        where cart_id = #{cartId}
+        WHERE sku_id = #{skuId}
+          AND cart_id = #{cartId}
+        LIMIT 1
     </select>
 
-    <update id="updateCartItem">
+    <select id="finByCartId" resultMap="CartItemResultMap">
+        SELECT id, cart_id, product_id, sku_id, product_name, product_price, quantity
+        FROM cart_item
+        WHERE cart_id = #{cartId}
+        ORDER BY id
+    </select>
+
+    <update id="updateCartItem" parameterType="com.vt.cms.model.entity.CartItem">
         UPDATE cart_item
-        SET quantity      = #{quantity},
-            product_name  = #{productName},
+        SET quantity = #{quantity},
+            product_name = #{productName},
             product_price = #{productPrice}
         WHERE id = #{id}
+          AND cart_id = #{cartId}
+          AND sku_id = #{skuId}
     </update>
+
     <delete id="deleteProductCart">
         DELETE FROM cart_item
         WHERE cart_id = #{cartId}
-        AND product_id IN
-        <foreach item="productId"
-                 collection="productIds"
-                 open="("
-                 separator=","
-                 close=")">
+          AND product_id IN
+        <foreach item="productId" collection="productIds" open="(" separator="," close=")">
             #{productId}
         </foreach>
-
     </delete>
 
     <select id="getCartItemCountById" resultType="int">
