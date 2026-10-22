@@ -11,9 +11,9 @@ public interface CartItemRepository {
 
     int insertCartItem(CartItem cartItem);
 
-    CartItem findByProductIDAndCart(
+    CartItem findBySkuAndCart(
             @Param("cartId") int cartId,
-            @Param("productId") int productId);
+            @Param("skuId") int skuId);
 
     int updateCartItem(CartItem cartItem);
 
