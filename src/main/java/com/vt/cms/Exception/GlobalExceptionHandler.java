@@ -1,7 +1,7 @@
 package com.vt.cms.Exception;
 
 import com.vt.cms.model.resp.APIRessponse;
-import com.vt.cms.Exception.BusinessException;
+import jakarta.validation.ConstraintViolationException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -24,6 +24,13 @@ public class GlobalExceptionHandler {
                 errors.put(error.getField(), error.getDefaultMessage()));
         return ResponseEntity.badRequest()
                 .body(new APIRessponse(400, "Dữ liệu không hợp lệ", errors));
+    }
+
+    @ExceptionHandler(ConstraintViolationException.class)
+    public ResponseEntity<APIRessponse> handleConstraintViolation(ConstraintViolationException ex) {
+        log.info("Constraint validation failed: {}", ex.getMessage());
+        return ResponseEntity.badRequest()
+                .body(new APIRessponse(400, "Tham số yêu cầu không hợp lệ", null));
     }
 
     @ExceptionHandler(HttpMessageNotReadableException.class)
