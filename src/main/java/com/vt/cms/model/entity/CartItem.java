@@ -9,8 +9,8 @@ public class CartItem {
     private String id;
     private Integer cartId;
     private int productId;
+    private Integer skuId;
     private Integer quantity;
     private String productName;
     private BigDecimal productPrice;
-//    private Cart cart;
 }
