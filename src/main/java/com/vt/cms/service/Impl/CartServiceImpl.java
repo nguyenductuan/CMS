@@ -96,7 +96,7 @@ public class CartServiceImpl implements CartService {
             throw new IllegalArgumentException("Sản phẩm không tồn tại");
         }
 
-        Product_Sku sku = productSkuRepository.findActiveById(request.getSkuId());
+        Product_Sku sku = productSkuRepository.findNotDeletedById(request.getSkuId());
         if (sku == null || !Objects.equals(sku.getProduct_id(), request.getProductId())) {
             throw new IllegalArgumentException("SKU không tồn tại hoặc không thuộc sản phẩm đã chọn");
         }
