@@ -26,6 +26,9 @@ public class CampainController {
         this.campainService = campainService ;
     }
     @PostMapping("/add")
+    /**
+     * Tạo mới dữ liệu create campain; nhận các tham số khai báo trong chữ ký hàm và trả về kết quả theo kiểu dữ liệu đã định nghĩa.
+     */
     public ResponseEntity<APIRessponse> createCampain(@RequestBody CreatedCampainRequest request) {
         campainService.createdCampain(request);
         return ResponseEntity.ok(new
@@ -33,12 +36,18 @@ public class CampainController {
     }
     // Lấy danh sách chiến dịch
     @GetMapping("/listcampain")
+    /**
+     * Lấy và trả về dữ liệu get campain; nhận các tham số khai báo trong chữ ký hàm và trả về kết quả theo kiểu dữ liệu đã định nghĩa.
+     */
     public ResponseEntity<APIRessponse> getCampain() {
         return ResponseEntity.ok(new APIRessponse(200, "Lấy danh sách chiến dịch thành công",
                 campainService.getlist()));
     }
     //Thay đổi trạng thái chiến dịch(Duyệt, kết thúc chiến dịch)
     @PutMapping("/status/{id}/{status}")
+    /**
+     * Cập nhật dữ liệu update campain; nhận các tham số khai báo trong chữ ký hàm và trả về kết quả theo kiểu dữ liệu đã định nghĩa.
+     */
     public ResponseEntity<APIRessponse> updateCampain(   @PathVariable("id") Integer campain_id,
                                                          @PathVariable("status") CampainStatus status) {
         campainService.updatestatus(campain_id, status);
@@ -46,6 +55,9 @@ public class CampainController {
     }
     // Xóa chiến dịch
     @DeleteMapping("/deletecampain/{id}")
+    /**
+     * Xóa dữ liệu delete campain; nhận các tham số khai báo trong chữ ký hàm và trả về kết quả theo kiểu dữ liệu đã định nghĩa.
+     */
     public ResponseEntity<APIRessponse> deleteCampain( @PathVariable("id") Integer campainId) {
       campainService.deletecampain(campainId);
       return ResponseEntity.ok(new APIRessponse(200,"Xóa chến dịch thành công"));

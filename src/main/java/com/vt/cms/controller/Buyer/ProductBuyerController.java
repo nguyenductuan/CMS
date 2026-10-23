@@ -20,6 +20,9 @@ public class ProductBuyerController {
     }
 
     @GetMapping("/product-detail/{product_id}/{campaign_id}")
+    /**
+     * Xử lý thông tin sản phẩm product detail; nhận các tham số khai báo trong chữ ký hàm và trả về kết quả theo kiểu dữ liệu đã định nghĩa.
+     */
     public ProductDetailResponse productDetail(
             @PathVariable Integer product_id,
             @PathVariable Integer campaign_id

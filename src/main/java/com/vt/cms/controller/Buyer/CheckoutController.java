@@ -22,6 +22,9 @@ public class CheckoutController {
     }
 
     @PostMapping("/checkout")
+    /**
+     * Kiểm tra điều kiện nghiệp vụ checkout controller; nhận các tham số khai báo trong chữ ký hàm và trả về kết quả theo kiểu dữ liệu đã định nghĩa.
+     */
     public CheckoutPreviewResponse checkoutController(@RequestBody CheckoutPreviewRequest request) {
         return checkoutService.getCheckout(request);
     }

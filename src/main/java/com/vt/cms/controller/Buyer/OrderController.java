@@ -24,11 +24,17 @@ public class OrderController {
     }
     //Hàm lấy danh sách order
     @GetMapping("order-list")
+    /**
+     * Xử lý thông tin đơn hàng orderlist; nhận các tham số khai báo trong chữ ký hàm và trả về kết quả theo kiểu dữ liệu đã định nghĩa.
+     */
     public BaseResponse<PagingResponse<List<OrderResponse>>> orderlist(@ModelAttribute OrdersRequest request) {
         return orderService.getorderlist(request);
     }
     // Ham tao order
     @PostMapping("/order")
+    /**
+     * Xử lý thông tin đơn hàng order; nhận các tham số khai báo trong chữ ký hàm và trả về kết quả theo kiểu dữ liệu đã định nghĩa.
+     */
     public ResponseEntity<APIRessponse>  order(@RequestBody OrderRequest orderRequest) {
         OrderCreateResponse orderCreateResponse =   orderService.createOrder(orderRequest);
         return ResponseEntity.ok(new APIRessponse(200, Order.ORDER_SUCCESS.getMessage(), orderCreateResponse));
@@ -36,12 +42,18 @@ public class OrderController {
     }
     // Ham huy order
     @PostMapping("cancelorder/{orderId}")
+    /**
+     * Hủy nghiệp vụ cancelorder; nhận các tham số khai báo trong chữ ký hàm và trả về kết quả theo kiểu dữ liệu đã định nghĩa.
+     */
     public ResponseEntity<APIRessponse> cancelorder(@PathVariable Integer orderId, String notecancel) {
         orderService.cancelOrder(orderId, notecancel);
         return ResponseEntity.ok(new APIRessponse(200, Order.ORDER_CANCEL.getMessage()));
     }
     // Hàm chi tiết order
     @GetMapping("/order/{id}")
+    /**
+     * Xử lý thông tin đơn hàng order; nhận các tham số khai báo trong chữ ký hàm và trả về kết quả theo kiểu dữ liệu đã định nghĩa.
+     */
     public OrderResponse order(@PathVariable long id) {
         return orderService.getdetailorder(id);
     }
