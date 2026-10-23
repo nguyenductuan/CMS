@@ -81,6 +81,7 @@ public class OrderServiceImpl implements OrderService {
     /**
      * Hủy nghiệp vụ cancel order. Các tham số và kết quả tuân theo chữ ký phương thức.
      */
+    @Transactional
     public void cancelOrder(int orderId, String notecancel) {
         Order order = new Order();
         order.setId(orderId);
