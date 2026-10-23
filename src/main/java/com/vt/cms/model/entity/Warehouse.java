@@ -1,12 +1,12 @@
 package com.vt.cms.model.entity;
 
 import lombok.Data;
-
 import java.time.LocalDateTime;
 
 @Data
 public class Warehouse {
     private Integer id;
+    // The existing schema stores warehouse_code as VARCHAR.
     private String warehouse_code;
     private String warehouse_name;
     private LocalDateTime created_at;
@@ -18,11 +18,10 @@ public class Warehouse {
     private Integer province_name;
     private Integer province_id;
     private String street;
-    // private String address_detail;
+    private String address_detail;
     private Integer ward_code;
     private String ward_name;
     private Integer ward_id;
     private boolean is_deleted;
     private boolean address_is_default;
-
 }
