@@ -12,6 +12,9 @@ import java.util.UUID;
  */
 @Component
 public class MockShippingProvider {
+    /**
+     * Gán dữ liệu assign shipper. Các tham số và kết quả tuân theo chữ ký phương thức.
+     */
     public ShippingAssignment assignShipper(Integer orderId, String warehouseCode) {
         String suffix = UUID.randomUUID().toString().replace("-", "").substring(0, 8).toUpperCase();
         ShippingAssignment assignment = new ShippingAssignment();
