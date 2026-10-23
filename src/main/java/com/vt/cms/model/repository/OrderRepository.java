@@ -54,9 +54,9 @@ public interface OrderRepository {
                         @Param("updatedBy") String updatedBy);
     // Thanh toan
     List<Itemorderdetail> getOrderItemsByOrderId1(long orderId);
-    void cancelOrder(Order order);
+    int cancelOrder(Order order);
 
-    long countorder();
+    long countorder(OrdersRequest request);
 
     int completeDeliveredOrdersOlderThan(
             @Param("cutoff") java.time.LocalDateTime cutoff,
