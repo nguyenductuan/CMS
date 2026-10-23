@@ -9,6 +9,9 @@ import java.math.BigDecimal;
 
 public class PriceServiceImpl implements PriceService {
     @Override
+    /**
+     * Tính toán calculate item price. Các tham số và kết quả tuân theo chữ ký phương thức.
+     */
     public BigDecimal calculateItemPrice(BigDecimal price, int quantity) {
         return price.multiply(BigDecimal.valueOf(quantity));
     }

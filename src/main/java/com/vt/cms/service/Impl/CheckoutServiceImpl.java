@@ -24,6 +24,9 @@ public class CheckoutServiceImpl implements CheckoutService {
     private final ProductRepository productRepository;
     private final OrderPricingService orderPricingService;
 
+    /**
+     * Kiểm tra điều kiện checkout service impl. Các tham số và kết quả tuân theo chữ ký phương thức.
+     */
     public CheckoutServiceImpl(ShippingFeeService shippingFeeService,
                                ProductRepository productRepository,
                                OrderPricingService orderPricingService) {
@@ -33,6 +36,9 @@ public class CheckoutServiceImpl implements CheckoutService {
     }
 
     @Override
+    /**
+     * Lấy dữ liệu get checkout. Các tham số và kết quả tuân theo chữ ký phương thức.
+     */
     public CheckoutPreviewResponse getCheckout(CheckoutPreviewRequest request) {
         validateRequest(request);
 
@@ -54,23 +60,38 @@ public class CheckoutServiceImpl implements CheckoutService {
         return response;
     }
 
+    /**
+     * Kiểm tra tính hợp lệ validate request. Các tham số và kết quả tuân theo chữ ký phương thức.
+     */
     private void validateRequest(CheckoutPreviewRequest request) {
         if (request == null || request.getItems() == null || request.getItems().isEmpty()) {
+            /**
+             * Thực hiện xử lý nghiệp vụ business exception. Các tham số và kết quả tuân theo chữ ký phương thức.
+             */
             throw new BusinessException(MessageCode.INVALID_ORDER);
         }
         for (ItemRequest item : request.getItems()) {
             if (item == null || item.getProductId() == null || item.getProductId() <= 0
                     || item.getCampainId() == null || item.getSkuId() == null
                     || item.getQuantity() <= 0) {
+                /**
+                 * Thực hiện xử lý nghiệp vụ business exception. Các tham số và kết quả tuân theo chữ ký phương thức.
+                 */
                 throw new BusinessException(MessageCode.INVALID_ORDER);
             }
         }
     }
 
+    /**
+     * Xử lý nghiệp vụ process item. Các tham số và kết quả tuân theo chữ ký phương thức.
+     */
     private ItemDto processItem(ItemRequest request) {
         ProductDetail product = productRepository.getproduct1(
                 request.getProductId(), request.getCampainId());
         if (product == null) {
+            /**
+             * Thực hiện xử lý nghiệp vụ business exception. Các tham số và kết quả tuân theo chữ ký phương thức.
+             */
             throw new BusinessException(MessageCode.PRODUCT_NOT_FOUND);
         }
 
@@ -80,9 +101,15 @@ public class CheckoutServiceImpl implements CheckoutService {
                         && Objects.equals(candidate.getId(), request.getSkuId()))
                 .findFirst().orElse(null);
         if (sku == null) {
+            /**
+             * Thực hiện xử lý nghiệp vụ business exception. Các tham số và kết quả tuân theo chữ ký phương thức.
+             */
             throw new BusinessException(MessageCode.PRODUCT_NOT_FOUND);
         }
         if (sku.getStock() == null || request.getQuantity() > sku.getStock()) {
+            /**
+             * Thực hiện xử lý nghiệp vụ business exception. Các tham số và kết quả tuân theo chữ ký phương thức.
+             */
             throw new BusinessException(MessageCode.STOCK_NOT_ENOUGH);
         }
 
