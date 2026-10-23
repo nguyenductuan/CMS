@@ -18,6 +18,9 @@ public class OrderFulfillmentController {
     private final OrderFulfillmentService fulfillmentService;
 
     @PostMapping("/{orderId}/warehouse")
+    /**
+     * Thực hiện xử lý nghiệp vụ select warehouse. Các tham số đầu vào và kết quả được xác định theo chữ ký phương thức.
+     */
     public ResponseEntity<APIRessponse> selectWarehouse(
             @PathVariable Integer orderId,
             @Valid @RequestBody WarehouseSelectionRequest request) {
@@ -27,6 +30,9 @@ public class OrderFulfillmentController {
     }
 
     @PostMapping("/{orderId}/dispatch")
+    /**
+     * Thực hiện xử lý nghiệp vụ dispatch. Các tham số đầu vào và kết quả được xác định theo chữ ký phương thức.
+     */
     public ResponseEntity<APIRessponse> dispatch(@PathVariable Integer orderId) {
         log.info("API dispatch order. orderId={}", orderId);
         ShippingAssignment assignment = fulfillmentService.dispatchToShipper(orderId);
@@ -35,6 +41,9 @@ public class OrderFulfillmentController {
 
     /** Mock webhook 3PL; chỉ dùng demo, production cần xác thực chữ ký callback. */
     @PostMapping("/{orderId}/carrier/delivery-success")
+    /**
+     * Thực hiện xử lý nghiệp vụ delivery successful. Các tham số đầu vào và kết quả được xác định theo chữ ký phương thức.
+     */
     public ResponseEntity<APIRessponse> deliverySuccessful(
             @PathVariable Integer orderId,
             @RequestBody DeliverySuccessRequest request) {
@@ -43,6 +52,9 @@ public class OrderFulfillmentController {
     }
 
     @PostMapping("/{orderId}/confirm-received")
+    /**
+     * Xác nhận nghiệp vụ confirm received. Các tham số đầu vào và kết quả được xác định theo chữ ký phương thức.
+     */
     public ResponseEntity<APIRessponse> confirmReceived(
             @PathVariable Integer orderId,
             @RequestHeader("X-Customer-Id") String customerId) {
@@ -53,7 +65,13 @@ public class OrderFulfillmentController {
 
     public static class DeliverySuccessRequest {
         private String trackingNumber;
+        /**
+         * Lấy dữ liệu get tracking number. Các tham số đầu vào và kết quả được xác định theo chữ ký phương thức.
+         */
         public String getTrackingNumber() { return trackingNumber; }
+        /**
+         * Thiết lập hoặc cập nhật set tracking number. Các tham số đầu vào và kết quả được xác định theo chữ ký phương thức.
+         */
         public void setTrackingNumber(String trackingNumber) { this.trackingNumber = trackingNumber; }
     }
 }
