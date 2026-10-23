@@ -27,6 +27,9 @@ public class DeliveredOrderCompletionJob {
      */
     @Scheduled(cron = "0 0 * * * *", zone = "Asia/Ho_Chi_Minh")
     @Transactional(rollbackFor = Exception.class)
+    /**
+     * Hoàn tất nghiệp vụ complete delivered orders. Các tham số và kết quả tuân theo chữ ký phương thức.
+     */
     public void completeDeliveredOrders() {
         LocalDateTime now = LocalDateTime.now();
         LocalDateTime cutoff = now.minusDays(AUTO_COMPLETE_AFTER_DAYS);

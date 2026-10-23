@@ -60,6 +60,9 @@ public class CampainServiceImpl implements CampainService {
      */
     @Override
     @Transactional
+    /**
+     * Tạo mới dữ liệu created campain. Các tham số và kết quả tuân theo chữ ký phương thức.
+     */
     public void createdCampain(CreatedCampainRequest request) {
         log.info("Start creating campaign");
 
@@ -173,6 +176,9 @@ public class CampainServiceImpl implements CampainService {
                 );
     }
 
+    /**
+     * Kiểm tra tính hợp lệ validate sku status. Các tham số và kết quả tuân theo chữ ký phương thức.
+     */
     private void validateSkuStatus(
             Product_Sku sku,
             Integer campaignId) {
@@ -189,6 +195,9 @@ public class CampainServiceImpl implements CampainService {
         }
     }
 
+    /**
+     * Kiểm tra tính hợp lệ validate campaign stock. Các tham số và kết quả tuân theo chữ ký phương thức.
+     */
     private void validateCampaignStock(
             Product_Sku sku,
             CampainProductSku skuRequest,
@@ -245,6 +254,9 @@ public class CampainServiceImpl implements CampainService {
         return campaignProduct;
     }
     @Override
+    /**
+     * Cập nhật dữ liệu updatestatus. Các tham số và kết quả tuân theo chữ ký phương thức.
+     */
     public void updatestatus(Integer campain_id, CampainStatus status) {
         if (campain_id == null || campain_id <= 0 || status == null) {
             throw new IllegalArgumentException("Campaign ID và trạng thái là bắt buộc");
@@ -261,11 +273,17 @@ public class CampainServiceImpl implements CampainService {
         if (rows != 1) throw new BusinessException(MessageCode.CAMPAIN_STATUS_INVALID);
     }
     @Override
+    /**
+     * Lấy dữ liệu getlist. Các tham số và kết quả tuân theo chữ ký phương thức.
+     */
     public List<CampainResponse> getlist() {
         return campainRepository.getlistcampain();
     }
 
     @Override
+    /**
+     * Xóa dữ liệu deletecampain. Các tham số và kết quả tuân theo chữ ký phương thức.
+     */
     public void deletecampain(Integer campainID) {
         if (campainID == null || campainID <= 0) throw new IllegalArgumentException("Campaign ID không hợp lệ");
         int rows = campainRepository.deletecampain(campainID);
