@@ -21,10 +21,16 @@ public enum OrderStatus {
         this.description = description;
     }
 
+    /**
+     * Phương thức get code cung cấp thông tin hoặc thao tác liên quan đến trạng thái nghiệp vụ.
+     */
     public String getCode() {
         return code;
     }
 
+    /**
+     * Phương thức get description cung cấp thông tin hoặc thao tác liên quan đến trạng thái nghiệp vụ.
+     */
     public String getDescription() {
         return description;
     }
