@@ -88,7 +88,10 @@ public class OrderServiceImpl implements OrderService {
         order.setNotecancel(notecancel);
         order.setUpdatedAt(LocalDateTime.now());
         order.setCancelled_by("SYSTEM");
-        orderRepository.cancelOrder(order);
+        int updatedRows = orderRepository.cancelOrder(order);
+        if (updatedRows != 1) {
+            throw new IllegalStateException("Không thể hủy đơn hàng ở trạng thái hiện tại hoặc không tìm thấy đơn hàng");
+        }
     }
 
     @Override
@@ -118,7 +121,7 @@ public class OrderServiceImpl implements OrderService {
             // Gắn danh sách item vào order
             order.setOrderItems(itemDtos);
         }
-        long totalCount = orderRepository.countorder();
+        long totalCount = orderRepository.countorder(request);
         long pageSize = request.getPageSize();
         long totalPage = pageSize > 0
                 ? (totalCount + pageSize - 1) / pageSize
