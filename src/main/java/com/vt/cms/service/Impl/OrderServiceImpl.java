@@ -202,6 +202,7 @@ public class OrderServiceImpl implements OrderService {
                 orderItem.setPrice(unitPrice);
                 orderItem.setTotal_price(lineTotal);
                 orderItem.setProduct_id(product.getId());
+                orderItem.setCampaign_id(itemRequest.getCampainId());
                 orderItems.add(orderItem);
             }
 
