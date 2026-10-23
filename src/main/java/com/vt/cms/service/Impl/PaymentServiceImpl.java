@@ -43,14 +43,14 @@ public class PaymentServiceImpl implements PaymentService {
     @Override
     @Transactional(rollbackFor = Exception.class)
     /**
-     * Xử lý thanh toán paymentcallback. Các tham số và kết quả tuân theo chữ ký phương thức.
+     * Xử lý thanh toán paymentCallback. Các tham số và kết quả tuân theo chữ ký phương thức.
      */
     public void paymentCallback(PaymentCallback paymentCallback) {
         if (paymentCallback == null
                 || paymentCallback.getTransactionCode() == null
-                || paymentcallback.getTransactionCode().isBlank()
+                || paymentCallback.getTransactionCode().isBlank()
                 || paymentCallback.getAmount() == null
-                || paymentcallback.getAmount().compareTo(BigDecimal.ZERO) <= 0) {
+                || paymentCallback.getAmount().compareTo(BigDecimal.ZERO) <= 0) {
             /**
              * Thực hiện xử lý nghiệp vụ illegal argument exception. Các tham số và kết quả tuân theo chữ ký phương thức.
              */
@@ -58,7 +58,7 @@ public class PaymentServiceImpl implements PaymentService {
         }
 
         Payment payment = paymentRepository.findByTransactionCodeForUpdate(
-                paymentcallback.getTransactionCode());
+                paymentCallback.getTransactionCode());
         if (payment == null) {
             /**
              * Thực hiện xử lý nghiệp vụ illegal argument exception. Các tham số và kết quả tuân theo chữ ký phương thức.
@@ -66,7 +66,7 @@ public class PaymentServiceImpl implements PaymentService {
             throw new IllegalArgumentException("Không tìm thấy giao dịch thanh toán");
         }
         if (payment.getAmount() == null
-                || paymentcallback.getAmount().compareTo(payment.getAmount()) != 0) {
+                || paymentCallback.getAmount().compareTo(payment.getAmount()) != 0) {
             /**
              * Thực hiện xử lý nghiệp vụ illegal argument exception. Các tham số và kết quả tuân theo chữ ký phương thức.
              */
@@ -81,7 +81,7 @@ public class PaymentServiceImpl implements PaymentService {
             throw new IllegalArgumentException("Không tìm thấy đơn hàng");
         }
         if (order.getTotal() == null
-                || paymentcallback.getAmount().compareTo(order.getTotal()) != 0) {
+                || paymentCallback.getAmount().compareTo(order.getTotal()) != 0) {
             /**
              * Thực hiện xử lý nghiệp vụ illegal argument exception. Các tham số và kết quả tuân theo chữ ký phương thức.
              */
@@ -92,7 +92,7 @@ public class PaymentServiceImpl implements PaymentService {
         if ("SUCCESS".equalsIgnoreCase(paymentStatus)
                 || PaymentStatus.PAYMENT_SUCCESS.getCode().equalsIgnoreCase(paymentStatus)) {
             log.info("Duplicate payment callback ignored. orderId={}, transactionCode={}",
-                    payment.getOrderId(), paymentcallback.getTransactionCode());
+                    payment.getOrderId(), paymentCallback.getTransactionCode());
             return;
         }
         if (!"PENDING".equalsIgnoreCase(paymentStatus)) {
@@ -134,15 +134,17 @@ public class PaymentServiceImpl implements PaymentService {
             }
         }
 
-        paymentRepostitory.updatepayment(paymentcallback.getTransactionCode());
+        if (paymentRepository.markSuccessIfPending(paymentCallback.getTransactionCode()) != 1) {
+            throw new IllegalStateException("Giao dịch không còn ở trạng thái chờ thanh toán");
+        }
         order.setOrder_status(OrderStatus.PAID);
         order.setUpdatedAt(LocalDateTime.now());
         order.setUpdated_by("SYSTEM");
         orderRepository.save(order);
 
         log.info("Payment confirmed. orderId={}, transactionCode={}, amount={}",
-                payment.getOrderId(), paymentcallback.getTransactionCode(),
-                paymentcallback.getAmount());
+                payment.getOrderId(), paymentCallback.getTransactionCode(),
+                paymentCallback.getAmount());
     }
 
     @Override
