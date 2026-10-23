@@ -37,9 +37,17 @@
     </select>
 
     <select id="countorder" resultType="long">
-        SELECT COUNT(orders.id)
-        FROM `orders`
-        WHERE 1
+        SELECT COUNT(o.id)
+        FROM `orders` o
+        <where>
+            <if test="status != null and status.trim() != ''">
+                AND o.order_status = #{status}
+            </if>
+            <if test="keyword != null and keyword.trim() != ''">
+                AND (CAST(o.id AS CHAR) LIKE CONCAT('%', #{keyword}, '%')
+                     OR o.created_by LIKE CONCAT('%', #{keyword}, '%'))
+            </if>
+        </where>
     </select>
 
     <update id="save">
@@ -57,6 +65,7 @@
             updated_at = #{updatedAt},
             canceled_by = #{canceled_by}
         WHERE id = #{id}
+          AND order_status IN ('WAIT_PAYMENT', 'PAID')
     </update>
     <select id="getOrderItemsByOrderId"
             parameterType="long"
@@ -142,7 +151,8 @@
                  LEFT JOIN products p
                            ON oi.product_id = p.id
                  LEFT JOIN campain_product cp
-                           ON cp.product_id = p.id
+                           ON cp.product_id = oi.product_id
+                          AND cp.sku_id = oi.sku_id
         WHERE oi.order_id = #{orderId}
     </select>
 
@@ -156,6 +166,15 @@
             o.expected_delivery AS expectedDelivery,
             o.created_by AS createdBy
         FROM orders o
+        <where>
+            <if test="status != null and status.trim() != ''">
+                AND o.order_status = #{status}
+            </if>
+            <if test="keyword != null and keyword.trim() != ''">
+                AND (CAST(o.id AS CHAR) LIKE CONCAT('%', #{keyword}, '%')
+                     OR o.created_by LIKE CONCAT('%', #{keyword}, '%'))
+            </if>
+        </where>
         ORDER BY o.created_at DESC
         LIMIT #{pageSize}
             OFFSET #{offset}
