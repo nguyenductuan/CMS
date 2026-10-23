@@ -27,7 +27,7 @@ public class PaymentController {
      */
     public ResponseEntity<APIRessponse> payment(@RequestBody PaymentRequest paymentRequest) {
       PaymentResponse paymentResponse=  paymentService.payment(paymentRequest);
-        return ResponseEntity.ok(new APIRessponse(202, "Đang chờ xác nhận thanh toán", paymentResponse));
+        return ResponseEntity.accepted().body(new APIRessponse(202, "Đang chờ xác nhận thanh toán", paymentResponse));
     }
     // Gọi API callback từ cổng thanh toán, cập nhật trạng thái thanh toán
     @PostMapping("/paymentcallback")
