@@ -21,12 +21,18 @@ public class APIRessponse {
     private Map<String, String> errors;
 
     // Thành công
+    /**
+     * Phương thức apiressponse hỗ trợ thao tác với dữ liệu phản hồi API.
+     */
     public APIRessponse(int code, String message) {
         this.code = code;
         this.message = message;
     }
 
     // Có data
+    /**
+     * Phương thức apiressponse hỗ trợ thao tác với dữ liệu phản hồi API.
+     */
     public APIRessponse(int code, String message, Object data) {
         this.code = code;
         this.message = message;
@@ -35,6 +41,9 @@ public class APIRessponse {
     }
 
     // Có errors
+    /**
+     * Phương thức apiressponse hỗ trợ thao tác với dữ liệu phản hồi API.
+     */
     public APIRessponse(
             int code,
             String message,
