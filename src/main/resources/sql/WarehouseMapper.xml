@@ -3,21 +3,93 @@
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.vt.cms.model.repository.WarehouseRepository">
     <resultMap id="WarehouseResultMap" type="com.vt.cms.model.entity.Warehouse">
-        <id column="id" property="id" jdbcType="OTHER"/>
-        <result column="warehouse_code" property="warehouse_code" jdbcType="OTHER"/>
-        <result column="warehouse_name" property="warehouse_name" jdbcType="OTHER"/>
-        <result column="is_address_default" property="is_address_default" jdbcType="OTHER"/>
-
+        <id column="id" property="id"/>
+        <result column="warehouse_code" property="warehouse_code"/>
+        <result column="warehouse_name" property="warehouse_name"/>
+        <result column="created_at" property="created_at"/>
+        <result column="updated_at" property="updated_at"/>
+        <result column="created_by" property="created_by"/>
+        <result column="updated_by" property="updated_by"/>
+        <result column="phone_number" property="phone_number"/>
+        <result column="province_code" property="province_code"/>
+        <result column="province_name" property="province_name"/>
+        <result column="province_id" property="province_id"/>
+        <result column="street" property="street"/>
+        <result column="address_detail" property="address_detail"/>
+        <result column="ward_code" property="ward_code"/>
+        <result column="ward_name" property="ward_name"/>
+        <result column="ward_id" property="ward_id"/>
+        <result column="is_deleted" property="is_deleted"/>
+        <result column="is_address_default" property="address_is_default"/>
     </resultMap>
 
-    <select id="getlistwahouse">
-        SELECT *
-        from warehouse
+    <select id="getlistwahouse" resultMap="WarehouseResultMap">
+        SELECT * FROM warehouse WHERE is_deleted = 'false' ORDER BY id DESC
     </select>
 
     <select id="getdetail" resultMap="WarehouseResultMap">
-        SELECT *
-        from warehouse
-        where id = #{id}
+        SELECT * FROM warehouse WHERE id = #{id} AND is_deleted = 'false' LIMIT 1
     </select>
+
+    <insert id="add">
+        INSERT INTO warehouse (warehouse_code, warehouse_name, created_at, updated_at,
+            phone_number, province_code, province_name, province_id, street, address_detail,
+            ward_code, ward_name, ward_id, is_deleted, is_address_default)
+        VALUES (#{warehouse.warehouse_code}, #{warehouse.warehouse_name}, #{createdAt}, #{createdAt},
+            #{warehouse.phone_number}, #{warehouse.province_code}, #{warehouse.province_name},
+            #{warehouse.province_id}, #{warehouse.street}, #{warehouse.address_detail},
+            #{warehouse.ward_code}, #{warehouse.ward_name}, #{warehouse.ward_id}, 'false',
+            #{warehouse.address_is_default})
+    </insert>
+
+    <update id="setDeleted">
+        UPDATE warehouse SET is_deleted = CASE WHEN #{deleted} = 1 THEN 'true' ELSE 'false' END, updated_at = NOW()
+        WHERE id = #{id}
+    </update>
+
+    <select id="listInventory" resultType="com.vt.cms.model.dto.WarehouseInventoryResponse">
+        SELECT wi.warehouse_id AS warehouseId, w.warehouse_name AS warehouseName,
+            wi.sku_id AS skuId, ps.sku_code AS skuCode, ps.product_id AS productId,
+            p.name AS productName, wi.quantity AS quantity, wi.updated_at AS updatedAt
+        FROM warehouse_inventory wi
+        JOIN warehouse w ON w.id = wi.warehouse_id AND w.is_deleted = 'false'
+        JOIN product_sku ps ON ps.id = wi.sku_id AND ps.is_deleted = 'false'
+        LEFT JOIN products p ON p.id = ps.product_id
+        WHERE wi.warehouse_id = #{warehouseId}
+        ORDER BY p.name, ps.sku_code
+    </select>
+
+    <select id="listInventoryMovements" resultType="com.vt.cms.model.dto.WarehouseInventoryMovementResponse">
+        SELECT m.id, m.warehouse_id AS warehouseId, m.sku_id AS skuId, ps.sku_code AS skuCode,
+            m.quantity_delta AS quantityDelta, m.quantity_after AS quantityAfter, m.reason,
+            m.created_by AS createdBy, m.created_at AS createdAt
+        FROM warehouse_inventory_movement m LEFT JOIN product_sku ps ON ps.id = m.sku_id
+        WHERE m.warehouse_id = #{warehouseId}
+        <if test="skuId != null">AND m.sku_id = #{skuId}</if>
+        ORDER BY m.id DESC LIMIT #{limit}
+    </select>
+
+    <select id="skuExists" resultType="int">
+        SELECT COUNT(*) FROM product_sku WHERE id = #{skuId} AND is_deleted = 'false'
+    </select>
+
+    <insert id="ensureInventoryRow">
+        INSERT IGNORE INTO warehouse_inventory (warehouse_id, sku_id, quantity, updated_at)
+        VALUES (#{warehouseId}, #{skuId}, 0, NOW())
+    </insert>
+
+    <update id="adjustInventory">
+        UPDATE warehouse_inventory SET quantity = quantity + #{delta}, updated_at = NOW()
+        WHERE warehouse_id = #{warehouseId} AND sku_id = #{skuId} AND quantity + #{delta} &gt;= 0
+    </update>
+
+    <select id="getInventoryQuantity" resultType="int">
+        SELECT quantity FROM warehouse_inventory WHERE warehouse_id = #{warehouseId} AND sku_id = #{skuId} LIMIT 1
+    </select>
+
+    <insert id="insertInventoryMovement">
+        INSERT INTO warehouse_inventory_movement
+            (warehouse_id, sku_id, quantity_delta, quantity_after, reason, created_by, created_at)
+        VALUES (#{warehouseId}, #{skuId}, #{delta}, #{quantityAfter}, #{reason}, #{createdBy}, NOW())
+    </insert>
 </mapper>
