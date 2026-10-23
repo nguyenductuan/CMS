@@ -11,6 +11,7 @@ import com.vt.cms.model.repository.CartRepository;
 import com.vt.cms.model.repository.ProductRepository;
 import com.vt.cms.model.repository.ProductSkuRepository;
 import com.vt.cms.service.CartService;
+import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -151,14 +152,19 @@ public class CartServiceImpl implements CartService {
 
         Cart cart = cartRepository.finByUserId(request.getUserId());
         if (cart == null) {
-            cart = new Cart();
-            cart.setUserId(request.getUserId());
-            int insertedRows = cartRepository.insertCart(cart);
-            if (insertedRows != 1 || cart.getId() == null) {
-                /**
-                 * Thực hiện xử lý nghiệp vụ illegal state exception. Các tham số và kết quả tuân theo chữ ký phương thức.
-                 */
-                throw new IllegalStateException("Không thể tạo giỏ hàng");
+            Cart newCart = new Cart();
+            newCart.setUserId(request.getUserId());
+            try {
+                int insertedRows = cartRepository.insertCart(newCart);
+                if (insertedRows == 1) {
+                    cart = newCart;
+                }
+            } catch (DuplicateKeyException concurrentCreate) {
+                // Another request created the user's cart after our initial lookup.
+                cart = cartRepository.finByUserId(request.getUserId());
+            }
+            if (cart == null || cart.getId() == null) {
+                throw new IllegalStateException("Không thể tạo hoặc tải giỏ hàng");
             }
         }
         if (cart.getId() == null) {
@@ -178,13 +184,17 @@ public class CartServiceImpl implements CartService {
             newItem.setProductName(product.getName());
             newItem.setProductPrice(sku.getPrice());
 
-            if (cartItemRepository.insertCartItem(newItem) != 1) {
-                /**
-                 * Thực hiện xử lý nghiệp vụ illegal state exception. Các tham số và kết quả tuân theo chữ ký phương thức.
-                 */
+            try {
+                if (cartItemRepository.insertCartItem(newItem) == 1) {
+                    return;
+                }
+            } catch (DuplicateKeyException concurrentInsert) {
+                // Another request inserted this SKU concurrently; re-read and update it.
+            }
+            existingItem = cartItemRepository.findBySkuAndCart(cart.getId(), sku.getId());
+            if (existingItem == null) {
                 throw new IllegalStateException("Không thể thêm SKU vào giỏ hàng");
             }
-            return;
         }
 
         int currentQuantity = existingItem.getQuantity() == null ? 0 : existingItem.getQuantity();
