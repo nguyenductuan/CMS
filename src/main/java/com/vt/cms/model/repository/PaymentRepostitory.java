@@ -9,7 +9,16 @@ public interface PaymentRepostitory {
 //
 //    int insertpayment(Payment payment);
 //
+   /**
+    * Cập nhật updatepayment. Các tham số và giá trị trả về được mô tả bởi chữ ký phương thức.
+    */
    int updatepayment(String transactionCode);
+    /**
+     * Lưu save. Các tham số và giá trị trả về được mô tả bởi chữ ký phương thức.
+     */
     void save(Payment payment);
+    /**
+     * Xử lý thanh toán paymentbytransaction. Các tham số và giá trị trả về được mô tả bởi chữ ký phương thức.
+     */
     Payment paymentbytransaction(String transactionCode);
 }
