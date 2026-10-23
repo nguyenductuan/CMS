@@ -69,23 +69,22 @@
     </update>
     <select id="getOrderItemsByOrderId"
             parameterType="long"
-            resultType="com.vt.cms.model.dto.order.Itemorderdetail">
+            resultType="com.vt.cms.model.dto.ItemDto">
         SELECT
-            p.id as productId,
-            p.name as productName,
-            oi.price,
-            cp.campaign_id as campaignId,
-            cp.stock_campaign as stockCampaign,
-            s.sku_code AS skuCode,
-            s.id AS skuId,
-            p.json_images as jsonImages,
-            cp.price as priceCampaign,
-            cp.price_discount as priceDiscountCampaign,
-            oi.quantity
+            p.id AS productId,
+            p.name AS productName,
+            oi.quantity AS quantity,
+            oi.sku_id AS skuId,
+            cp.campaign_id AS campaignId,
+            cp.stock_campaign AS stock,
+            cp.price AS price_campain,
+            cp.price_discount AS price_discount
         FROM order_item oi
-                 JOIN products p ON p.id = oi.product_id
-                 LEFT JOIN product_sku s ON s.id = oi.sku_id
-                 LEFT JOIN campain_product cp ON cp.product_id = oi.product_id AND cp.sku_id = oi.sku_id
+        JOIN products p ON p.id = oi.product_id
+        LEFT JOIN campain_product cp
+          ON cp.product_id = oi.product_id
+         AND cp.sku_id = oi.sku_id
+         AND cp.campaign_id = oi.campaign_id
         WHERE oi.order_id = #{orderId}
     </select>
 
@@ -107,7 +106,7 @@
         FROM order_item oi
                  JOIN products p ON p.id = oi.product_id
                  LEFT JOIN product_sku s ON s.id = oi.sku_id
-                 LEFT JOIN campain_product cp ON cp.product_id = oi.product_id AND cp.sku_id = oi.sku_id
+                 LEFT JOIN campain_product cp ON cp.product_id = oi.product_id AND cp.sku_id = oi.sku_id AND cp.campaign_id = oi.campaign_id
         WHERE oi.order_id = #{orderId}
     </select>
 
@@ -153,6 +152,7 @@
                  LEFT JOIN campain_product cp
                            ON cp.product_id = oi.product_id
                           AND cp.sku_id = oi.sku_id
+                          AND cp.campaign_id = oi.campaign_id
         WHERE oi.order_id = #{orderId}
     </select>
 
