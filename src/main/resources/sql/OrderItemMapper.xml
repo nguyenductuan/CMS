@@ -7,6 +7,7 @@
         <result column="quantity" property="quantity" jdbcType="OTHER"/>
         <result column="order_id" property="order_id" jdbcType="OTHER"/>
         <result column="sku_id" property="sku_id" jdbcType="OTHER"/>
+        <result column="campaign_id" property="campaign_id" jdbcType="OTHER"/>
         <result column="price" property="price" jdbcType="OTHER"/>
         <result column="product_id" property="product_id" jdbcType="OTHER"/>
         <result column="total_price" property="total_price" jdbcType="OTHER"/>
@@ -33,7 +34,8 @@
         product_id,
         price,
         total_price,
-        sku_id
+        sku_id,
+        campaign_id
         )
         VALUES
             <foreach collection="list" item="item" separator=",">
@@ -43,7 +45,8 @@
             #{item.product_id},
             #{item.price},
             #{item.total_price},
-            #{item.sku_id}
+            #{item.sku_id},
+            #{item.campaign_id}
             )
         </foreach>
     </insert>
