@@ -12,5 +12,6 @@ public class OrderItem {
     private  BigDecimal total_price;
     private Integer order_id;
     private Integer sku_id;
+    private Integer campaign_id;
 
 }
