@@ -16,6 +16,9 @@ public class ShippingServiceImpl implements ShippingService {
     private final ShippingRepository shippingRepository;
 
     @Override
+    /**
+     * Lấy dữ liệu get shipping. Các tham số và kết quả tuân theo chữ ký phương thức.
+     */
     public List<Shipping> getShipping() {
         List<Shipping> shippingMethods = shippingRepository.getShipping();
         return shippingMethods == null ? List.of() : shippingMethods;

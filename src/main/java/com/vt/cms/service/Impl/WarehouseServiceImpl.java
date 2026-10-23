@@ -17,16 +17,25 @@ import java.util.List;
 public class WarehouseServiceImpl implements WarehouseService {
     private final WarehouseRepository warehouseRepository;
 
+    /**
+     * Thực hiện xử lý nghiệp vụ warehouse service impl. Các tham số và kết quả tuân theo chữ ký phương thức.
+     */
     public WarehouseServiceImpl(WarehouseRepository warehouseRepository) {
         this.warehouseRepository = warehouseRepository;
     }
 
     @Override
+    /**
+     * Lấy danh sách listqwarehouse. Các tham số và kết quả tuân theo chữ ký phương thức.
+     */
     public List<Warehouse> listqwarehouse() {
         return warehouseRepository.getlistwahouse();
     }
 
     @Override
+    /**
+     * Lấy dữ liệu getdetail. Các tham số và kết quả tuân theo chữ ký phương thức.
+     */
     public WarehouseResponse getdetail(Integer id) {
         if (id == null || id <= 0) throw new IllegalArgumentException("Mã kho không hợp lệ");
         Warehouse warehouse = warehouseRepository.getdetail(id);
@@ -45,22 +54,37 @@ public class WarehouseServiceImpl implements WarehouseService {
     }
 
     @Override
+    /**
+     * Thêm dữ liệu addwarehouse. Các tham số và kết quả tuân theo chữ ký phương thức.
+     */
     public void addwarehouse(WarehouseRequest warehouse) {
         if (warehouse == null || warehouse.getWarehouse_name() == null || warehouse.getWarehouse_name().isBlank()) {
+            /**
+             * Thực hiện xử lý nghiệp vụ illegal argument exception. Các tham số và kết quả tuân theo chữ ký phương thức.
+             */
             throw new IllegalArgumentException("Tên kho không được để trống");
         }
         if (warehouseRepository.add(warehouse, LocalDateTime.now()) != 1) {
+            /**
+             * Thực hiện xử lý nghiệp vụ illegal state exception. Các tham số và kết quả tuân theo chữ ký phương thức.
+             */
             throw new IllegalStateException("Không thể tạo kho");
         }
     }
 
     @Override
+    /**
+     * Thiết lập hoặc cập nhật set warehouse deleted. Các tham số và kết quả tuân theo chữ ký phương thức.
+     */
     public void setWarehouseDeleted(Integer id, boolean deleted) {
         if (id == null || id <= 0) throw new IllegalArgumentException("Mã kho không hợp lệ");
         if (warehouseRepository.setDeleted(id, deleted) != 1) throw new IllegalArgumentException("Không tìm thấy kho");
     }
 
     @Override
+    /**
+     * Lấy danh sách list inventory. Các tham số và kết quả tuân theo chữ ký phương thức.
+     */
     public List<WarehouseInventoryResponse> listInventory(Integer warehouseId) {
         requireActiveWarehouse(warehouseId);
         return warehouseRepository.listInventory(warehouseId);
@@ -68,17 +92,29 @@ public class WarehouseServiceImpl implements WarehouseService {
 
     @Override
     @Transactional
+    /**
+     * Điều chỉnh dữ liệu adjust inventory. Các tham số và kết quả tuân theo chữ ký phương thức.
+     */
     public void adjustInventory(Integer warehouseId, WarehouseInventoryAdjustRequest request) {
         requireActiveWarehouse(warehouseId);
         if (request == null || request.getSkuId() == null || request.getSkuId() <= 0
                 || request.getQuantityDelta() == null || request.getQuantityDelta() == 0) {
+            /**
+             * Thực hiện xử lý nghiệp vụ illegal argument exception. Các tham số và kết quả tuân theo chữ ký phương thức.
+             */
             throw new IllegalArgumentException("SKU và số lượng điều chỉnh phải hợp lệ, số lượng không được bằng 0");
         }
         if (warehouseRepository.skuExists(request.getSkuId()) == 0) {
+            /**
+             * Thực hiện xử lý nghiệp vụ illegal argument exception. Các tham số và kết quả tuân theo chữ ký phương thức.
+             */
             throw new IllegalArgumentException("Không tìm thấy SKU hoặc SKU đã bị xóa");
         }
         warehouseRepository.ensureInventoryRow(warehouseId, request.getSkuId());
         if (warehouseRepository.adjustInventory(warehouseId, request.getSkuId(), request.getQuantityDelta()) != 1) {
+            /**
+             * Thực hiện xử lý nghiệp vụ illegal state exception. Các tham số và kết quả tuân theo chữ ký phương thức.
+             */
             throw new IllegalStateException("Số lượng tồn kho không đủ để thực hiện điều chỉnh");
         }
         Integer quantityAfter = warehouseRepository.getInventoryQuantity(warehouseId, request.getSkuId());
@@ -90,6 +126,9 @@ public class WarehouseServiceImpl implements WarehouseService {
     }
 
     @Override
+    /**
+     * Lấy danh sách list inventory movements. Các tham số và kết quả tuân theo chữ ký phương thức.
+     */
     public List<WarehouseInventoryMovementResponse> listInventoryMovements(Integer warehouseId, Integer skuId, Integer limit) {
         requireActiveWarehouse(warehouseId);
         int safeLimit = limit == null ? 50 : limit;
@@ -98,8 +137,14 @@ public class WarehouseServiceImpl implements WarehouseService {
         return warehouseRepository.listInventoryMovements(warehouseId, skuId, safeLimit);
     }
 
+    /**
+     * Kiểm tra điều kiện require active warehouse. Các tham số và kết quả tuân theo chữ ký phương thức.
+     */
     private void requireActiveWarehouse(Integer warehouseId) {
         if (warehouseId == null || warehouseId <= 0 || warehouseRepository.getdetail(warehouseId) == null) {
+            /**
+             * Thực hiện xử lý nghiệp vụ illegal argument exception. Các tham số và kết quả tuân theo chữ ký phương thức.
+             */
             throw new IllegalArgumentException("Không tìm thấy kho");
         }
     }
