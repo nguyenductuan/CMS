@@ -52,40 +52,25 @@ public class PaymentServiceImpl implements PaymentService {
                 || paymentcallback.getTransactionCode().isBlank()
                 || paymentcallback.getAmount() == null
                 || paymentcallback.getAmount().compareTo(BigDecimal.ZERO) <= 0) {
-            /**
-             * Thực hiện xử lý nghiệp vụ illegal argument exception. Các tham số và kết quả tuân theo chữ ký phương thức.
-             */
             throw new IllegalArgumentException("Yêu cầu thanh toán không hợp lệ");
         }
 
         Payment payment = paymentRepostitory.paymentbytransaction(
                 paymentcallback.getTransactionCode());
         if (payment == null) {
-            /**
-             * Thực hiện xử lý nghiệp vụ illegal argument exception. Các tham số và kết quả tuân theo chữ ký phương thức.
-             */
             throw new IllegalArgumentException("Không tìm thấy giao dịch thanh toán");
         }
         if (payment.getAmount() == null
                 || paymentcallback.getAmount().compareTo(payment.getAmount()) != 0) {
-            /**
-             * Thực hiện xử lý nghiệp vụ illegal argument exception. Các tham số và kết quả tuân theo chữ ký phương thức.
-             */
             throw new IllegalArgumentException("Số tiền thanh toán không hợp lệ");
         }
 
         Order order = orderRepository.getorderbyId(payment.getOrderId());
         if (order == null) {
-            /**
-             * Thực hiện xử lý nghiệp vụ illegal argument exception. Các tham số và kết quả tuân theo chữ ký phương thức.
-             */
             throw new IllegalArgumentException("Không tìm thấy đơn hàng");
         }
         if (order.getTotal() == null
                 || paymentcallback.getAmount().compareTo(order.getTotal()) != 0) {
-            /**
-             * Thực hiện xử lý nghiệp vụ illegal argument exception. Các tham số và kết quả tuân theo chữ ký phương thức.
-             */
             throw new IllegalArgumentException("Số tiền callback không khớp tổng tiền đơn hàng");
         }
 
@@ -97,18 +82,12 @@ public class PaymentServiceImpl implements PaymentService {
             return;
         }
         if (order.getOrder_status() != OrderStatus.WAIT_PAYMENT) {
-            /**
-             * Thực hiện xử lý nghiệp vụ illegal state exception. Các tham số và kết quả tuân theo chữ ký phương thức.
-             */
             throw new IllegalStateException("Đơn hàng không ở trạng thái chờ thanh toán");
         }
 
         List<Itemorderdetail> orderItems =
                 orderRepository.getOrderItemsByOrderId1(payment.getOrderId());
         if (orderItems == null || orderItems.isEmpty()) {
-            /**
-             * Thực hiện xử lý nghiệp vụ illegal state exception. Các tham số và kết quả tuân theo chữ ký phương thức.
-             */
             throw new IllegalStateException("Đơn hàng không có sản phẩm để thanh toán");
         }
 
@@ -117,17 +96,11 @@ public class PaymentServiceImpl implements PaymentService {
         for (Itemorderdetail item : orderItems) {
             if (item == null || item.getCampaignId() == null || item.getSkuId() == null
                     || item.getQuantity() <= 0) {
-                /**
-                 * Thực hiện xử lý nghiệp vụ illegal state exception. Các tham số và kết quả tuân theo chữ ký phương thức.
-                 */
                 throw new IllegalStateException("Chi tiết đơn hàng không hợp lệ");
             }
             int updatedRows = campainProductRepository.deductStock(
                     item.getCampaignId(), item.getSkuId(), item.getQuantity());
             if (updatedRows != 1) {
-                /**
-                 * Thực hiện xử lý nghiệp vụ illegal state exception. Các tham số và kết quả tuân theo chữ ký phương thức.
-                 */
                 throw new IllegalStateException("SKU không tồn tại hoặc không đủ tồn kho");
             }
         }
@@ -153,30 +126,18 @@ public class PaymentServiceImpl implements PaymentService {
                 || paymentRequest.getOrderIds() <= 0
                 || paymentRequest.getTotalPayment() == null
                 || paymentRequest.getTotalPayment().compareTo(BigDecimal.ZERO) <= 0) {
-            /**
-             * Thực hiện xử lý nghiệp vụ illegal argument exception. Các tham số và kết quả tuân theo chữ ký phương thức.
-             */
             throw new IllegalArgumentException("Thông tin tạo thanh toán không hợp lệ");
         }
 
         Order order = orderRepository.getorderbyId(paymentRequest.getOrderIds());
         if (order == null) {
-            /**
-             * Thực hiện xử lý nghiệp vụ illegal argument exception. Các tham số và kết quả tuân theo chữ ký phương thức.
-             */
             throw new IllegalArgumentException("Không tìm thấy đơn hàng");
         }
         if (order.getOrder_status() != OrderStatus.WAIT_PAYMENT) {
-            /**
-             * Thực hiện xử lý nghiệp vụ illegal state exception. Các tham số và kết quả tuân theo chữ ký phương thức.
-             */
             throw new IllegalStateException("Đơn hàng không ở trạng thái chờ thanh toán");
         }
         if (order.getTotal() == null
                 || order.getTotal().compareTo(paymentRequest.getTotalPayment()) != 0) {
-            /**
-             * Thực hiện xử lý nghiệp vụ illegal argument exception. Các tham số và kết quả tuân theo chữ ký phương thức.
-             */
             throw new IllegalArgumentException("Số tiền thanh toán không khớp tổng tiền đơn hàng");
         }
 

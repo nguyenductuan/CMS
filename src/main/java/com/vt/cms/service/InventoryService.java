@@ -26,15 +26,9 @@ public class InventoryService {
             List<SkuOrderRequest> requestedItems) {
 
         if (product == null || product.getSkus() == null) {
-            /**
-             * Thực hiện xử lý nghiệp vụ business exception. Các tham số và kết quả tuân theo chữ ký phương thức.
-             */
             throw new BusinessException(MessageCode.PRODUCT_SKU_NOT_FOUND);
         }
         if (requestedItems == null || requestedItems.isEmpty()) {
-            /**
-             * Thực hiện xử lý nghiệp vụ business exception. Các tham số và kết quả tuân theo chữ ký phương thức.
-             */
             throw new BusinessException(MessageCode.INVALID_ORDER);
         }
 
@@ -48,22 +42,13 @@ public class InventoryService {
         Map<Integer, Long> requestedQuantityBySku = new HashMap<>();
         for (SkuOrderRequest item : requestedItems) {
             if (item == null || item.getSkuId() == null) {
-                /**
-                 * Thực hiện xử lý nghiệp vụ business exception. Các tham số và kết quả tuân theo chữ ký phương thức.
-                 */
                 throw new BusinessException(MessageCode.SKU_NOT_FOUND);
             }
             if (item.getQuantity() == null || item.getQuantity() <= 0) {
-                /**
-                 * Thực hiện xử lý nghiệp vụ business exception. Các tham số và kết quả tuân theo chữ ký phương thức.
-                 */
                 throw new BusinessException(MessageCode.INVALID_QUANTITY);
             }
 
             if (!skuById.containsKey(item.getSkuId())) {
-                /**
-                 * Thực hiện xử lý nghiệp vụ business exception. Các tham số và kết quả tuân theo chữ ký phương thức.
-                 */
                 throw new BusinessException(MessageCode.SKU_NOT_FOUND);
             }
 
@@ -79,9 +64,6 @@ public class InventoryService {
             Integer availableStock = sku.getStock();
 
             if (availableStock == null || entry.getValue() > availableStock.longValue()) {
-                /**
-                 * Thực hiện xử lý nghiệp vụ business exception. Các tham số và kết quả tuân theo chữ ký phương thức.
-                 */
                 throw new BusinessException(MessageCode.STOCK_NOT_ENOUGH);
             }
         }
