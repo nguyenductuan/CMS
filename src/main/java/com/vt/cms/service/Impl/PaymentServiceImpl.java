@@ -148,6 +148,7 @@ public class PaymentServiceImpl implements PaymentService {
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     /**
      * Xử lý thanh toán payment. Các tham số và kết quả tuân theo chữ ký phương thức.
      */
@@ -196,7 +197,10 @@ public class PaymentServiceImpl implements PaymentService {
         payment.setStatus("PENDING");
         payment.setTransactionCode(transactionCode);
         payment.setAmount(paymentRequest.getTotalPayment());
-        paymentRepository.save(payment);
+        int insertedRows = paymentRepository.save(payment);
+        if (insertedRows != 1 || payment.getId() == null) {
+            throw new IllegalStateException("Không thể tạo bản ghi thanh toán");
+        }
 
         PaymentResponse response = new PaymentResponse();
         response.setPayment_id(String.valueOf(payment.getId()));
