@@ -18,6 +18,7 @@ public interface OrderRepository {
     OrderResponse getorderbyid(long orderId);
 
     Order getorderbyId(Integer orderId);
+    Order getorderbyIdForUpdate(@Param("orderId") Integer orderId);
     List<OrderResponse> getOrder(OrdersRequest request);
 
     List<OrderItemResponse> getItemsByOrderId(long orderId);
