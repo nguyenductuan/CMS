@@ -57,28 +57,25 @@ public class PaymentServiceImpl implements PaymentService {
             throw new IllegalArgumentException("Yêu cầu thanh toán không hợp lệ");
         }
 
+        Payment paymentLookup = paymentRepository.findByTransactionCode(
+                paymentCallback.getTransactionCode());
+        if (paymentLookup == null) {
+            throw new IllegalArgumentException("Không tìm thấy giao dịch thanh toán");
+        }
+
+        // Lock order first to serialize different payment sessions for the same order.
+        Order order = orderRepository.getorderbyIdForUpdate(paymentLookup.getOrderId());
+        if (order == null) {
+            throw new IllegalArgumentException("Không tìm thấy đơn hàng");
+        }
         Payment payment = paymentRepository.findByTransactionCodeForUpdate(
                 paymentCallback.getTransactionCode());
         if (payment == null) {
-            /**
-             * Thực hiện xử lý nghiệp vụ illegal argument exception. Các tham số và kết quả tuân theo chữ ký phương thức.
-             */
             throw new IllegalArgumentException("Không tìm thấy giao dịch thanh toán");
         }
         if (payment.getAmount() == null
                 || paymentCallback.getAmount().compareTo(payment.getAmount()) != 0) {
-            /**
-             * Thực hiện xử lý nghiệp vụ illegal argument exception. Các tham số và kết quả tuân theo chữ ký phương thức.
-             */
             throw new IllegalArgumentException("Số tiền thanh toán không hợp lệ");
-        }
-
-        Order order = orderRepository.getorderbyId(payment.getOrderId());
-        if (order == null) {
-            /**
-             * Thực hiện xử lý nghiệp vụ illegal argument exception. Các tham số và kết quả tuân theo chữ ký phương thức.
-             */
-            throw new IllegalArgumentException("Không tìm thấy đơn hàng");
         }
         if (order.getTotal() == null
                 || paymentCallback.getAmount().compareTo(order.getTotal()) != 0) {
@@ -164,7 +161,7 @@ public class PaymentServiceImpl implements PaymentService {
             throw new IllegalArgumentException("Thông tin tạo thanh toán không hợp lệ");
         }
 
-        Order order = orderRepository.getorderbyId(paymentRequest.getOrderIds());
+        Order order = orderRepository.getorderbyIdForUpdate(paymentRequest.getOrderIds());
         if (order == null) {
             /**
              * Thực hiện xử lý nghiệp vụ illegal argument exception. Các tham số và kết quả tuân theo chữ ký phương thức.
@@ -179,13 +176,12 @@ public class PaymentServiceImpl implements PaymentService {
         }
         if (order.getTotal() == null
                 || order.getTotal().compareTo(paymentRequest.getTotalPayment()) != 0) {
-            /**
-             * Thực hiện xử lý nghiệp vụ illegal argument exception. Các tham số và kết quả tuân theo chữ ký phương thức.
-             */
             throw new IllegalArgumentException("Số tiền thanh toán không khớp tổng tiền đơn hàng");
         }
+        if (paymentRepository.countPendingByOrderId(order.getId()) > 0) {
+            throw new IllegalStateException("Đơn hàng đã có giao dịch đang chờ thanh toán");
+        }
 
-        
         String transactionCode = "VPO" + UUID.randomUUID().toString()
                 .replace("-", "").substring(0, 13).toUpperCase();
 
