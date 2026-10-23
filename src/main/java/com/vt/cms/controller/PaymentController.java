@@ -34,7 +34,7 @@ public class PaymentController {
     /**
      * Xử lý thanh toán paymentcallback. Các tham số đầu vào và kết quả được xác định theo chữ ký phương thức.
      */
-    public ResponseEntity<APIRessponse> paymentcallback(@RequestBody Paymentcallback paymentcallback) {
+    public ResponseEntity<APIRessponse> paymentCallback(@RequestBody PaymentCallback paymentCallback) {
         paymentService.paymentCallback(paymentCallback);
         return ResponseEntity.ok(new APIRessponse(200, "Đã nhận callback thanh toán"));
     }
