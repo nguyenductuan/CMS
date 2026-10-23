@@ -16,6 +16,19 @@
         VALUES (#{orderId}, #{status}, #{transactionCode}, #{amount})
     </insert>
 
+    <select id="findByTransactionCode" resultMap="PaymentResultMap">
+        SELECT id, order_id, status, transactionCode, amount
+        FROM payment
+        WHERE transactionCode = #{transactionCode}
+    </select>
+
+    <select id="countPendingByOrderId" resultType="int">
+        SELECT COUNT(*)
+        FROM payment
+        WHERE order_id = #{orderId}
+          AND UPPER(status) = 'PENDING'
+    </select>
+
     <select id="findByTransactionCodeForUpdate" resultMap="PaymentResultMap">
         SELECT id, order_id, status, transactionCode, amount
         FROM payment
