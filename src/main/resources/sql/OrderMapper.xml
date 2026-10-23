@@ -138,6 +138,15 @@
         FROM orders
         WHERE id = #{orderId}
     </select>
+    <select id="getorderbyIdForUpdate" resultMap="OrderResultMap">
+        SELECT id, total, order_status, sub_order_status,
+               deliveredAt, cancel_at, notecancel, created_by, created_at,
+               expected_delivery, updated_at, updated_by
+        FROM orders
+        WHERE id = #{orderId}
+        FOR UPDATE
+    </select>
+
     <!-- Query 2: Items -->
     <select id="getItemsByOrderId" resultType="com.vt.cms.model.resp.OrderItemResponse">
         SELECT
