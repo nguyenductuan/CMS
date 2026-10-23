@@ -11,6 +11,9 @@ import java.util.UUID;
 
 @Component
 public class ProductRequestValidator {
+    /**
+     * Kiểm tra tính hợp lệ validate. Tham số và kết quả tuân theo chữ ký phương thức.
+     */
     public void validate(CreateProductRequest request) {
         if (request == null) throw new IllegalArgumentException("Thông tin sản phẩm không được để trống");
         if (request.getName() == null || request.getName().isBlank()) throw new IllegalArgumentException("Tên sản phẩm không được để trống");
@@ -35,11 +38,17 @@ public class ProductRequestValidator {
         }
     }
 
+    /**
+     * Kiểm tra tính hợp lệ validate dimension. Tham số và kết quả tuân theo chữ ký phương thức.
+     */
     private void validateDimension(String value, String label, String skuCode) {
         if (value == null || value.isBlank()) throw new IllegalArgumentException("Thiếu " + label + " SKU: " + skuCode);
         try {
             if (new BigDecimal(value).compareTo(BigDecimal.ZERO) < 0) throw new IllegalArgumentException(label + " SKU phải >= 0: " + skuCode);
         } catch (NumberFormatException ex) {
+            /**
+             * Thực hiện illegal argument exception. Tham số và kết quả tuân theo chữ ký phương thức.
+             */
             throw new IllegalArgumentException(label + " SKU không hợp lệ: " + skuCode, ex);
         }
     }

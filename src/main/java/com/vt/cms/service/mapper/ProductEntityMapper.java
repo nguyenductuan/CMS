@@ -15,10 +15,16 @@ import java.util.List;
 public class ProductEntityMapper {
     private final ObjectMapper objectMapper;
 
+    /**
+     * Thực hiện product entity mapper. Tham số và kết quả tuân theo chữ ký phương thức.
+     */
     public ProductEntityMapper(ObjectMapper objectMapper) {
         this.objectMapper = objectMapper;
     }
 
+    /**
+     * Thực hiện to new product. Tham số và kết quả tuân theo chữ ký phương thức.
+     */
     public Product toNewProduct(CreateProductRequest request) {
         Product product = new Product();
         product.setName(request.getName().trim());
@@ -36,11 +42,17 @@ public class ProductEntityMapper {
         return product;
     }
 
+    /**
+     * Thực hiện to json. Tham số và kết quả tuân theo chữ ký phương thức.
+     */
     private String toJson(Object value) {
         try {
             return objectMapper.writeValueAsString(value == null ? List.of() : value);
         } catch (JsonProcessingException ex) {
             log.error("Cannot serialize product request data", ex);
+            /**
+             * Thực hiện illegal argument exception. Tham số và kết quả tuân theo chữ ký phương thức.
+             */
             throw new IllegalArgumentException("Dữ liệu sản phẩm không thể chuyển đổi sang JSON", ex);
         }
     }

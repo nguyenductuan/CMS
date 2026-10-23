@@ -11,6 +11,9 @@ import java.util.Set;
 
 @Component
 public class CampaignRequestValidator {
+    /**
+     * Kiểm tra tính hợp lệ validate. Tham số và kết quả tuân theo chữ ký phương thức.
+     */
     public void validate(CreatedCampainRequest request) {
         if (request == null) throw new IllegalArgumentException("Request is required");
         if (request.getName() == null || request.getName().isBlank()) throw new IllegalArgumentException("Tên chiến dịch không được để trống");
@@ -31,6 +34,9 @@ public class CampaignRequestValidator {
         }
     }
 
+    /**
+     * Kiểm tra tính hợp lệ validate discount. Tham số và kết quả tuân theo chữ ký phương thức.
+     */
     private void validateDiscount(BigDecimal discount) {
         if (discount == null) throw new IllegalArgumentException("Discount is required");
         if (discount.stripTrailingZeros().scale() > 0) throw new IllegalArgumentException("Discount must be an integer");

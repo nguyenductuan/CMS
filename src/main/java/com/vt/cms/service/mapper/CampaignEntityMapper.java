@@ -9,6 +9,9 @@ import java.time.LocalDateTime;
 
 @Component
 public class CampaignEntityMapper {
+    /**
+     * Thực hiện to new campaign. Tham số và kết quả tuân theo chữ ký phương thức.
+     */
     public Campain toNewCampaign(CreatedCampainRequest request) {
         Campain campaign = new Campain();
         campaign.setName(request.getName());
