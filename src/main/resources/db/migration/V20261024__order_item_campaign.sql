@@ -5,3 +5,6 @@ ALTER TABLE order_item
 
 CREATE INDEX idx_order_item_campaign_sku
     ON order_item (campaign_id, sku_id);
+
+-- Transaction codes must be unique for reliable callback lookup and idempotency.
+CREATE UNIQUE INDEX uk_payment_transaction_code ON payment (transactionCode);
