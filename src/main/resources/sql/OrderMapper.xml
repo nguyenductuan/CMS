@@ -28,12 +28,12 @@
     <select id="getdetailById"
             resultMap="OrderResultMap">
         SELECT orders.id,
-               orders.status,
+               orders.order_status,
                order_item.product_id
         from orders
                  INNER JOIN order_item
                             ON orders.id = order_item.order_id
-        where orders.id = (#{id})
+        WHERE orders.id = #{id}
     </select>
 
     <select id="countorder" resultType="long">
