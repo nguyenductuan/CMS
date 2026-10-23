@@ -26,9 +26,6 @@ public class OrderFulfillmentService {
     public void selectWarehouse(Integer orderId, WarehouseSelectionRequest request) {
         validateOrderId(orderId);
         if (request == null || request.getWarehouseCode() == null || request.getWarehouseCode().isBlank()) {
-            /**
-             * Thực hiện xử lý nghiệp vụ illegal argument exception. Các tham số và kết quả tuân theo chữ ký phương thức.
-             */
             throw new IllegalArgumentException("Mã kho không được để trống");
         }
         Order order = requireOrder(orderId);
@@ -38,9 +35,6 @@ public class OrderFulfillmentService {
                 LocalDateTime.now(), "SYSTEM");
         if (rows != 1) {
             log.warn("Warehouse selection rejected due to concurrent status change. orderId={}", orderId);
-            /**
-             * Thực hiện xử lý nghiệp vụ illegal state exception. Các tham số và kết quả tuân theo chữ ký phương thức.
-             */
             throw new IllegalStateException("Không thể chọn kho: trạng thái đơn hàng đã thay đổi");
         }
         log.info("Warehouse selected. orderId={}, warehouseCode={}", orderId, request.getWarehouseCode().trim());
@@ -55,9 +49,6 @@ public class OrderFulfillmentService {
         Order order = requireOrder(orderId);
         requireStatus(order, OrderStatus.PREPARING);
         if (order.getWarehouseCode() == null || order.getWarehouseCode().isBlank()) {
-            /**
-             * Thực hiện xử lý nghiệp vụ illegal state exception. Các tham số và kết quả tuân theo chữ ký phương thức.
-             */
             throw new IllegalStateException("Đơn hàng chưa được chọn kho");
         }
 
@@ -68,9 +59,6 @@ public class OrderFulfillmentService {
                 LocalDateTime.now(), "MOCK-3PL");
         if (rows != 1) {
             log.warn("Dispatch rejected due to concurrent status change. orderId={}", orderId);
-            /**
-             * Thực hiện xử lý nghiệp vụ illegal state exception. Các tham số và kết quả tuân theo chữ ký phương thức.
-             */
             throw new IllegalStateException("Không thể bàn giao vận chuyển: trạng thái đơn hàng đã thay đổi");
         }
         log.info("Order dispatched. orderId={}, provider={}, trackingNumber={}, shipperCode={}",
@@ -86,18 +74,12 @@ public class OrderFulfillmentService {
     public void markDeliverySuccessful(Integer orderId, String trackingNumber) {
         validateOrderId(orderId);
         if (trackingNumber == null || trackingNumber.isBlank()) {
-            /**
-             * Thực hiện xử lý nghiệp vụ illegal argument exception. Các tham số và kết quả tuân theo chữ ký phương thức.
-             */
             throw new IllegalArgumentException("Mã vận đơn không được để trống");
         }
         int rows = orderRepository.markDeliverySuccessful(orderId, trackingNumber.trim(),
                 OrderStatus.SHIPPING.name(), OrderStatus.DELIVERED.name(), LocalDateTime.now(), "MOCK-3PL");
         if (rows != 1) {
             log.warn("Delivery callback rejected. orderId={}, trackingNumber={}", orderId, trackingNumber);
-            /**
-             * Thực hiện xử lý nghiệp vụ illegal state exception. Các tham số và kết quả tuân theo chữ ký phương thức.
-             */
             throw new IllegalStateException("Không tìm thấy vận đơn đang giao hoặc trạng thái không hợp lệ");
         }
         log.info("Carrier reports delivery successful. orderId={}, trackingNumber={}", orderId, trackingNumber);
@@ -110,18 +92,12 @@ public class OrderFulfillmentService {
     public void confirmReceived(Integer orderId, String customerId) {
         validateOrderId(orderId);
         if (customerId == null || customerId.isBlank()) {
-            /**
-             * Thực hiện xử lý nghiệp vụ illegal argument exception. Các tham số và kết quả tuân theo chữ ký phương thức.
-             */
             throw new IllegalArgumentException("Không xác định được người nhận hàng");
         }
         int rows = orderRepository.confirmReceived(orderId, OrderStatus.DELIVERED.name(),
                 OrderStatus.COMPLETED.name(), LocalDateTime.now(), customerId);
         if (rows != 1) {
             log.warn("Receive confirmation rejected. orderId={}, customerId={}", orderId, customerId);
-            /**
-             * Thực hiện xử lý nghiệp vụ illegal state exception. Các tham số và kết quả tuân theo chữ ký phương thức.
-             */
             throw new IllegalStateException("Chỉ có thể xác nhận nhận hàng khi shipper đã giao thành công");
         }
         log.info("Customer confirmed order received; order completed. orderId={}, customerId={}", orderId, customerId);
@@ -134,9 +110,6 @@ public class OrderFulfillmentService {
         Order order = orderRepository.getorderbyId(orderId);
         if (order == null) {
             log.warn("Order not found. orderId={}", orderId);
-            /**
-             * Thực hiện xử lý nghiệp vụ illegal argument exception. Các tham số và kết quả tuân theo chữ ký phương thức.
-             */
             throw new IllegalArgumentException("Không tìm thấy đơn hàng: " + orderId);
         }
         return order;
@@ -149,9 +122,6 @@ public class OrderFulfillmentService {
         if (order.getOrder_status() != expected) {
             log.warn("Invalid order transition. orderId={}, currentStatus={}, expectedStatus={}",
                     order.getId(), order.getOrder_status(), expected);
-            /**
-             * Thực hiện xử lý nghiệp vụ illegal state exception. Các tham số và kết quả tuân theo chữ ký phương thức.
-             */
             throw new IllegalStateException("Trạng thái đơn hàng phải là " + expected.getDescription());
         }
     }

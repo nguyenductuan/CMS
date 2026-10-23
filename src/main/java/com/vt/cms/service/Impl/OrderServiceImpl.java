@@ -66,9 +66,6 @@ public class OrderServiceImpl implements OrderService {
     public OrderResponse getdetailorder(long orderId) {
          OrderResponse order = orderRepository.getorderbyid(orderId);
         if (order == null) {
-            /**
-             * Thực hiện xử lý nghiệp vụ runtime exception. Các tham số và kết quả tuân theo chữ ký phương thức.
-             */
             throw new RuntimeException("Order not found");
         }
         // Lấy danh sách item của order
@@ -151,9 +148,6 @@ public class OrderServiceImpl implements OrderService {
      */
     public OrderCreateResponse createOrder(OrderRequest request) {
         if (request == null || request.getOrder() == null || request.getOrder().isEmpty()) {
-            /**
-             * Thực hiện xử lý nghiệp vụ business exception. Các tham số và kết quả tuân theo chữ ký phương thức.
-             */
             throw new BusinessException(MessageCode.INVALID_ORDER);
         }
 
@@ -164,9 +158,6 @@ public class OrderServiceImpl implements OrderService {
         for (OrderItemRequest itemRequest : request.getOrder()) {
             if (itemRequest == null || itemRequest.getProductId() == null
                     || itemRequest.getItem() == null || itemRequest.getItem().isEmpty()) {
-                /**
-                 * Thực hiện xử lý nghiệp vụ business exception. Các tham số và kết quả tuân theo chữ ký phương thức.
-                 */
                 throw new BusinessException(MessageCode.INVALID_ORDER);
             }
 
@@ -175,9 +166,6 @@ public class OrderServiceImpl implements OrderService {
                     itemRequest.getCampainId());
 
             if (product == null) {
-                /**
-                 * Thực hiện xử lý nghiệp vụ business exception. Các tham số và kết quả tuân theo chữ ký phương thức.
-                 */
                 throw new BusinessException(MessageCode.PRODUCT_NOT_FOUND);
             }
 
@@ -219,9 +207,6 @@ public class OrderServiceImpl implements OrderService {
 
         int insertedOrders = orderRepository.insertorder(order);
         if (insertedOrders <= 0 || order.getId() == null) {
-            /**
-             * Thực hiện xử lý nghiệp vụ business exception. Các tham số và kết quả tuân theo chữ ký phương thức.
-             */
             throw new BusinessException(MessageCode.INVALID_ORDER);
         }
 
@@ -231,9 +216,6 @@ public class OrderServiceImpl implements OrderService {
 
         int insertedItems = orderItemRepository.insertorderitems(orderItems);
         if (insertedItems <= 0) {
-            /**
-             * Thực hiện xử lý nghiệp vụ business exception. Các tham số và kết quả tuân theo chữ ký phương thức.
-             */
             throw new BusinessException(MessageCode.INVALID_ORDER);
         }
 
