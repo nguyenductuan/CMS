@@ -63,7 +63,7 @@
             notecancel = #{notecancel},
             cancel_at  = #{cancel_at},
             updated_at = #{updatedAt},
-            canceled_by = #{canceled_by}
+            canceled_by = #{cancelled_by}
         WHERE id = #{id}
           AND order_status IN ('WAIT_PAYMENT', 'PAID')
     </update>
@@ -122,8 +122,10 @@
         WHERE id = #{orderId}
     </select>
 
-    <select id="getorderbyId" resultType="com.vt.cms.model.entity.Order">
-        SELECT *,
+    <select id="getorderbyId" resultMap="OrderResultMap">
+        SELECT id, total, order_status, sub_order_status,
+               deliveredAt, cancel_at, notecancel, created_by, created_at,
+               expected_delivery, updated_at, updated_by,
                warehouse_code AS warehouseCode,
                shipping_provider AS shippingProvider,
                tracking_number AS trackingNumber,
