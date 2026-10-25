@@ -8,6 +8,9 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 @EnableScheduling
 public class CmsApplication {
 
+    /**
+     * Thực hiện xử lý main. Tham số và kết quả tuân theo chữ ký phương thức.
+     */
     public static void main(String[] args) {
         SpringApplication.run(CmsApplication.class, args);
     }

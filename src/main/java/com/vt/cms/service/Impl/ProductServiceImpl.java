@@ -57,9 +57,6 @@ public class ProductServiceImpl implements ProductService {
         int rows = productRepository.insertproduct(product);
         if (rows != 1 || product.getId() == null) {
             log.error("Insert product failed. name={}, rows={}, generatedId={}", request.getName(), rows, product.getId());
-            /**
-             * Thực hiện xử lý nghiệp vụ illegal state exception. Các tham số và kết quả tuân theo chữ ký phương thức.
-             */
             throw new IllegalStateException("Không thể tạo sản phẩm");
         }
         saveSkus(product.getId(), request.getSkus());
@@ -86,9 +83,6 @@ public class ProductServiceImpl implements ProductService {
             int rows = productSkuRepository.updateByProductIdAndSkuCode(sku);
             if (rows != 1) {
                 log.error("Update SKU failed. productId={}, skuCode={}, rows={}", productId, sku.getSku_code(), rows);
-                /**
-                 * Thực hiện xử lý nghiệp vụ illegal state exception. Các tham số và kết quả tuân theo chữ ký phương thức.
-                 */
                 throw new IllegalStateException("Không thể cập nhật SKU: " + sku.getSku_code());
             }
         }
@@ -127,9 +121,6 @@ public class ProductServiceImpl implements ProductService {
             int rows = productSkuRepository.inserproductsku(sku);
             if (rows != 1) {
                 log.error("Insert SKU failed. productId={}, skuCode={}, rows={}", productId, sku.getSku_code(), rows);
-                /**
-                 * Thực hiện xử lý nghiệp vụ illegal state exception. Các tham số và kết quả tuân theo chữ ký phương thức.
-                 */
                 throw new IllegalStateException("Không thể lưu SKU: " + sku.getSku_code());
             }
         }
@@ -142,9 +133,6 @@ public class ProductServiceImpl implements ProductService {
         ProductResponse product = productRepository.detailProduct(product_id);
         if (product == null || "true".equalsIgnoreCase(product.getIsDeleted())) {
             log.warn("Product detail not found. productId={}", product_id);
-            /**
-             * Thực hiện xử lý nghiệp vụ illegal argument exception. Các tham số và kết quả tuân theo chữ ký phương thức.
-             */
             throw new IllegalArgumentException("Không tìm thấy sản phẩm: " + product_id);
         }
         ProductResponse response = new ProductResponse();
@@ -212,9 +200,6 @@ public class ProductServiceImpl implements ProductService {
             return objectMapper.readValue(json,typeReference);
 
         } catch (JsonProcessingException e) {
-            /**
-             * Thực hiện xử lý nghiệp vụ runtime exception. Các tham số và kết quả tuân theo chữ ký phương thức.
-             */
             throw new RuntimeException(
                     "JSON sản phẩm không hợp lệ",
                     e
@@ -232,16 +217,10 @@ public class ProductServiceImpl implements ProductService {
         Product existing = productRepository.getProductById(id);
         if (existing == null || "true".equalsIgnoreCase(existing.getIsDeleted())) {
             log.warn("Update product rejected: not found. productId={}", id);
-            /**
-             * Thực hiện xử lý nghiệp vụ illegal argument exception. Các tham số và kết quả tuân theo chữ ký phương thức.
-             */
             throw new IllegalArgumentException("Không tìm thấy sản phẩm: " + id);
         }
         if (!"PENDING_APPROVAL".equalsIgnoreCase(existing.getStatus())
                 && !"REJECTED".equalsIgnoreCase(existing.getStatus())) {
-            /**
-             * Thực hiện xử lý nghiệp vụ illegal state exception. Các tham số và kết quả tuân theo chữ ký phương thức.
-             */
             throw new IllegalStateException("Chỉ được sửa sản phẩm đang chờ duyệt hoặc đã bị từ chối");
         }
         Product update = productEntityMapper.toNewProduct(request);
@@ -251,9 +230,6 @@ public class ProductServiceImpl implements ProductService {
         int rows = productRepository.updateProduct(update, id);
         if (rows != 1) {
             log.error("Update product failed. productId={}, rows={}", id, rows);
-            /**
-             * Thực hiện xử lý nghiệp vụ illegal state exception. Các tham số và kết quả tuân theo chữ ký phương thức.
-             */
             throw new IllegalStateException("Không thể cập nhật sản phẩm");
         }
         // Merge SKU theo sku_code để không vô tình xóa SKU đang được campaign tham chiếu.
@@ -339,20 +315,11 @@ public class ProductServiceImpl implements ProductService {
      */
     public void editstatusproduct(Integer product_id) {
         if (product_id == null || product_id <= 0)
-            /**
-             * Thực hiện xử lý nghiệp vụ illegal argument exception. Các tham số và kết quả tuân theo chữ ký phương thức.
-             */
             throw new IllegalArgumentException("ID sản phẩm không hợp lệ");
         Product existing = productRepository.getProductById(product_id);
         if (existing == null || "true".equalsIgnoreCase(existing.getIsDeleted()))
-            /**
-             * Thực hiện xử lý nghiệp vụ illegal argument exception. Các tham số và kết quả tuân theo chữ ký phương thức.
-             */
             throw new IllegalArgumentException("Không tìm thấy sản phẩm: " + product_id);
         if (!"PENDING_APPROVAL".equalsIgnoreCase(existing.getStatus())) {
-            /**
-             * Thực hiện xử lý nghiệp vụ illegal state exception. Các tham số và kết quả tuân theo chữ ký phương thức.
-             */
             throw new IllegalStateException("Chỉ sản phẩm đang chờ duyệt mới được duyệt");
         }
         LocalDateTime now = LocalDateTime.now();
@@ -370,15 +337,9 @@ public class ProductServiceImpl implements ProductService {
         if (product_id == null || product_id <= 0) throw new IllegalArgumentException("ID sản phẩm không hợp lệ");
         Product existing = productRepository.getProductById(product_id);
         if (existing == null || "true".equalsIgnoreCase(existing.getIsDeleted())) {
-            /**
-             * Thực hiện xử lý nghiệp vụ illegal argument exception. Các tham số và kết quả tuân theo chữ ký phương thức.
-             */
             throw new IllegalArgumentException("Không tìm thấy sản phẩm: " + product_id);
         }
         if (!"PENDING_APPROVAL".equalsIgnoreCase(existing.getStatus())) {
-            /**
-             * Thực hiện xử lý nghiệp vụ illegal state exception. Các tham số và kết quả tuân theo chữ ký phương thức.
-             */
             throw new IllegalStateException("Chỉ sản phẩm đang chờ duyệt mới được từ chối");
         }
         LocalDateTime now = LocalDateTime.now();
@@ -393,36 +354,21 @@ public class ProductServiceImpl implements ProductService {
      */
     public void deleteproduct(Integer product_id) {
         if (product_id == null || product_id <= 0)
-            /**
-             * Thực hiện xử lý nghiệp vụ illegal argument exception. Các tham số và kết quả tuân theo chữ ký phương thức.
-             */
             throw new IllegalArgumentException("ID sản phẩm không hợp lệ");
         Product existing = productRepository.getProductById(product_id);
         if (existing == null || "true".equalsIgnoreCase(existing.getIsDeleted())) {
-            /**
-             * Thực hiện xử lý nghiệp vụ illegal argument exception. Các tham số và kết quả tuân theo chữ ký phương thức.
-             */
             throw new IllegalArgumentException("Không tìm thấy sản phẩm: " + product_id);
         }
         if (!"PENDING_APPROVAL".equalsIgnoreCase(existing.getStatus())
                 && !"REJECTED".equalsIgnoreCase(existing.getStatus())) {
-            /**
-             * Thực hiện xử lý nghiệp vụ illegal state exception. Các tham số và kết quả tuân theo chữ ký phương thức.
-             */
             throw new IllegalStateException("Chỉ được xóa sản phẩm đang chờ duyệt hoặc đã bị từ chối");
         }
         if (campainProductRepository.existsAssociationByProductId(product_id)) {
-            /**
-             * Thực hiện xử lý nghiệp vụ illegal state exception. Các tham số và kết quả tuân theo chữ ký phương thức.
-             */
             throw new IllegalStateException("Không thể xóa sản phẩm đã được thêm vào chiến dịch");
         }
         int rows = productRepository.deleteproduct(product_id);
         if (rows != 1) {
             log.warn("Delete product rejected: not found/already deleted. productId={}, rows={}", product_id, rows);
-            /**
-             * Thực hiện xử lý nghiệp vụ illegal argument exception. Các tham số và kết quả tuân theo chữ ký phương thức.
-             */
             throw new IllegalArgumentException("Không tìm thấy sản phẩm hoặc sản phẩm đã bị xóa: " + product_id);
         }
         int skuRows = productSkuRepository.softDeleteByProductId(product_id);

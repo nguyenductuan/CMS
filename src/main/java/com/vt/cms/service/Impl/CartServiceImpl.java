@@ -64,24 +64,15 @@ public class CartServiceImpl implements CartService {
      */
     public int deleteproductAndCart(DeleteRequest request) {
         if (request == null) {
-            /**
-             * Thực hiện xử lý nghiệp vụ illegal argument exception. Các tham số và kết quả tuân theo chữ ký phương thức.
-             */
             throw new IllegalArgumentException("Yêu cầu xóa giỏ hàng không được để trống");
         }
         validateUserId(request.getUserid());
 
         List<Integer> productIds = request.getProductids();
         if (productIds == null || productIds.isEmpty()) {
-            /**
-             * Thực hiện xử lý nghiệp vụ illegal argument exception. Các tham số và kết quả tuân theo chữ ký phương thức.
-             */
             throw new IllegalArgumentException("Danh sách product ID không được để trống");
         }
         if (productIds.stream().anyMatch(id -> id == null || id <= 0)) {
-            /**
-             * Thực hiện xử lý nghiệp vụ illegal argument exception. Các tham số và kết quả tuân theo chữ ký phương thức.
-             */
             throw new IllegalArgumentException("Tất cả product ID phải lớn hơn 0");
         }
 
@@ -118,35 +109,20 @@ public class CartServiceImpl implements CartService {
 
         ProductResponse product = productRepository.detailProduct(request.getProductId());
         if (product == null) {
-            /**
-             * Thực hiện xử lý nghiệp vụ illegal argument exception. Các tham số và kết quả tuân theo chữ ký phương thức.
-             */
             throw new IllegalArgumentException("Sản phẩm không tồn tại");
         }
 
         Product_Sku sku = productSkuRepository.findNotDeletedById(request.getSkuId());
         if (sku == null || !Objects.equals(sku.getProduct_id(), request.getProductId())) {
-            /**
-             * Thực hiện xử lý nghiệp vụ illegal argument exception. Các tham số và kết quả tuân theo chữ ký phương thức.
-             */
             throw new IllegalArgumentException("SKU không tồn tại hoặc không thuộc sản phẩm đã chọn");
         }
         if (sku.getPrice() == null || sku.getPrice().compareTo(BigDecimal.ZERO) < 0) {
-            /**
-             * Thực hiện xử lý nghiệp vụ illegal state exception. Các tham số và kết quả tuân theo chữ ký phương thức.
-             */
             throw new IllegalStateException("Giá SKU không hợp lệ");
         }
         if (sku.getStock() == null || sku.getStock() < 0) {
-            /**
-             * Thực hiện xử lý nghiệp vụ illegal state exception. Các tham số và kết quả tuân theo chữ ký phương thức.
-             */
             throw new IllegalStateException("Tồn kho SKU không hợp lệ");
         }
         if (request.getQuantity() > sku.getStock()) {
-            /**
-             * Thực hiện xử lý nghiệp vụ illegal argument exception. Các tham số và kết quả tuân theo chữ ký phương thức.
-             */
             throw new IllegalArgumentException("Số lượng yêu cầu vượt quá tồn kho SKU");
         }
 
@@ -168,9 +144,6 @@ public class CartServiceImpl implements CartService {
             }
         }
         if (cart.getId() == null) {
-            /**
-             * Thực hiện xử lý nghiệp vụ illegal state exception. Các tham số và kết quả tuân theo chữ ký phương thức.
-             */
             throw new IllegalStateException("Giỏ hàng không có ID hợp lệ");
         }
 
@@ -199,9 +172,6 @@ public class CartServiceImpl implements CartService {
 
         int currentQuantity = existingItem.getQuantity() == null ? 0 : existingItem.getQuantity();
         if (currentQuantity < 0) {
-            /**
-             * Thực hiện xử lý nghiệp vụ illegal state exception. Các tham số và kết quả tuân theo chữ ký phương thức.
-             */
             throw new IllegalStateException("Số lượng sản phẩm hiện tại không hợp lệ");
         }
 
@@ -209,15 +179,9 @@ public class CartServiceImpl implements CartService {
         try {
             updatedQuantity = Math.addExact(currentQuantity, request.getQuantity());
         } catch (ArithmeticException ex) {
-            /**
-             * Thực hiện xử lý nghiệp vụ illegal argument exception. Các tham số và kết quả tuân theo chữ ký phương thức.
-             */
             throw new IllegalArgumentException("Số lượng sản phẩm vượt giới hạn cho phép", ex);
         }
         if (updatedQuantity > sku.getStock()) {
-            /**
-             * Thực hiện xử lý nghiệp vụ illegal argument exception. Các tham số và kết quả tuân theo chữ ký phương thức.
-             */
             throw new IllegalArgumentException("Tổng số lượng SKU trong giỏ vượt quá tồn kho");
         }
 
@@ -225,9 +189,6 @@ public class CartServiceImpl implements CartService {
         existingItem.setProductName(product.getName());
         existingItem.setProductPrice(sku.getPrice());
         if (cartItemRepository.updateCartItem(existingItem) != 1) {
-            /**
-             * Thực hiện xử lý nghiệp vụ illegal state exception. Các tham số và kết quả tuân theo chữ ký phương thức.
-             */
             throw new IllegalStateException("Không thể cập nhật SKU trong giỏ hàng");
         }
     }
@@ -237,28 +198,16 @@ public class CartServiceImpl implements CartService {
      */
     private void validateAddToCart(AddCartRequest request) {
         if (request == null) {
-            /**
-             * Thực hiện xử lý nghiệp vụ illegal argument exception. Các tham số và kết quả tuân theo chữ ký phương thức.
-             */
             throw new IllegalArgumentException("Yêu cầu không được để trống");
         }
         validateUserId(request.getUserId());
         if (request.getProductId() == null || request.getProductId() <= 0) {
-            /**
-             * Thực hiện xử lý nghiệp vụ illegal argument exception. Các tham số và kết quả tuân theo chữ ký phương thức.
-             */
             throw new IllegalArgumentException("Product ID phải lớn hơn 0");
         }
         if (request.getSkuId() == null || request.getSkuId() <= 0) {
-            /**
-             * Thực hiện xử lý nghiệp vụ illegal argument exception. Các tham số và kết quả tuân theo chữ ký phương thức.
-             */
             throw new IllegalArgumentException("SKU ID phải lớn hơn 0");
         }
         if (request.getQuantity() == null || request.getQuantity() <= 0) {
-            /**
-             * Thực hiện xử lý nghiệp vụ illegal argument exception. Các tham số và kết quả tuân theo chữ ký phương thức.
-             */
             throw new IllegalArgumentException("Số lượng sản phẩm phải lớn hơn 0");
         }
     }
@@ -268,9 +217,6 @@ public class CartServiceImpl implements CartService {
      */
     private void validateUserId(Integer userId) {
         if (userId == null || userId <= 0) {
-            /**
-             * Thực hiện xử lý nghiệp vụ illegal argument exception. Các tham số và kết quả tuân theo chữ ký phương thức.
-             */
             throw new IllegalArgumentException("User ID phải lớn hơn 0");
         }
     }

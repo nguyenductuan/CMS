@@ -9,5 +9,8 @@ import org.apache.ibatis.annotations.Mapper;
 public interface OrderTrackingRepository {
 
 
+    /**
+     * Thêm bản ghi insertordertracking. Các tham số và giá trị trả về được mô tả bởi chữ ký phương thức.
+     */
     void insertordertracking(OrderTracking tracking);
 }

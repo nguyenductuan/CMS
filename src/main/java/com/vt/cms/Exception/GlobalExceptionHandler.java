@@ -18,6 +18,9 @@ import java.util.Map;
 public class GlobalExceptionHandler {
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
+    /**
+     * Xử lý handle validation. Tham số và kết quả tuân theo chữ ký phương thức.
+     */
     public ResponseEntity<APIRessponse> handleValidation(MethodArgumentNotValidException ex) {
         Map<String, String> errors = new HashMap<>();
         ex.getBindingResult().getFieldErrors().forEach(error ->
@@ -27,6 +30,9 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(ConstraintViolationException.class)
+    /**
+     * Xử lý handle constraint violation. Tham số và kết quả tuân theo chữ ký phương thức.
+     */
     public ResponseEntity<APIRessponse> handleConstraintViolation(ConstraintViolationException ex) {
         log.info("Constraint validation failed: {}", ex.getMessage());
         return ResponseEntity.badRequest()
@@ -34,6 +40,9 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(HttpMessageNotReadableException.class)
+    /**
+     * Xử lý handle not readable. Tham số và kết quả tuân theo chữ ký phương thức.
+     */
     public ResponseEntity<APIRessponse> handleNotReadable(HttpMessageNotReadableException ex) {
         log.debug("Malformed request body", ex);
         return ResponseEntity.badRequest()
@@ -41,6 +50,9 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(IllegalArgumentException.class)
+    /**
+     * Xử lý handle illegal argument. Tham số và kết quả tuân theo chữ ký phương thức.
+     */
     public ResponseEntity<APIRessponse> handleIllegalArgument(IllegalArgumentException ex) {
         log.info("Request rejected: {}", ex.getMessage());
         return ResponseEntity.badRequest()
@@ -48,6 +60,9 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(BusinessException.class)
+    /**
+     * Xử lý handle business exception. Tham số và kết quả tuân theo chữ ký phương thức.
+     */
     public ResponseEntity<APIRessponse> handleBusinessException(BusinessException ex) {
         log.info("Business rule rejected: code={}, message={}", ex.getCode(), ex.getMessage());
         return ResponseEntity.status(HttpStatus.CONFLICT)
@@ -55,6 +70,9 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(IllegalStateException.class)
+    /**
+     * Xử lý handle illegal state. Tham số và kết quả tuân theo chữ ký phương thức.
+     */
     public ResponseEntity<APIRessponse> handleIllegalState(IllegalStateException ex) {
         log.info("Business state conflict: {}", ex.getMessage());
         return ResponseEntity.status(HttpStatus.CONFLICT)
@@ -62,6 +80,9 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(Exception.class)
+    /**
+     * Xử lý handle exception. Tham số và kết quả tuân theo chữ ký phương thức.
+     */
     public ResponseEntity<APIRessponse> handleException(Exception ex) {
         log.error("Unhandled application exception", ex);
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)

@@ -64,10 +64,16 @@ public enum MessageCode {
         this.message = message;
     }
 
+    /**
+     * Phương thức get code cung cấp thông tin hoặc thao tác liên quan đến trạng thái nghiệp vụ.
+     */
     public String getCode() {
         return code;
     }
 
+    /**
+     * Phương thức get message cung cấp thông tin hoặc thao tác liên quan đến trạng thái nghiệp vụ.
+     */
     public String getMessage() {
         return message;
     }

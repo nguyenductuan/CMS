@@ -13,23 +13,47 @@ import java.util.List;
 
 @Mapper
 public interface OrderRepository {
+    /**
+     * Thêm bản ghi insertorder. Các tham số và giá trị trả về được mô tả bởi chữ ký phương thức.
+     */
     int insertorder(Order order);
 
+    /**
+     * Lấy dữ liệu getorderbyid. Các tham số và giá trị trả về được mô tả bởi chữ ký phương thức.
+     */
     OrderResponse getorderbyid(long orderId);
 
+    /**
+     * Lấy dữ liệu getorderby id. Các tham số và giá trị trả về được mô tả bởi chữ ký phương thức.
+     */
     Order getorderbyId(Integer orderId);
     Order getorderbyIdForUpdate(@Param("orderId") Integer orderId);
     List<OrderResponse> getOrder(OrdersRequest request);
 
+    /**
+     * Lấy dữ liệu get items by order id. Các tham số và giá trị trả về được mô tả bởi chữ ký phương thức.
+     */
     List<OrderItemResponse> getItemsByOrderId(long orderId);
+    /**
+     * Lấy dữ liệu get order items by order id. Các tham số và giá trị trả về được mô tả bởi chữ ký phương thức.
+     */
     List<ItemDto> getOrderItemsByOrderId(long orderId);
+    /**
+     * Lưu save. Các tham số và giá trị trả về được mô tả bởi chữ ký phương thức.
+     */
     void save(Order order);
 
+    /**
+     * Truy vấn select warehouse. Các tham số và giá trị trả về được mô tả bởi chữ ký phương thức.
+     */
     int selectWarehouse(@Param("orderId") Integer orderId,
                         @Param("warehouseCode") String warehouseCode,
                         @Param("updatedAt") java.time.LocalDateTime updatedAt,
                         @Param("updatedBy") String updatedBy);
 
+    /**
+     * Gán dữ liệu assign shipper. Các tham số và giá trị trả về được mô tả bởi chữ ký phương thức.
+     */
     int assignShipper(@Param("orderId") Integer orderId,
                       @Param("expectedStatus") String expectedStatus,
                       @Param("nextStatus") String nextStatus,
@@ -41,6 +65,9 @@ public interface OrderRepository {
                       @Param("updatedAt") java.time.LocalDateTime updatedAt,
                       @Param("updatedBy") String updatedBy);
 
+    /**
+     * Thực hiện truy cập dữ liệu mark delivery successful. Các tham số và giá trị trả về được mô tả bởi chữ ký phương thức.
+     */
     int markDeliverySuccessful(@Param("orderId") Integer orderId,
                                @Param("trackingNumber") String trackingNumber,
                                @Param("expectedStatus") String expectedStatus,
@@ -48,17 +75,26 @@ public interface OrderRepository {
                                @Param("deliveredAt") java.time.LocalDateTime deliveredAt,
                                @Param("updatedBy") String updatedBy);
 
+    /**
+     * Xác nhận confirm received. Các tham số và giá trị trả về được mô tả bởi chữ ký phương thức.
+     */
     int confirmReceived(@Param("orderId") Integer orderId,
                         @Param("expectedStatus") String expectedStatus,
                         @Param("nextStatus") String nextStatus,
                         @Param("receivedAt") java.time.LocalDateTime receivedAt,
                         @Param("updatedBy") String updatedBy);
     // Thanh toan
+    /**
+     * Lấy dữ liệu get order items by order id1. Các tham số và giá trị trả về được mô tả bởi chữ ký phương thức.
+     */
     List<Itemorderdetail> getOrderItemsByOrderId1(long orderId);
     int cancelOrder(Order order);
 
     long countorder(OrdersRequest request);
 
+    /**
+     * Hoàn tất complete delivered orders older than. Các tham số và giá trị trả về được mô tả bởi chữ ký phương thức.
+     */
     int completeDeliveredOrdersOlderThan(
             @Param("cutoff") java.time.LocalDateTime cutoff,
             @Param("completedAt") java.time.LocalDateTime completedAt,

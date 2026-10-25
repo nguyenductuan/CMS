@@ -65,18 +65,12 @@ public class CheckoutServiceImpl implements CheckoutService {
      */
     private void validateRequest(CheckoutPreviewRequest request) {
         if (request == null || request.getItems() == null || request.getItems().isEmpty()) {
-            /**
-             * Thực hiện xử lý nghiệp vụ business exception. Các tham số và kết quả tuân theo chữ ký phương thức.
-             */
             throw new BusinessException(MessageCode.INVALID_ORDER);
         }
         for (ItemRequest item : request.getItems()) {
             if (item == null || item.getProductId() == null || item.getProductId() <= 0
                     || item.getCampainId() == null || item.getSkuId() == null
                     || item.getQuantity() <= 0) {
-                /**
-                 * Thực hiện xử lý nghiệp vụ business exception. Các tham số và kết quả tuân theo chữ ký phương thức.
-                 */
                 throw new BusinessException(MessageCode.INVALID_ORDER);
             }
         }
@@ -89,9 +83,6 @@ public class CheckoutServiceImpl implements CheckoutService {
         ProductDetail product = productRepository.getproduct1(
                 request.getProductId(), request.getCampainId());
         if (product == null) {
-            /**
-             * Thực hiện xử lý nghiệp vụ business exception. Các tham số và kết quả tuân theo chữ ký phương thức.
-             */
             throw new BusinessException(MessageCode.PRODUCT_NOT_FOUND);
         }
 
@@ -101,15 +92,9 @@ public class CheckoutServiceImpl implements CheckoutService {
                         && Objects.equals(candidate.getId(), request.getSkuId()))
                 .findFirst().orElse(null);
         if (sku == null) {
-            /**
-             * Thực hiện xử lý nghiệp vụ business exception. Các tham số và kết quả tuân theo chữ ký phương thức.
-             */
             throw new BusinessException(MessageCode.PRODUCT_NOT_FOUND);
         }
         if (sku.getStock() == null || request.getQuantity() > sku.getStock()) {
-            /**
-             * Thực hiện xử lý nghiệp vụ business exception. Các tham số và kết quả tuân theo chữ ký phương thức.
-             */
             throw new BusinessException(MessageCode.STOCK_NOT_ENOUGH);
         }
 
