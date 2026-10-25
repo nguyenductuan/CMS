@@ -28,18 +28,26 @@
     <select id="getdetailById"
             resultMap="OrderResultMap">
         SELECT orders.id,
-               orders.status,
+               orders.order_status,
                order_item.product_id
         from orders
                  INNER JOIN order_item
                             ON orders.id = order_item.order_id
-        where orders.id = (#{id})
+        WHERE orders.id = #{id}
     </select>
 
     <select id="countorder" resultType="long">
-        SELECT COUNT(orders.id)
-        FROM `orders`
-        WHERE 1
+        SELECT COUNT(o.id)
+        FROM `orders` o
+        <where>
+            <if test="status != null and status.trim() != ''">
+                AND o.order_status = #{status}
+            </if>
+            <if test="keyword != null and keyword.trim() != ''">
+                AND (CAST(o.id AS CHAR) LIKE CONCAT('%', #{keyword}, '%')
+                     OR o.created_by LIKE CONCAT('%', #{keyword}, '%'))
+            </if>
+        </where>
     </select>
 
     <update id="save">
@@ -55,28 +63,28 @@
             notecancel = #{notecancel},
             cancel_at  = #{cancel_at},
             updated_at = #{updatedAt},
-            canceled_by = #{canceled_by}
+            canceled_by = #{cancelled_by}
         WHERE id = #{id}
+          AND order_status IN ('WAIT_PAYMENT', 'PAID')
     </update>
     <select id="getOrderItemsByOrderId"
             parameterType="long"
-            resultType="com.vt.cms.model.dto.order.Itemorderdetail">
+            resultType="com.vt.cms.model.dto.ItemDto">
         SELECT
-            p.id as productId,
-            p.name as productName,
-            oi.price,
-            cp.campaign_id as campaignId,
-            cp.stock_campaign as stockCampaign,
-            s.sku_code AS skuCode,
-            s.id AS skuId,
-            p.json_images as jsonImages,
-            cp.price as priceCampaign,
-            cp.price_discount as priceDiscountCampaign,
-            oi.quantity
+            p.id AS productId,
+            p.name AS productName,
+            oi.quantity AS quantity,
+            oi.sku_id AS skuId,
+            cp.campaign_id AS campaignId,
+            cp.stock_campaign AS stock,
+            cp.price AS price_campain,
+            cp.price_discount AS price_discount
         FROM order_item oi
-                 JOIN products p ON p.id = oi.product_id
-                 LEFT JOIN product_sku s ON s.id = oi.sku_id
-                 LEFT JOIN campain_product cp ON cp.product_id = oi.product_id AND cp.sku_id = oi.sku_id
+        JOIN products p ON p.id = oi.product_id
+        LEFT JOIN campain_product cp
+          ON cp.product_id = oi.product_id
+         AND cp.sku_id = oi.sku_id
+         AND cp.campaign_id = oi.campaign_id
         WHERE oi.order_id = #{orderId}
     </select>
 
@@ -98,7 +106,7 @@
         FROM order_item oi
                  JOIN products p ON p.id = oi.product_id
                  LEFT JOIN product_sku s ON s.id = oi.sku_id
-                 LEFT JOIN campain_product cp ON cp.product_id = oi.product_id AND cp.sku_id = oi.sku_id
+                 LEFT JOIN campain_product cp ON cp.product_id = oi.product_id AND cp.sku_id = oi.sku_id AND cp.campaign_id = oi.campaign_id
         WHERE oi.order_id = #{orderId}
     </select>
 
@@ -114,8 +122,10 @@
         WHERE id = #{orderId}
     </select>
 
-    <select id="getorderbyId" resultType="com.vt.cms.model.entity.Order">
-        SELECT *,
+    <select id="getorderbyId" resultMap="OrderResultMap">
+        SELECT id, total, order_status, sub_order_status,
+               deliveredAt, cancel_at, notecancel, created_by, created_at,
+               expected_delivery, updated_at, updated_by,
                warehouse_code AS warehouseCode,
                shipping_provider AS shippingProvider,
                tracking_number AS trackingNumber,
@@ -128,6 +138,15 @@
         FROM orders
         WHERE id = #{orderId}
     </select>
+    <select id="getorderbyIdForUpdate" resultMap="OrderResultMap">
+        SELECT id, total, order_status, sub_order_status,
+               deliveredAt, cancel_at, notecancel, created_by, created_at,
+               expected_delivery, updated_at, updated_by
+        FROM orders
+        WHERE id = #{orderId}
+        FOR UPDATE
+    </select>
+
     <!-- Query 2: Items -->
     <select id="getItemsByOrderId" resultType="com.vt.cms.model.resp.OrderItemResponse">
         SELECT
@@ -142,7 +161,9 @@
                  LEFT JOIN products p
                            ON oi.product_id = p.id
                  LEFT JOIN campain_product cp
-                           ON cp.product_id = p.id
+                           ON cp.product_id = oi.product_id
+                          AND cp.sku_id = oi.sku_id
+                          AND cp.campaign_id = oi.campaign_id
         WHERE oi.order_id = #{orderId}
     </select>
 
@@ -156,6 +177,15 @@
             o.expected_delivery AS expectedDelivery,
             o.created_by AS createdBy
         FROM orders o
+        <where>
+            <if test="status != null and status.trim() != ''">
+                AND o.order_status = #{status}
+            </if>
+            <if test="keyword != null and keyword.trim() != ''">
+                AND (CAST(o.id AS CHAR) LIKE CONCAT('%', #{keyword}, '%')
+                     OR o.created_by LIKE CONCAT('%', #{keyword}, '%'))
+            </if>
+        </where>
         ORDER BY o.created_at DESC
         LIMIT #{pageSize}
             OFFSET #{offset}

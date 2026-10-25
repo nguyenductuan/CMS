@@ -78,6 +78,7 @@ public class OrderServiceImpl implements OrderService {
     /**
      * Hủy nghiệp vụ cancel order. Các tham số và kết quả tuân theo chữ ký phương thức.
      */
+    @Transactional
     public void cancelOrder(int orderId, String notecancel) {
         Order order = new Order();
         order.setId(orderId);
@@ -85,7 +86,10 @@ public class OrderServiceImpl implements OrderService {
         order.setNotecancel(notecancel);
         order.setUpdatedAt(LocalDateTime.now());
         order.setCancelled_by("SYSTEM");
-        orderRepository.cancelOrder(order);
+        int updatedRows = orderRepository.cancelOrder(order);
+        if (updatedRows != 1) {
+            throw new IllegalStateException("Không thể hủy đơn hàng ở trạng thái hiện tại hoặc không tìm thấy đơn hàng");
+        }
     }
 
     @Override
@@ -115,7 +119,7 @@ public class OrderServiceImpl implements OrderService {
             // Gắn danh sách item vào order
             order.setOrderItems(itemDtos);
         }
-        long totalCount = orderRepository.countorder();
+        long totalCount = orderRepository.countorder(request);
         long pageSize = request.getPageSize();
         long totalPage = pageSize > 0
                 ? (totalCount + pageSize - 1) / pageSize
@@ -187,6 +191,7 @@ public class OrderServiceImpl implements OrderService {
                 orderItem.setPrice(unitPrice);
                 orderItem.setTotal_price(lineTotal);
                 orderItem.setProduct_id(product.getId());
+                orderItem.setCampaign_id(itemRequest.getCampainId());
                 orderItems.add(orderItem);
             }
 

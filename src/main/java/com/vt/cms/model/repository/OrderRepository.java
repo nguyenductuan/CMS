@@ -27,9 +27,7 @@ public interface OrderRepository {
      * Lấy dữ liệu getorderby id. Các tham số và giá trị trả về được mô tả bởi chữ ký phương thức.
      */
     Order getorderbyId(Integer orderId);
-    /**
-     * Lấy dữ liệu get order. Các tham số và giá trị trả về được mô tả bởi chữ ký phương thức.
-     */
+    Order getorderbyIdForUpdate(@Param("orderId") Integer orderId);
     List<OrderResponse> getOrder(OrdersRequest request);
 
     /**
@@ -90,15 +88,9 @@ public interface OrderRepository {
      * Lấy dữ liệu get order items by order id1. Các tham số và giá trị trả về được mô tả bởi chữ ký phương thức.
      */
     List<Itemorderdetail> getOrderItemsByOrderId1(long orderId);
-    /**
-     * Hủy cancel order. Các tham số và giá trị trả về được mô tả bởi chữ ký phương thức.
-     */
-    void cancelOrder(Order order);
+    int cancelOrder(Order order);
 
-    /**
-     * Đếm số lượng countorder. Các tham số và giá trị trả về được mô tả bởi chữ ký phương thức.
-     */
-    long countorder();
+    long countorder(OrdersRequest request);
 
     /**
      * Hoàn tất complete delivered orders older than. Các tham số và giá trị trả về được mô tả bởi chữ ký phương thức.

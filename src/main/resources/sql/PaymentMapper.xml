@@ -1,66 +1,45 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="com.vt.cms.model.repository.PaymentRepostitory">
+<mapper namespace="com.vt.cms.model.repository.PaymentRepository">
     <resultMap id="PaymentResultMap" type="com.vt.cms.model.entity.Payment">
-
-
-        <!-- Payment -->
-        <result column="id"
-                property="id"
-                jdbcType="INTEGER"/>
-
-        <result column="order_id"
-                property="orderId"
-                jdbcType="INTEGER"/>
-
-        <result column="status"
-                property="status"
-                jdbcType="VARCHAR"/>
-
-        <result column="transactionCode"
-                property="transactionCode"
-                jdbcType="VARCHAR"/>
-
-        <result column="amount"
-                property="amount"
-                jdbcType="DECIMAL"/>
-
-
-
+        <id column="id" property="id" jdbcType="INTEGER"/>
+        <result column="order_id" property="orderId" jdbcType="INTEGER"/>
+        <result column="status" property="status" jdbcType="VARCHAR"/>
+        <result column="transactionCode" property="transactionCode" jdbcType="VARCHAR"/>
+        <result column="amount" property="amount" jdbcType="DECIMAL"/>
     </resultMap>
 
     <insert id="save" parameterType="com.vt.cms.model.entity.Payment"
-            useGeneratedKeys="true"
-            keyProperty="id">
-
-            INSERT INTO payment (
-                order_id,
-                status,
-                transactionCode,
-                amount
-            )
-            VALUES (
-                       #{orderId},
-                       #{status},
-                       #{transactionCode},
-                       #{amount}
-                   )
-
-
+            useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO payment (order_id, status, transactionCode, amount)
+        VALUES (#{orderId}, #{status}, #{transactionCode}, #{amount})
     </insert>
 
-    <select id="paymentbytransaction" resultMap="PaymentResultMap">
-        SELECT *
+    <select id="findByTransactionCode" resultMap="PaymentResultMap">
+        SELECT id, order_id, status, transactionCode, amount
         FROM payment
         WHERE transactionCode = #{transactionCode}
     </select>
 
+    <select id="countPendingByOrderId" resultType="int">
+        SELECT COUNT(*)
+        FROM payment
+        WHERE order_id = #{orderId}
+          AND UPPER(status) = 'PENDING'
+    </select>
 
-
-    <update id="updatepayment" parameterType="com.vt.cms.model.entity.Payment">
-        UPDATE payment
-        SET status       = "SUCCESS"
+    <select id="findByTransactionCodeForUpdate" resultMap="PaymentResultMap">
+        SELECT id, order_id, status, transactionCode, amount
+        FROM payment
         WHERE transactionCode = #{transactionCode}
+        FOR UPDATE
+    </select>
+
+    <update id="markSuccessIfPending">
+        UPDATE payment
+        SET status = 'SUCCESS'
+        WHERE transactionCode = #{transactionCode}
+          AND UPPER(status) = 'PENDING'
     </update>
 </mapper>

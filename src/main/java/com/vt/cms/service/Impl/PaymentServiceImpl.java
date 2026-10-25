@@ -1,7 +1,7 @@
 package com.vt.cms.service.Impl;
 
 import com.vt.cms.model.dto.PaymentRequest;
-import com.vt.cms.model.dto.Paymentcallback;
+import com.vt.cms.model.dto.PaymentCallback;
 import com.vt.cms.model.dto.order.Itemorderdetail;
 import com.vt.cms.model.entity.Order;
 import com.vt.cms.model.entity.Payment;
@@ -9,7 +9,7 @@ import com.vt.cms.model.enums.OrderStatus;
 import com.vt.cms.model.enums.PaymentStatus;
 import com.vt.cms.model.repository.CampainProductRepository;
 import com.vt.cms.model.repository.OrderRepository;
-import com.vt.cms.model.repository.PaymentRepostitory;
+import com.vt.cms.model.repository.PaymentRepository;
 import com.vt.cms.model.resp.PaymentResponse;
 import com.vt.cms.service.PaymentService;
 import lombok.extern.slf4j.Slf4j;
@@ -19,13 +19,12 @@ import org.springframework.transaction.annotation.Transactional;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Random;
 import java.util.UUID;
 
 @Service
 @Slf4j
 public class PaymentServiceImpl implements PaymentService {
-    private final PaymentRepostitory paymentRepostitory;
+    private final PaymentRepository paymentRepository;
     private final OrderRepository orderRepository;
     private final CampainProductRepository campainProductRepository;
 
@@ -33,10 +32,10 @@ public class PaymentServiceImpl implements PaymentService {
      * Xử lý thanh toán payment service impl. Các tham số và kết quả tuân theo chữ ký phương thức.
      */
     public PaymentServiceImpl(
-            PaymentRepostitory paymentRepostitory,
+            PaymentRepository paymentRepository,
             OrderRepository orderRepository,
             CampainProductRepository campainProductRepository) {
-        this.paymentRepostitory = paymentRepostitory;
+        this.paymentRepository = paymentRepository;
         this.orderRepository = orderRepository;
         this.campainProductRepository = campainProductRepository;
     }
@@ -44,42 +43,57 @@ public class PaymentServiceImpl implements PaymentService {
     @Override
     @Transactional(rollbackFor = Exception.class)
     /**
-     * Xử lý thanh toán paymentcallback. Các tham số và kết quả tuân theo chữ ký phương thức.
+     * Xử lý thanh toán paymentCallback. Các tham số và kết quả tuân theo chữ ký phương thức.
      */
-    public void paymentcallback(Paymentcallback paymentcallback) {
-        if (paymentcallback == null
-                || paymentcallback.getTransactionCode() == null
-                || paymentcallback.getTransactionCode().isBlank()
-                || paymentcallback.getAmount() == null
-                || paymentcallback.getAmount().compareTo(BigDecimal.ZERO) <= 0) {
+    public void paymentCallback(PaymentCallback paymentCallback) {
+        if (paymentCallback == null
+                || paymentCallback.getTransactionCode() == null
+                || paymentCallback.getTransactionCode().isBlank()
+                || paymentCallback.getAmount() == null
+                || paymentCallback.getAmount().compareTo(BigDecimal.ZERO) <= 0) {
+            /**
+             * Thực hiện xử lý nghiệp vụ illegal argument exception. Các tham số và kết quả tuân theo chữ ký phương thức.
+             */
             throw new IllegalArgumentException("Yêu cầu thanh toán không hợp lệ");
         }
 
-        Payment payment = paymentRepostitory.paymentbytransaction(
-                paymentcallback.getTransactionCode());
+        Payment paymentLookup = paymentRepository.findByTransactionCode(
+                paymentCallback.getTransactionCode());
+        if (paymentLookup == null) {
+            throw new IllegalArgumentException("Không tìm thấy giao dịch thanh toán");
+        }
+
+        // Lock order first to serialize different payment sessions for the same order.
+        Order order = orderRepository.getorderbyIdForUpdate(paymentLookup.getOrderId());
+        if (order == null) {
+            throw new IllegalArgumentException("Không tìm thấy đơn hàng");
+        }
+        Payment payment = paymentRepository.findByTransactionCodeForUpdate(
+                paymentCallback.getTransactionCode());
         if (payment == null) {
             throw new IllegalArgumentException("Không tìm thấy giao dịch thanh toán");
         }
         if (payment.getAmount() == null
-                || paymentcallback.getAmount().compareTo(payment.getAmount()) != 0) {
+                || paymentCallback.getAmount().compareTo(payment.getAmount()) != 0) {
             throw new IllegalArgumentException("Số tiền thanh toán không hợp lệ");
         }
-
-        Order order = orderRepository.getorderbyId(payment.getOrderId());
-        if (order == null) {
-            throw new IllegalArgumentException("Không tìm thấy đơn hàng");
-        }
         if (order.getTotal() == null
-                || paymentcallback.getAmount().compareTo(order.getTotal()) != 0) {
+                || paymentCallback.getAmount().compareTo(order.getTotal()) != 0) {
+            /**
+             * Thực hiện xử lý nghiệp vụ illegal argument exception. Các tham số và kết quả tuân theo chữ ký phương thức.
+             */
             throw new IllegalArgumentException("Số tiền callback không khớp tổng tiền đơn hàng");
         }
 
         String paymentStatus = payment.getStatus();
-        if (PaymentStatus.PAYMENT_SUCCESS.getCode().equalsIgnoreCase(paymentStatus)
-                || "SUCCESS".equalsIgnoreCase(paymentStatus)) {
+        if ("SUCCESS".equalsIgnoreCase(paymentStatus)
+                || PaymentStatus.PAYMENT_SUCCESS.getCode().equalsIgnoreCase(paymentStatus)) {
             log.info("Duplicate payment callback ignored. orderId={}, transactionCode={}",
-                    payment.getOrderId(), paymentcallback.getTransactionCode());
+                    payment.getOrderId(), paymentCallback.getTransactionCode());
             return;
+        }
+        if (!"PENDING".equalsIgnoreCase(paymentStatus)) {
+            throw new IllegalStateException("Giao dịch không ở trạng thái chờ thanh toán");
         }
         if (order.getOrder_status() != OrderStatus.WAIT_PAYMENT) {
             throw new IllegalStateException("Đơn hàng không ở trạng thái chờ thanh toán");
@@ -105,18 +119,21 @@ public class PaymentServiceImpl implements PaymentService {
             }
         }
 
-        paymentRepostitory.updatepayment(paymentcallback.getTransactionCode());
+        if (paymentRepository.markSuccessIfPending(paymentCallback.getTransactionCode()) != 1) {
+            throw new IllegalStateException("Giao dịch không còn ở trạng thái chờ thanh toán");
+        }
         order.setOrder_status(OrderStatus.PAID);
         order.setUpdatedAt(LocalDateTime.now());
         order.setUpdated_by("SYSTEM");
         orderRepository.save(order);
 
         log.info("Payment confirmed. orderId={}, transactionCode={}, amount={}",
-                payment.getOrderId(), paymentcallback.getTransactionCode(),
-                paymentcallback.getAmount());
+                payment.getOrderId(), paymentCallback.getTransactionCode(),
+                paymentCallback.getAmount());
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     /**
      * Xử lý thanh toán payment. Các tham số và kết quả tuân theo chữ ký phương thức.
      */
@@ -129,7 +146,7 @@ public class PaymentServiceImpl implements PaymentService {
             throw new IllegalArgumentException("Thông tin tạo thanh toán không hợp lệ");
         }
 
-        Order order = orderRepository.getorderbyId(paymentRequest.getOrderIds());
+        Order order = orderRepository.getorderbyIdForUpdate(paymentRequest.getOrderIds());
         if (order == null) {
             throw new IllegalArgumentException("Không tìm thấy đơn hàng");
         }
@@ -140,8 +157,10 @@ public class PaymentServiceImpl implements PaymentService {
                 || order.getTotal().compareTo(paymentRequest.getTotalPayment()) != 0) {
             throw new IllegalArgumentException("Số tiền thanh toán không khớp tổng tiền đơn hàng");
         }
+        if (paymentRepository.countPendingByOrderId(order.getId()) > 0) {
+            throw new IllegalStateException("Đơn hàng đã có giao dịch đang chờ thanh toán");
+        }
 
-        String paymentId = String.valueOf(System.currentTimeMillis() + new Random().nextInt(100000));
         String transactionCode = "VPO" + UUID.randomUUID().toString()
                 .replace("-", "").substring(0, 13).toUpperCase();
 
@@ -153,10 +172,13 @@ public class PaymentServiceImpl implements PaymentService {
         payment.setStatus("PENDING");
         payment.setTransactionCode(transactionCode);
         payment.setAmount(paymentRequest.getTotalPayment());
-        paymentRepostitory.save(payment);
+        int insertedRows = paymentRepository.save(payment);
+        if (insertedRows != 1 || payment.getId() == null) {
+            throw new IllegalStateException("Không thể tạo bản ghi thanh toán");
+        }
 
         PaymentResponse response = new PaymentResponse();
-        response.setPayment_id(paymentId);
+        response.setPayment_id(String.valueOf(payment.getId()));
         response.setAmount(paymentRequest.getTotalPayment());
         response.setTransaction_code(transactionCode);
         response.setCreated_qr_time(createdTime);
