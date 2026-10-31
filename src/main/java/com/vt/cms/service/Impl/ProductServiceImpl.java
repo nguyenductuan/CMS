@@ -19,6 +19,7 @@ import com.vt.cms.model.resp.ProductDetailResponse;
 import com.vt.cms.model.resp.ProductResponse;
 import com.vt.cms.model.resp.SkuResponse;
 import com.vt.cms.service.ProductService;
+import com.vt.cms.service.ProductReviewService;
 import com.vt.cms.service.validation.ProductRequestValidator;
 import com.vt.cms.service.mapper.ProductEntityMapper;
 import lombok.RequiredArgsConstructor;
@@ -44,6 +45,7 @@ public class ProductServiceImpl implements ProductService {
     private final ProductSkuRepository productSkuRepository;
     private final ProductRequestValidator productRequestValidator;
     private final ProductEntityMapper productEntityMapper;
+    private final ProductReviewService productReviewService;
 
     @Override
     @Transactional(rollbackFor = Exception.class)
@@ -193,6 +195,9 @@ public class ProductServiceImpl implements ProductService {
                 })
                 .toList();
         response.setSkus(skus);
+        response.setReviews(productReviewService.getByProduct(product_id));
+        response.setAverageRating(productReviewService.getAverage(product_id));
+        response.setReviewCount((long) response.getReviews().size());
         return response;
     }
     /**
