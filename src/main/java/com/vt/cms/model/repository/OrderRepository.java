@@ -89,6 +89,8 @@ public interface OrderRepository {
      */
     List<Itemorderdetail> getOrderItemsByOrderId1(long orderId);
     int cancelOrder(Order order);
+    int setReturnRequested(@Param("orderId") Integer orderId, @Param("buyerUsername") String buyerUsername, @Param("updatedAt") java.time.LocalDateTime updatedAt, @Param("updatedBy") String updatedBy);
+    int setReturnRejected(@Param("orderId") Integer orderId, @Param("updatedAt") java.time.LocalDateTime updatedAt, @Param("updatedBy") String updatedBy);
 
     long countorder(OrdersRequest request);
 
