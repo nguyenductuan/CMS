@@ -51,6 +51,14 @@ public class OrderFulfillmentController {
         return ResponseEntity.ok(new APIRessponse(200, "Shipper đã giao hàng thành công"));
     }
 
+    /** API nhận trạng thái tracking do đơn vị vận chuyển callback. */
+    @PostMapping("/{orderId}/carrier/tracking-event")
+    public ResponseEntity<APIRessponse> carrierTrackingEvent(
+            @PathVariable Integer orderId, @RequestBody CarrierTrackingEventRequest request) {
+        fulfillmentService.recordCarrierTrackingEvent(orderId, request.getCode(), request.getDescription());
+        return ResponseEntity.ok(new APIRessponse(200, "Đã ghi nhận trạng thái vận chuyển"));
+    }
+
     @PostMapping("/{orderId}/confirm-received")
     /**
      * Xác nhận nghiệp vụ confirm received. Các tham số đầu vào và kết quả được xác định theo chữ ký phương thức.
@@ -61,6 +69,15 @@ public class OrderFulfillmentController {
         // Demo only: production lấy customerId từ authenticated principal, không tin header client tự gửi.
         fulfillmentService.confirmReceived(orderId, customerId);
         return ResponseEntity.ok(new APIRessponse(200, "Bạn đã xác nhận nhận hàng"));
+    }
+
+    public static class CarrierTrackingEventRequest {
+        private String code;
+        private String description;
+        public String getCode() { return code; }
+        public void setCode(String code) { this.code = code; }
+        public String getDescription() { return description; }
+        public void setDescription(String description) { this.description = description; }
     }
 
     public static class DeliverySuccessRequest {
