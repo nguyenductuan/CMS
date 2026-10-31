@@ -235,6 +235,7 @@
                cancel_at,
                cancel_by,
                approve_by,
+               approve_by_role,
                approved_time
         FROM products
         WHERE id = #{id}
@@ -357,6 +358,7 @@
             <if test="status == 'APPROVED'">
                 approved_time = #{approved_time},
                 approve_by = #{approve_by},
+                approve_by_role = #{approve_by_role},
             </if>
             <if test="status == 'REJECTED'">
                 cancel_at = #{approved_time},
