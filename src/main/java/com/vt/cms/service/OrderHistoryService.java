@@ -20,7 +20,7 @@ public class OrderHistoryService {
      */
     private static final Map<String, String> SHIPPING_ACTION_MAP = Map.ofEntries(
             Map.entry("103", "Đơn vị vận chuyển lấy hàng thành công"),
-            Map.entry("104", "Đơn vị vận chuyển đã nhận hàng"),
+            Map.entry("104", "Đơn vị vận chuyển lấy hàng thành công"),
             Map.entry("101", "Đơn vị vận chuyển lấy hàng thất bại"),
             Map.entry("320", "Đơn vị vận chuyển đang giao hàng"),
             Map.entry("400", "Đơn vị vận chuyển đang giao hàng"),
