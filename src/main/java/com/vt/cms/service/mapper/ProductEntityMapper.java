@@ -1,5 +1,8 @@
 package com.vt.cms.service.mapper;
 
+
+import com.vt.cms.Exception.BusinessException;
+import com.vt.cms.model.enums.MessageCode;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.vt.cms.model.dto.CreateProductRequest;
@@ -53,7 +56,7 @@ public class ProductEntityMapper {
             /**
              * Thực hiện illegal argument exception. Tham số và kết quả tuân theo chữ ký phương thức.
              */
-            throw new IllegalArgumentException("Dữ liệu sản phẩm không thể chuyển đổi sang JSON", ex);
+            throw new BusinessException(MessageCode.DU_LIEU_SAN_PHAM_KHONG_THE_CHUYEN_DOI_SANG_JSON, ex);
         }
     }
 }
