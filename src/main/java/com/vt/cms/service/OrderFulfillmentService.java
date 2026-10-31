@@ -4,6 +4,10 @@ import com.vt.cms.model.dto.WarehouseSelectionRequest;
 import com.vt.cms.model.entity.Order;
 import com.vt.cms.model.entity.ShippingAssignment;
 import com.vt.cms.model.enums.OrderStatus;
+import com.vt.cms.model.enums.OrderTrackingStatus;
+import com.vt.cms.model.enums.RoleAction;
+
+import java.util.Map;
 import com.vt.cms.model.repository.OrderRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -97,32 +101,81 @@ public class OrderFulfillmentService {
      * Ghi nhận trạng thái vận chuyển do đơn vị vận chuyển gửi về.
      * Hỗ trợ mã 101, 103, 104, 320, 410, 400, 500, 506, 507, 508, 509 và 505.
      */
+    /**
+     * Ghi nhận trạng thái vận chuyển do đơn vị vận chuyển gửi về.
+     * Ánh xạ mã tracking sang enum và nội dung hiển thị theo cùng cấu trúc
+     * SHIPPING_ACTION_MAP dùng trong lịch sử tác động đơn hàng.
+     */
+    private static final Map<OrderTrackingStatus, String> SHIPPING_ACTION_MAP =
+            Map.ofEntries(
+                    Map.entry(OrderTrackingStatus.S103, "Đơn vị vận chuyển lấy hàng thành công"),
+                    Map.entry(OrderTrackingStatus.S104, "Đơn vị vận chuyển lấy hàng thành công"),
+                    Map.entry(OrderTrackingStatus.S101, "Đơn vị vận chuyển lấy hàng thất bại"),
+                    Map.entry(OrderTrackingStatus.S200, "Đơn vị vận chuyển đang giao hàng"),
+                    Map.entry(OrderTrackingStatus.S320, "Đơn vị vận chuyển đang giao hàng"),
+                    Map.entry(OrderTrackingStatus.S400, "Đơn vị vận chuyển đang giao hàng"),
+                    Map.entry(OrderTrackingStatus.S410, "Đơn vị vận chuyển đang giao hàng"),
+                    Map.entry(OrderTrackingStatus.S500, "Đơn vị vận chuyển đang giao hàng"),
+                    Map.entry(OrderTrackingStatus.S506, "Đơn vị vận chuyển đang giao hàng"),
+                    Map.entry(OrderTrackingStatus.S507, "Đơn vị vận chuyển đang giao hàng"),
+                    Map.entry(OrderTrackingStatus.S508, "Đơn vị vận chuyển đang giao hàng"),
+                    Map.entry(OrderTrackingStatus.S509, "Đơn vị vận chuyển đang giao hàng"),
+                    Map.entry(OrderTrackingStatus.S505, "Đơn hàng giao không thành công"),
+                    Map.entry(OrderTrackingStatus.RETURN_PICKUP_SUCCESS, "Đơn vị vận chuyển lấy hàng hoàn thành công"),
+                    Map.entry(OrderTrackingStatus.RETURN_PICKUP_FAILED, "Đơn vị vận chuyển lấy hàng hoàn thất bại"),
+                    Map.entry(OrderTrackingStatus.RETURN_DELIVERY_SUCCESS, "Đơn vị vận chuyển giao hàng hoàn thành công"),
+                    Map.entry(OrderTrackingStatus.RETURN_DELIVERY_FAILED, "Đơn vị vận chuyển giao hàng hoàn thất bại")
+            );
+
+    /**
+     * Ghi nhận trạng thái vận chuyển do đơn vị vận chuyển gửi về.
+     */
     @Transactional(rollbackFor = Exception.class)
     public void recordCarrierTrackingEvent(Integer orderId, String code, String description) {
         validateOrderId(orderId);
-        java.util.Map<String, String> titles = java.util.Map.ofEntries(
-                java.util.Map.entry("101", "Đơn vị vận chuyển lấy hàng thất bại"),
-                java.util.Map.entry("103", "Đơn vị vận chuyển lấy hàng thành công"),
-                java.util.Map.entry("104", "Đơn vị vận chuyển đã nhận hàng"),
-                java.util.Map.entry("200", "Đơn hàng đang giao"),
-                java.util.Map.entry("320", "Đơn hàng đang vận chuyển"),
-                java.util.Map.entry("410", "Đơn hàng đang giao"),
-                java.util.Map.entry("400", "Đơn hàng đang giao"),
-                java.util.Map.entry("500", "Đơn hàng đang vận chuyển/đang giao"),
-                java.util.Map.entry("506", "Đơn hàng đang giao"),
-                java.util.Map.entry("507", "Đơn hàng đang giao"),
-                java.util.Map.entry("508", "Đơn hàng đang giao"),
-                java.util.Map.entry("509", "Đơn hàng đang giao"),
-                java.util.Map.entry("505", "Đơn hàng giao không thành công"),
-                java.util.Map.entry("RETURN_PICKUP_SUCCESS", "Đơn vị vận chuyển lấy hàng hoàn thành công"),
-                java.util.Map.entry("RETURN_PICKUP_FAILED", "Đơn vị vận chuyển lấy hàng hoàn thất bại"),
-                java.util.Map.entry("RETURN_DELIVERY_SUCCESS", "Đơn vị vận chuyển giao hàng hoàn thành công"),
-                java.util.Map.entry("RETURN_DELIVERY_FAILED", "Đơn vị vận chuyển giao hàng hoàn thất bại"));
-        String title = titles.get(code);
-        if (title == null) throw new IllegalArgumentException("Mã trạng thái vận chuyển không được hỗ trợ");
-        int updated = orderRepository.updateShippingStatusCode(orderId, code, LocalDateTime.now(), "CARRIER");
-        if (updated != 1) throw new IllegalStateException("Không thể cập nhật mã trạng thái vận chuyển");
-        orderHistoryService.record(orderId, code, code, "CARRIER", "CARRIER", title, description);
+        OrderTrackingStatus trackingStatus = toOrderTrackingStatus(code);
+        String title = trackingStatus == null ? null : SHIPPING_ACTION_MAP.get(trackingStatus);
+        if (title == null) {
+            throw new IllegalArgumentException("Mã trạng thái vận chuyển không được hỗ trợ");
+        }
+
+        String normalizedCode = normalizeTrackingCode(trackingStatus);
+        int updated = orderRepository.updateShippingStatusCode(
+                orderId, normalizedCode, LocalDateTime.now(), "CARRIER");
+        if (updated != 1) {
+            throw new IllegalStateException("Không thể cập nhật mã trạng thái vận chuyển");
+        }
+
+        RoleAction roleAction = orderHistoryService.getRoleAction(trackingStatus);
+        orderHistoryService.record(orderId, normalizedCode, normalizedCode,
+                "CARRIER", roleAction.name(), title, description);
+    }
+
+    /**
+     * Chuyển mã callback dạng chuỗi sang enum OrderTrackingStatus.
+     * Chấp nhận cả mã số (103) và tên enum (S103).
+     */
+    private OrderTrackingStatus toOrderTrackingStatus(String code) {
+        if (code == null || code.isBlank()) {
+            return null;
+        }
+        String value = code.trim().toUpperCase();
+        if (value.matches("\\d+")) {
+            value = "S" + value;
+        }
+        try {
+            return OrderTrackingStatus.valueOf(value);
+        } catch (IllegalArgumentException ex) {
+            return null;
+        }
+    }
+
+    /**
+     * Chuẩn hóa enum về mã callback lưu trong database.
+     */
+    private String normalizeTrackingCode(OrderTrackingStatus status) {
+        String value = status.name();
+        return value.matches("S\\d+") ? value.substring(1) : value;
     }
 
     @Transactional(rollbackFor = Exception.class)
