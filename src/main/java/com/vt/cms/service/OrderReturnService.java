@@ -105,7 +105,7 @@ public class OrderReturnService {
         out.setId(r.getId()); out.setOrderId(r.getOrderId()); out.setBuyerUsername(r.getBuyerUsername());
         var orderSummary = orderRepository.getorderbyid(r.getOrderId());
         if (orderSummary != null) {
-            out.setOrderStatus(orderSummary.getOrder_status());
+            out.setOrderStatus(orderSummary.getOrderStatus());
             out.setOrderTotal(orderSummary.getTotal());
             out.setOrderItems(orderRepository.getOrderItemsByOrderId(r.getOrderId()));
         }
