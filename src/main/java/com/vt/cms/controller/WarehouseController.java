@@ -28,6 +28,10 @@ public class WarehouseController {
      * Lấy danh sách các kho đang hoạt động để giao diện quản trị hiển thị.
      * @return danh sách kho
      */
+    /**
+     * Truy vấn và trả về dữ liệu theo điều kiện đầu vào.
+     * @return Kết quả xử lý của hàm.
+     */
     @GetMapping({"/warehouse", "/warehouse/"})
     public List<Warehouse> getWarehouse() {
         return warehouseService.listqwarehouse();
@@ -38,6 +42,11 @@ public class WarehouseController {
      * @param id mã kho cần tra cứu
      * @return thông tin chi tiết kho
      */
+    /**
+     * Truy vấn và trả về dữ liệu theo điều kiện đầu vào.
+     * @param id Tham số phục vụ xử lý getWarehouse.
+     * @return Kết quả xử lý của hàm.
+     */
     @GetMapping("/warehouse/{id}")
     public WarehouseResponse getWarehouse(@PathVariable Integer id) {
         return warehouseService.getdetail(id);
@@ -47,6 +56,11 @@ public class WarehouseController {
      * Tạo kho mới sau khi kiểm tra dữ liệu request hợp lệ.
      * @param warehouse thông tin kho cần tạo
      * @return thông báo tạo kho thành công
+     */
+    /**
+     * Tạo mới và lưu dữ liệu nghiệp vụ.
+     * @param warehouse Tham số phục vụ xử lý createWarehouse.
+     * @return Kết quả xử lý của hàm.
      */
     @PostMapping("/warehouse")
     public ResponseEntity<APIRessponse> createWarehouse(@Valid @RequestBody WarehouseRequest warehouse) {
@@ -59,6 +73,11 @@ public class WarehouseController {
      * @param warehouse thông tin kho cần tạo
      * @return thông báo thêm kho thành công
      */
+    /**
+     * Tạo mới và lưu dữ liệu nghiệp vụ.
+     * @param warehouse Tham số phục vụ xử lý addWarehouse.
+     * @return Kết quả xử lý của hàm.
+     */
     @PostMapping({"/addwarehouse", "/warehouse/addwarehouse"})
     public ResponseEntity<APIRessponse> addWarehouse(@Valid @RequestBody WarehouseRequest warehouse) {
         warehouseService.addwarehouse(warehouse);
@@ -70,6 +89,11 @@ public class WarehouseController {
      * @param id mã kho cần xóa
      * @return thông báo xóa kho thành công
      */
+    /**
+     * Xử lý xóa, loại bỏ hoặc hủy dữ liệu theo quy tắc nghiệp vụ.
+     * @param id Tham số phục vụ xử lý deleteWarehouse.
+     * @return Kết quả xử lý của hàm.
+     */
     @DeleteMapping("/warehouse/{id}")
     public ResponseEntity<APIRessponse> deleteWarehouse(@PathVariable Integer id) {
         warehouseService.setWarehouseDeleted(id, true);
@@ -80,6 +104,11 @@ public class WarehouseController {
      * Xử lý yêu cầu xóa kho theo định dạng API cũ.
      * @param warehouse đối tượng chứa mã kho
      * @return thông báo xóa kho thành công
+     */
+    /**
+     * Xử lý xóa, loại bỏ hoặc hủy dữ liệu theo quy tắc nghiệp vụ.
+     * @param warehouse Tham số phục vụ xử lý deleteWarehouseLegacy.
+     * @return Kết quả xử lý của hàm.
      */
     @PostMapping({"/deletewarehouse", "/warehouse/deletewarehouse"})
     public ResponseEntity<APIRessponse> deleteWarehouseLegacy(@RequestBody Warehouse warehouse) {
@@ -95,6 +124,11 @@ public class WarehouseController {
      * @param request mã kho và trạng thái hoạt động mong muốn
      * @return thông báo cập nhật trạng thái
      */
+    /**
+     * Cập nhật thông tin hoặc trạng thái theo nghiệp vụ.
+     * @param request Tham số phục vụ xử lý updateWarehouseStatus.
+     * @return Kết quả xử lý của hàm.
+     */
     @PutMapping("/warehouse/status")
     public ResponseEntity<APIRessponse> updateWarehouseStatus(@Valid @RequestBody WarehouseStatusRequest request) {
         warehouseService.setWarehouseDeleted(request.getId(), !request.getActive());
@@ -105,6 +139,11 @@ public class WarehouseController {
      * Endpoint trạng thái tương thích ngược; chuyển kho sang trạng thái đã xóa.
      * @param id mã kho nhận từ request body
      * @return thông báo cập nhật trạng thái
+     */
+    /**
+     * Thực hiện chức năng nghiệp vụ theo tên hàm và các tham số đầu vào.
+     * @param id Tham số phục vụ xử lý statusWarehouse.
+     * @return Kết quả xử lý của hàm.
      */
     @PostMapping({"/statuswarehouse", "/warehouse/statuswarehouse"})
     public ResponseEntity<APIRessponse> statusWarehouse(@RequestBody Integer id) {
@@ -117,6 +156,11 @@ public class WarehouseController {
      * @param warehouseId mã kho
      * @return danh sách SKU và số lượng tồn
      */
+    /**
+     * Truy vấn và trả về dữ liệu theo điều kiện đầu vào.
+     * @param warehouseId Tham số phục vụ xử lý listInventory.
+     * @return Kết quả xử lý của hàm.
+     */
     @GetMapping("/warehouse/{warehouseId}/inventory")
     public List<WarehouseInventoryResponse> listInventory(@PathVariable Integer warehouseId) {
         return warehouseService.listInventory(warehouseId);
@@ -127,6 +171,12 @@ public class WarehouseController {
      * @param warehouseId mã kho cần điều chỉnh
      * @param request SKU, lượng thay đổi và lý do điều chỉnh
      * @return thông báo điều chỉnh thành công
+     */
+    /**
+     * Cập nhật thông tin hoặc trạng thái theo nghiệp vụ.
+     * @param warehouseId Tham số phục vụ xử lý adjustInventory.
+     * @param request Tham số phục vụ xử lý adjustInventory.
+     * @return Kết quả xử lý của hàm.
      */
     @PostMapping("/warehouse/{warehouseId}/inventory/adjust")
     public ResponseEntity<APIRessponse> adjustInventory(@PathVariable Integer warehouseId,
@@ -141,6 +191,13 @@ public class WarehouseController {
      * @param skuId mã SKU cần lọc, có thể bỏ trống
      * @param limit số bản ghi tối đa cần trả về
      * @return danh sách lịch sử biến động tồn kho
+     */
+    /**
+     * Truy vấn và trả về dữ liệu theo điều kiện đầu vào.
+     * @param warehouseId Tham số phục vụ xử lý listInventoryMovements.
+     * @param skuId Tham số phục vụ xử lý listInventoryMovements.
+     * @param limit Tham số phục vụ xử lý listInventoryMovements.
+     * @return Kết quả xử lý của hàm.
      */
     @GetMapping("/warehouse/{warehouseId}/inventory/movements")
     public List<WarehouseInventoryMovementResponse> listInventoryMovements(
