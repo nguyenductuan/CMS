@@ -28,6 +28,6 @@ public interface OrderService {
     /**
      * Hủy nghiệp vụ cancel order. Các tham số và kết quả tuân theo chữ ký phương thức.
      */
-    void cancelOrder(int orderId, String notecancel);
+    void cancelOrder(int orderId, String notecancel, String actorUsername, String actorRole);
 
 }
