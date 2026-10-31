@@ -109,7 +109,10 @@ public class OrderHistoryService {
 
         String eventCode = event.getEventCode();
         if (eventCode != null && !eventCode.isBlank()) {
-            String shippingAction = SHIPPING_ACTION_MAP.get(toOrderTrackingStatus(eventCode));
+            OrderTrackingStatus trackingStatus = toOrderTrackingStatus(eventCode);
+            String shippingAction = trackingStatus == null
+                    ? null
+                    : SHIPPING_ACTION_MAP.get(trackingStatus);
             if (shippingAction != null) {
                 return shippingAction;
             }
