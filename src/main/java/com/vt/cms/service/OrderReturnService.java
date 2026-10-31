@@ -175,10 +175,23 @@ public class OrderReturnService {
     public void escalateSellerTimeouts() {
         LocalDateTime now = LocalDateTime.now();
         LocalDateTime cutoff = now.minusHours(24);
+        List<OrderReturn> expiredSellerReviews = returnRepository.findExpiredSellerReviews(cutoff);
         returnRepository.escalateExpiredSellerReviews(cutoff);
         orderRepository.escalateReturnReviews(cutoff, now, "SYSTEM");
+        for (OrderReturn item : expiredSellerReviews) {
+            orderHistoryService.record(item.getOrderId(), "SYSTEM_ESCALATED_TO_ADMIN", "PENDING_ADMIN_REVIEW",
+                    "SYSTEM", "SYSTEM", "Hệ thống chuyển yêu cầu trả hàng lên Admin do Seller không phê duyệt trong 24h",
+                    "Yêu cầu trả hàng #" + item.getId());
+        }
+
+        List<OrderReturn> expiredMethodSelections = returnRepository.findExpiredMethodSelections(now);
         returnRepository.autoSelectExpiredReturnMethods(now);
         orderRepository.syncReturnMethodStatus(now, "SYSTEM");
+        for (OrderReturn item : expiredMethodSelections) {
+            orderHistoryService.record(item.getOrderId(), "SYSTEM_AUTO_RETURN_METHOD", "WAITING_FOR_RETURN_SHIPMENT",
+                    "SYSTEM", "SYSTEM", "Hệ thống tự động chọn phương thức Trả hàng & Hoàn tiền do quá 24h không thao tác",
+                    "Yêu cầu trả hàng #" + item.getId() + "; phương thức RETURN_AND_REFUND");
+        }
     }
 
     /**
