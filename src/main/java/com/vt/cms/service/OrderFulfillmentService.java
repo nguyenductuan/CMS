@@ -18,6 +18,7 @@ import java.time.LocalDateTime;
 public class OrderFulfillmentService {
     private final OrderRepository orderRepository;
     private final MockShippingProvider mockShippingProvider;
+    private final OrderHistoryService orderHistoryService;
 
     @Transactional(rollbackFor = Exception.class)
     /**
@@ -37,6 +38,7 @@ public class OrderFulfillmentService {
             log.warn("Warehouse selection rejected due to concurrent status change. orderId={}", orderId);
             throw new IllegalStateException("Không thể chọn kho: trạng thái đơn hàng đã thay đổi");
         }
+        orderHistoryService.record(orderId, "SELLER_PREPARED", "PREPARING", "SYSTEM", "SYSTEM", "Seller xác nhận đã chuẩn bị hàng thành công", "Kho được chọn: " + request.getWarehouseCode().trim());
         log.info("Warehouse selected. orderId={}, warehouseCode={}", orderId, request.getWarehouseCode().trim());
     }
 
@@ -61,7 +63,8 @@ public class OrderFulfillmentService {
             log.warn("Dispatch rejected due to concurrent status change. orderId={}", orderId);
             throw new IllegalStateException("Không thể bàn giao vận chuyển: trạng thái đơn hàng đã thay đổi");
         }
-        log.info("Order dispatched. orderId={}, provider={}, trackingNumber={}, shipperCode={}",
+        orderHistoryService.record(orderId, "CARRIER_PICKUP_SUCCESS", "SHIPPING", assignment.getProvider(), "CARRIER", "Đơn vị vận chuyển đã lấy hàng thành công", "Mã vận đơn: " + assignment.getTrackingNumber());
+        log.info("Order dispatched. orderId={}, provider={}, trackingNumber={}, shipperCode={},",
                 orderId, assignment.getProvider(), assignment.getTrackingNumber(), assignment.getShipperCode());
         return assignment;
     }
@@ -82,6 +85,7 @@ public class OrderFulfillmentService {
             log.warn("Delivery callback rejected. orderId={}, trackingNumber={}", orderId, trackingNumber);
             throw new IllegalStateException("Không tìm thấy vận đơn đang giao hoặc trạng thái không hợp lệ");
         }
+        orderHistoryService.record(orderId, "CARRIER_DELIVERY_SUCCESS", "DELIVERED", "MOCK-3PL", "CARRIER", "Đơn hàng giao thành công", "Đơn vị vận chuyển báo giao thành công. Mã vận đơn: " + trackingNumber);
         log.info("Carrier reports delivery successful. orderId={}, trackingNumber={}", orderId, trackingNumber);
     }
 
@@ -100,6 +104,7 @@ public class OrderFulfillmentService {
             log.warn("Receive confirmation rejected. orderId={}, customerId={}", orderId, customerId);
             throw new IllegalStateException("Chỉ có thể xác nhận nhận hàng khi shipper đã giao thành công");
         }
+        orderHistoryService.record(orderId, "BUYER_RECEIVED", "COMPLETED", customerId, "BUYER", "Đơn hàng đã giao thành công", "Buyer đã nhấn nút Đã nhận hàng");
         log.info("Customer confirmed order received; order completed. orderId={}, customerId={}", orderId, customerId);
     }
 
