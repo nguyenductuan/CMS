@@ -16,4 +16,10 @@ public class User {
     @JsonIgnore
     private String password;
     private String role;
+    private String phone;
+    private String email;
+    private String address;
+    private String bankName;
+    private String bankAccountNumber;
+    private String bankAccountHolder;
 }
