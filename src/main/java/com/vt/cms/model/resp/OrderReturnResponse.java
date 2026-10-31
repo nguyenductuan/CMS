@@ -8,6 +8,9 @@ import java.util.List;
 public class OrderReturnResponse {
     private Integer id;
     private Integer orderId;
+    private String orderStatus;
+    private java.math.BigDecimal orderTotal;
+    private java.util.List<com.vt.cms.model.dto.ItemDto> orderItems;
     private String buyerUsername;
     private String buyerName;
     private String phone;
