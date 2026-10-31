@@ -259,7 +259,7 @@ public class CampainServiceImpl implements CampainService {
      */
     public void updatestatus(Integer campain_id, CampainStatus status) {
         if (campain_id == null || campain_id <= 0 || status == null) {
-            throw new IllegalArgumentException("Campaign ID và trạng thái là bắt buộc");
+            throw new BusinessException(MessageCode.CAMPAIGN_ID_VA_TRANG_THAI_LA_BAT_BUOC);
         }
         Campain campaign = campainRepository.getCampainById(campain_id);
         if (campaign == null || "true".equalsIgnoreCase(campaign.getIsDeleted())) {
@@ -285,7 +285,7 @@ public class CampainServiceImpl implements CampainService {
      * Xóa dữ liệu deletecampain. Các tham số và kết quả tuân theo chữ ký phương thức.
      */
     public void deletecampain(Integer campainID) {
-        if (campainID == null || campainID <= 0) throw new IllegalArgumentException("Campaign ID không hợp lệ");
+        if (campainID == null || campainID <= 0) throw new BusinessException(MessageCode.CAMPAIGN_ID_KHONG_HOP_LE);
         int rows = campainRepository.deletecampain(campainID);
         if (rows != 1) throw new IllegalStateException("Không thể xóa chiến dịch: chiến dịch không tồn tại hoặc trạng thái không cho phép");
     }
