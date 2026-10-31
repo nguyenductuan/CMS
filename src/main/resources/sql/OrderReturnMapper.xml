@@ -77,6 +77,15 @@
         WHERE status='PENDING_SELLER_METHOD_SELECTION'
           AND method_selection_deadline IS NOT NULL AND method_selection_deadline &lt;= #{now}
     </update>
+    <select id="findExpiredSellerReviews" resultMap="ReturnMap">
+        SELECT * FROM order_return_request
+        WHERE status='PENDING_SELLER_REVIEW' AND created_at &lt;= #{cutoff}
+    </select>
+    <select id="findExpiredMethodSelections" resultMap="ReturnMap">
+        SELECT * FROM order_return_request
+        WHERE status='PENDING_SELLER_METHOD_SELECTION'
+          AND method_selection_deadline IS NOT NULL AND method_selection_deadline &lt;= #{now}
+    </select>
     <update id="escalateExpiredSellerReviews">
         UPDATE order_return_request
         SET status='PENDING_ADMIN_REVIEW'
