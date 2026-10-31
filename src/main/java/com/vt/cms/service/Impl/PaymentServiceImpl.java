@@ -1,5 +1,7 @@
 package com.vt.cms.service.Impl;
 
+
+import com.vt.cms.Exception.BusinessException;import com.vt.cms.model.enums.MessageCode;
 import com.vt.cms.model.dto.PaymentRequest;
 import com.vt.cms.model.dto.PaymentCallback;
 import com.vt.cms.model.dto.order.Itemorderdetail;
@@ -58,35 +60,35 @@ public class PaymentServiceImpl implements PaymentService {
             /**
              * Thực hiện xử lý nghiệp vụ illegal argument exception. Các tham số và kết quả tuân theo chữ ký phương thức.
              */
-            throw new IllegalArgumentException("Yêu cầu thanh toán không hợp lệ");
+            throw new BusinessException(MessageCode.YEU_CAU_THANH_TOAN_KHONG_HOP_LE);
         }
 
         Payment paymentLookup = paymentRepository.findByTransactionCode(
                 paymentCallback.getTransactionCode());
         if (paymentLookup == null) {
-            throw new IllegalArgumentException("Không tìm thấy giao dịch thanh toán");
+            throw new BusinessException(MessageCode.KHONG_TIM_THAY_GIAO_DICH_THANH_TOAN);
         }
 
         // Lock order first to serialize different payment sessions for the same order.
         Order order = orderRepository.getorderbyIdForUpdate(paymentLookup.getOrderId());
         if (order == null) {
-            throw new IllegalArgumentException("Không tìm thấy đơn hàng");
+            throw new BusinessException(MessageCode.KHONG_TIM_THAY_DON_HANG);
         }
         Payment payment = paymentRepository.findByTransactionCodeForUpdate(
                 paymentCallback.getTransactionCode());
         if (payment == null) {
-            throw new IllegalArgumentException("Không tìm thấy giao dịch thanh toán");
+            throw new BusinessException(MessageCode.KHONG_TIM_THAY_GIAO_DICH_THANH_TOAN);
         }
         if (payment.getAmount() == null
                 || paymentCallback.getAmount().compareTo(payment.getAmount()) != 0) {
-            throw new IllegalArgumentException("Số tiền thanh toán không hợp lệ");
+            throw new BusinessException(MessageCode.SO_TIEN_THANH_TOAN_KHONG_HOP_LE);
         }
         if (order.getTotal() == null
                 || paymentCallback.getAmount().compareTo(order.getTotal()) != 0) {
             /**
              * Thực hiện xử lý nghiệp vụ illegal argument exception. Các tham số và kết quả tuân theo chữ ký phương thức.
              */
-            throw new IllegalArgumentException("Số tiền callback không khớp tổng tiền đơn hàng");
+            throw new BusinessException(MessageCode.SO_TIEN_CALLBACK_KHONG_KHOP_TONG_TIEN_DON_HANG);
         }
 
         String paymentStatus = payment.getStatus();
@@ -148,19 +150,19 @@ public class PaymentServiceImpl implements PaymentService {
                 || paymentRequest.getOrderIds() <= 0
                 || paymentRequest.getTotalPayment() == null
                 || paymentRequest.getTotalPayment().compareTo(BigDecimal.ZERO) <= 0) {
-            throw new IllegalArgumentException("Thông tin tạo thanh toán không hợp lệ");
+            throw new BusinessException(MessageCode.THONG_TIN_TAO_THANH_TOAN_KHONG_HOP_LE);
         }
 
         Order order = orderRepository.getorderbyIdForUpdate(paymentRequest.getOrderIds());
         if (order == null) {
-            throw new IllegalArgumentException("Không tìm thấy đơn hàng");
+            throw new BusinessException(MessageCode.KHONG_TIM_THAY_DON_HANG);
         }
         if (order.getOrder_status() != OrderStatus.WAIT_PAYMENT) {
             throw new IllegalStateException("Đơn hàng không ở trạng thái chờ thanh toán");
         }
         if (order.getTotal() == null
                 || order.getTotal().compareTo(paymentRequest.getTotalPayment()) != 0) {
-            throw new IllegalArgumentException("Số tiền thanh toán không khớp tổng tiền đơn hàng");
+            throw new BusinessException(MessageCode.SO_TIEN_THANH_TOAN_KHONG_KHOP_TONG_TIEN_DON_HANG);
         }
         if (paymentRepository.countPendingByOrderId(order.getId()) > 0) {
             throw new IllegalStateException("Đơn hàng đã có giao dịch đang chờ thanh toán");
