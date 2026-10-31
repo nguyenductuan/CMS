@@ -47,6 +47,12 @@
         <where>
             <if test="fromDate != null">AND o.created_at &gt;= #{fromDate}</if>
             <if test="toDateExclusive != null">AND o.created_at &lt; #{toDateExclusive}</if>
+            <if test="statuses != null and statuses.size() > 0">
+                AND o.order_status IN
+                <foreach collection="statuses" item="status" open="(" separator="," close=")">
+                    #{status}
+                </foreach>
+            </if>
         </where>
         ORDER BY o.created_at DESC, o.id DESC, oi.product_id ASC, oi.sku_id ASC
     </select>
