@@ -99,7 +99,7 @@ public class OrderExportService {
             case "đã giao", "da_giao" -> List.of("DELIVERED", "RECEIVED", "COMPLETED");
             case "đã hủy", "đã huỷ", "da_huy" -> List.of("CANCELLED");
             case "trả hàng/hoàn tiền", "trả hàng", "tra_hang" -> List.of("RETURN_REQUESTED", "REFUND_PENDING");
-            default -> throw new IllegalArgumentException("Tên tab không được hỗ trợ: " + tabName);
+            default -> throw new BusinessException(MessageCode.INVALID_EXPORT_TAB);
         };
     }
 
