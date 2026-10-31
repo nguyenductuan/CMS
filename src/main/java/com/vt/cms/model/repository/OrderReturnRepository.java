@@ -19,6 +19,8 @@ public interface OrderReturnRepository {
                     @Param("reviewer") String reviewer, @Param("note") String note,
                     @Param("reviewedAt") LocalDateTime reviewedAt);
     int escalateExpiredSellerReviews(@Param("cutoff") LocalDateTime cutoff);
+    java.util.List<OrderReturn> findExpiredSellerReviews(@Param("cutoff") LocalDateTime cutoff);
+    java.util.List<OrderReturn> findExpiredMethodSelections(@Param("now") LocalDateTime now);
     int selectReturnMethod(@Param("returnId") Integer returnId, @Param("method") String method, @Param("selectedAt") LocalDateTime selectedAt);
     int autoSelectExpiredReturnMethods(@Param("now") LocalDateTime now);
 }
