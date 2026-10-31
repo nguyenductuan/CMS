@@ -59,7 +59,7 @@
     </update>
     <update id="adminReview">
         UPDATE order_return_request
-        SET status=CASE WHEN #{approved}=1 THEN 'WAITING_FOR_RETURN_SHIPMENT' ELSE 'REJECTED' END,
+        SET status=CASE WHEN #{approved}=1 THEN 'PENDING_SELLER_METHOD_SELECTION' ELSE 'REJECTED' END,
             admin_reviewer=#{reviewer}, admin_note=#{note}, admin_reviewed_at=#{reviewedAt}, method_selection_deadline=CASE WHEN #{approved}=1 THEN DATE_ADD(#{reviewedAt}, INTERVAL 24 HOUR) ELSE NULL END
         WHERE id=#{returnId} AND status='PENDING_ADMIN_REVIEW'
     </update>
