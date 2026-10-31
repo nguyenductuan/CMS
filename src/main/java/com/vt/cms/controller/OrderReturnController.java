@@ -25,6 +25,11 @@ public class OrderReturnController {
                 (String) http.getAttribute(JwtAuthenticationFilter.USERNAME_ATTRIBUTE)));
     }
 
+    @GetMapping("/return/{returnId}")
+    public ResponseEntity<OrderReturnResponse> getReturn(@PathVariable Integer returnId) {
+        return ResponseEntity.ok(service.getReturn(returnId));
+    }
+
     @PostMapping("/return/{returnId}/seller-review")
     public ResponseEntity<OrderReturnResponse> sellerReview(@PathVariable Integer returnId,
             @Valid @RequestBody ReturnReviewRequest request, HttpServletRequest http) {
