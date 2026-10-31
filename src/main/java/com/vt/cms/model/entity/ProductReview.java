@@ -2,7 +2,6 @@ package com.vt.cms.model.entity;
 
 import lombok.Data;
 import java.time.LocalDateTime;
-import java.util.List;
 
 @Data
 public class ProductReview {
@@ -15,7 +14,7 @@ public class ProductReview {
     private String username;
     private Integer rating;
     private String content;
-    private List<String> images;
-    private List<String> videos;
+    private String imagesJson;
+    private String videosJson;
     private LocalDateTime createdAt;
 }
