@@ -11,6 +11,7 @@ import java.util.List;
 public class OrderResponse {
 private Integer orderId;
 private String orderStatus;
+private String shippingStatusCode;
 private BigDecimal total;
 
 private LocalDateTime orderDate;
