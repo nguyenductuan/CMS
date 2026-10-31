@@ -202,6 +202,7 @@
         SELECT
             o.id AS orderId,
             o.order_status AS orderStatus,
+            o.shipping_status_code AS shippingStatusCode,
             o.total AS total,
             o.created_at AS orderDate,
             o.expected_delivery AS expectedDelivery,
