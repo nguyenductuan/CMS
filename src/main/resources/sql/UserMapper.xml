@@ -18,15 +18,15 @@
     </resultMap>
 
     <select id="getUser" resultMap="UserResultMap">
-        SELECT id, name, age, username, role FROM user
+        SELECT id, name, age, username, role, phone, email, address, bank_name, bank_account_number, bank_account_holder FROM user
     </select>
 
     <select id="detailUser" resultMap="UserResultMap">
-        SELECT id, name, age, username, role FROM user WHERE id = #{id}
+        SELECT id, name, age, username, role, phone, email, address, bank_name, bank_account_number, bank_account_holder FROM user WHERE id = #{id}
     </select>
 
     <select id="findByUsername" resultMap="UserResultMap">
-        SELECT id, name, age, username, password, role
+        SELECT id, name, age, username, password, role, phone, email, address, bank_name, bank_account_number, bank_account_holder
         FROM user
         WHERE username = #{username}
         LIMIT 1
@@ -38,8 +38,8 @@
         VALUES (#{name}, #{age}, #{username}, #{password}, #{role})
     </insert>
     <update id="updateBuyerProfile" parameterType="com.vt.cms.model.entity.User">
-        UPDATE user SET name=#{name}, age=#{age}, phone=#{phone}, email=#{email}, address=#{address},
-            bank_name=#{bankName}, bank_account_number=#{bankAccountNumber}, bank_account_holder=#{bankAccountHolder}
+        UPDATE user SET name=COALESCE(#{name},name), age=COALESCE(#{age},age), phone=COALESCE(#{phone},phone), email=COALESCE(#{email},email), address=COALESCE(#{address},address),
+            bank_name=COALESCE(#{bankName},bank_name), bank_account_number=COALESCE(#{bankAccountNumber},bank_account_number), bank_account_holder=COALESCE(#{bankAccountHolder},bank_account_holder)
         WHERE id=#{id} AND role='BUYER'
     </update>
 </mapper>
