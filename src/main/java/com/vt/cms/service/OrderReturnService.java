@@ -61,10 +61,20 @@ public class OrderReturnService {
         return map(returnRepository.findById(ret.getId()));
     }
 
-    public OrderReturnResponse getReturn(Integer returnId) {
+    public OrderReturnResponse getReturn(Integer returnId, String username, String role) {
         OrderReturn ret = returnRepository.findById(returnId);
         if (ret == null) throw new IllegalArgumentException("Không tìm thấy yêu cầu trả hàng");
+        if ("BUYER".equals(role) && !username.equals(ret.getBuyerUsername())) throw new SecurityException("Không có quyền xem yêu cầu trả hàng này");
+        if (!List.of("BUYER", "SELLER", "ADMIN").contains(role)) throw new SecurityException("Không có quyền xem yêu cầu trả hàng");
         return map(ret);
+    }
+
+    public List<OrderReturnResponse> getPending(String role) {
+        String status;
+        if ("SELLER".equals(role)) status = "PENDING_SELLER_REVIEW";
+        else if ("ADMIN".equals(role)) status = "PENDING_ADMIN_REVIEW";
+        else throw new SecurityException("Chỉ SELLER hoặc ADMIN được xem danh sách chờ duyệt");
+        return returnRepository.findPending(status).stream().map(this::map).toList();
     }
 
     @Transactional(rollbackFor = Exception.class)
