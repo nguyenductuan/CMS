@@ -37,6 +37,9 @@
     <select id="findById" resultMap="ReturnMap">
         SELECT * FROM order_return_request WHERE id=#{returnId}
     </select>
+    <select id="findPending" resultMap="ReturnMap">
+        SELECT * FROM order_return_request WHERE status=#{status} ORDER BY created_at ASC
+    </select>
     <update id="sellerReview">
         UPDATE order_return_request
         SET status=CASE WHEN #{approved}=1 THEN 'PENDING_ADMIN_REVIEW' ELSE 'REJECTED' END,
