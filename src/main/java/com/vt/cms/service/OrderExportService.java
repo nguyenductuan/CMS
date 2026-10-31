@@ -51,8 +51,9 @@ public class OrderExportService {
         LocalDateTime fromTime = from == null ? null : from.atStartOfDay();
         LocalDateTime toExclusive = to == null ? null : to.plusDays(1).atStartOfDay();
         var rows = repository.findOrdersForExport(fromTime, toExclusive, statuses);
-        String fileName = from == null ? normalizedTab + ".xlsx"
-                : normalizedTab + " _" + from.format(FILE_DATE) + " - " + to.format(FILE_DATE) + ".xlsx";
+        String fileTabName = normalizedTab.replace("/", "_").replace("\\", "_").replace(":", "_");
+        String fileName = from == null ? fileTabName + ".xlsx"
+                : fileTabName + " _" + from.format(FILE_DATE) + " - " + to.format(FILE_DATE) + ".xlsx";
         try (Workbook workbook = new XSSFWorkbook(); ByteArrayOutputStream output = new ByteArrayOutputStream()) {
             Sheet sheet = workbook.createSheet(sheetName);
             Row header = sheet.createRow(0);
