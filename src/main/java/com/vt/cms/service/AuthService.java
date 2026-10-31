@@ -16,6 +16,11 @@ public class AuthService {
     private final JwtService jwtService;
     private final BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
 
+    /**
+     * Xác thực tài khoản hoặc kiểm tra tính hợp lệ của JWT.
+     * @param request Tham số đầu vào của hàm.
+     * @return Kết quả xử lý.
+     */
     public LoginResponse login(LoginRequest request) {
         User user = userRepository.findByUsername(request.getUsername().trim());
         if (user == null || user.getPassword() == null
