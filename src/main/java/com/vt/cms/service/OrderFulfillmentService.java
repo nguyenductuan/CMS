@@ -24,7 +24,7 @@ public class OrderFulfillmentService {
     /**
      * Thực hiện xử lý nghiệp vụ select warehouse. Các tham số và kết quả tuân theo chữ ký phương thức.
      */
-    public void selectWarehouse(Integer orderId, WarehouseSelectionRequest request) {
+    public void selectWarehouse(Integer orderId, WarehouseSelectionRequest request, String actor, String actorRole) {
         validateOrderId(orderId);
         if (request == null || request.getWarehouseCode() == null || request.getWarehouseCode().isBlank()) {
             throw new IllegalArgumentException("Mã kho không được để trống");
@@ -38,7 +38,7 @@ public class OrderFulfillmentService {
             log.warn("Warehouse selection rejected due to concurrent status change. orderId={}", orderId);
             throw new IllegalStateException("Không thể chọn kho: trạng thái đơn hàng đã thay đổi");
         }
-        orderHistoryService.record(orderId, "008", "PREPARING", "SYSTEM", "SYSTEM", "Seller xác nhận đã chuẩn bị hàng thành công", "Kho được chọn: " + request.getWarehouseCode().trim());
+        orderHistoryService.record(orderId, "008", "PREPARING", actor, actorRole, "Seller xác nhận đã chuẩn bị hàng thành công", "Kho được chọn: " + request.getWarehouseCode().trim());
         log.info("Warehouse selected. orderId={}, warehouseCode={}", orderId, request.getWarehouseCode().trim());
     }
 
