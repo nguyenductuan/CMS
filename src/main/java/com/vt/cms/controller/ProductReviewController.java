@@ -16,6 +16,12 @@ import org.springframework.web.bind.annotation.*;
 public class ProductReviewController {
     private final ProductReviewService reviewService;
 
+    /**
+     * Tạo mới và lưu dữ liệu nghiệp vụ.
+     * @param request Tham số phục vụ xử lý createReview.
+     * @param httpRequest Tham số phục vụ xử lý createReview.
+     * @return Kết quả xử lý của hàm.
+     */
     @PostMapping("/review")
     public ResponseEntity<APIRessponse> createReview(@Valid @RequestBody CreateReviewRequest request,
                                                       HttpServletRequest httpRequest) {
