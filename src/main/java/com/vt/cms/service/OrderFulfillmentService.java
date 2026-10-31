@@ -98,13 +98,9 @@ public class OrderFulfillmentService {
     }
 
     /**
-     * Ghi nhận trạng thái vận chuyển do đơn vị vận chuyển gửi về.
-     * Hỗ trợ mã 101, 103, 104, 320, 410, 400, 500, 506, 507, 508, 509 và 505.
-     */
-    /**
-     * Ghi nhận trạng thái vận chuyển do đơn vị vận chuyển gửi về.
-     * Ánh xạ mã tracking sang enum và nội dung hiển thị theo cùng cấu trúc
-     * SHIPPING_ACTION_MAP dùng trong lịch sử tác động đơn hàng.
+     * Ánh xạ mã trạng thái vận chuyển sang nội dung lịch sử tác động.
+     * Sử dụng Enum làm key và Map.ofEntries giống cấu trúc định nghĩa
+     * SHIPPING_ACTION_MAP trong OrderHistoryService.
      */
     private static final Map<OrderTrackingStatus, String> SHIPPING_ACTION_MAP =
             Map.ofEntries(
