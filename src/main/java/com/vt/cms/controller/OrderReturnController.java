@@ -17,6 +17,13 @@ import org.springframework.web.bind.annotation.*;
 public class OrderReturnController {
     private final OrderReturnService service;
 
+    /**
+     * Tạo mới và lưu dữ liệu nghiệp vụ.
+     * @param orderId Tham số phục vụ xử lý requestReturn.
+     * @param request Tham số phục vụ xử lý requestReturn.
+     * @param http Tham số phục vụ xử lý requestReturn.
+     * @return Kết quả xử lý của hàm.
+     */
     @PostMapping("/{orderId}/return")
     public ResponseEntity<OrderReturnResponse> requestReturn(@PathVariable Integer orderId,
             @Valid @RequestBody CreateReturnRequest request, HttpServletRequest http) {
@@ -25,11 +32,22 @@ public class OrderReturnController {
                 (String) http.getAttribute(JwtAuthenticationFilter.USERNAME_ATTRIBUTE)));
     }
 
+    /**
+     * Truy vấn và trả về dữ liệu theo điều kiện đầu vào.
+     * @param http Tham số phục vụ xử lý getPending.
+     * @return Kết quả xử lý của hàm.
+     */
     @GetMapping("/return/pending")
     public ResponseEntity<java.util.List<OrderReturnResponse>> getPending(HttpServletRequest http) {
         return ResponseEntity.ok(service.getPending((String) http.getAttribute(JwtAuthenticationFilter.ROLE_ATTRIBUTE)));
     }
 
+    /**
+     * Truy vấn và trả về dữ liệu theo điều kiện đầu vào.
+     * @param returnId Tham số phục vụ xử lý getReturn.
+     * @param http Tham số phục vụ xử lý getReturn.
+     * @return Kết quả xử lý của hàm.
+     */
     @GetMapping("/return/{returnId}")
     public ResponseEntity<OrderReturnResponse> getReturn(@PathVariable Integer returnId, HttpServletRequest http) {
         return ResponseEntity.ok(service.getReturn(returnId,
@@ -37,6 +55,13 @@ public class OrderReturnController {
                 (String) http.getAttribute(JwtAuthenticationFilter.ROLE_ATTRIBUTE)));
     }
 
+    /**
+     * Kiểm tra điều kiện và thực hiện bước xét duyệt hoặc xác nhận tương ứng.
+     * @param returnId Tham số phục vụ xử lý sellerReview.
+     * @param request Tham số phục vụ xử lý sellerReview.
+     * @param http Tham số phục vụ xử lý sellerReview.
+     * @return Kết quả xử lý của hàm.
+     */
     @PostMapping("/return/{returnId}/seller-review")
     public ResponseEntity<OrderReturnResponse> sellerReview(@PathVariable Integer returnId,
             @Valid @RequestBody ReturnReviewRequest request, HttpServletRequest http) {
@@ -45,6 +70,13 @@ public class OrderReturnController {
                 (String) http.getAttribute(JwtAuthenticationFilter.ROLE_ATTRIBUTE)));
     }
 
+    /**
+     * Kiểm tra điều kiện và thực hiện bước xét duyệt hoặc xác nhận tương ứng.
+     * @param returnId Tham số phục vụ xử lý adminReview.
+     * @param request Tham số phục vụ xử lý adminReview.
+     * @param http Tham số phục vụ xử lý adminReview.
+     * @return Kết quả xử lý của hàm.
+     */
     @PostMapping("/return/{returnId}/admin-review")
     public ResponseEntity<OrderReturnResponse> adminReview(@PathVariable Integer returnId,
             @Valid @RequestBody ReturnReviewRequest request, HttpServletRequest http) {
