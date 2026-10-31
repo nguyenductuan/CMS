@@ -27,7 +27,9 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             "/v1/product/reject/",
             "/cancelorder/",
             "/order",
-            "/v1/product/review"
+            "/v1/product/review",
+            "/v1/order/",
+            "/v1/buyer/profile"
     );
 
     private final JwtService jwtService;
@@ -66,6 +68,22 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             }
             if ("/order".equals(path) && !"BUYER".equals(role)) {
                 forbidden(response, "Chỉ BUYER được tạo đơn hàng");
+                return;
+            }
+            if (path.startsWith("/v1/order/") && path.endsWith("/return") && !"BUYER".equals(role)) {
+                forbidden(response, "Chỉ BUYER được yêu cầu trả hàng");
+                return;
+            }
+            if (path.startsWith("/v1/order/return/") && path.endsWith("/seller-review") && !"SELLER".equals(role)) {
+                forbidden(response, "Chỉ SELLER được xét duyệt bước đầu");
+                return;
+            }
+            if (path.startsWith("/v1/order/return/") && path.endsWith("/admin-review") && !"ADMIN".equals(role)) {
+                forbidden(response, "Chỉ ADMIN được xét duyệt bước cuối");
+                return;
+            }
+            if ("/v1/buyer/profile".equals(path) && !"BUYER".equals(role)) {
+                forbidden(response, "Chỉ BUYER được cập nhật hồ sơ");
                 return;
             }
             if ("/v1/product/review".equals(path) && !"BUYER".equals(role)) {
