@@ -140,6 +140,13 @@ public class ProductServiceImpl implements ProductService {
         response.setName(product.getName());
         response.setDescription(product.getDescription());
         response.setStatus(product.getStatus());
+        // Reuse existing product lookup; keep detailProduct SQL unchanged.
+        Product approverInfo = productRepository.getProductById(product_id);
+        if (approverInfo != null) {
+            response.setApproveBy(approverInfo.getApproveBy());
+            response.setApproveByRole(approverInfo.getApproveByRole());
+            response.setApprovedTime(approverInfo.getApprovedTime());
+        }
         response.setCreatedAt(product.getCreatedAt());
         response.setUpdatedAt(product.getUpdatedAt());
         response.setIsDeleted(product.getIsDeleted());
@@ -313,7 +320,7 @@ public class ProductServiceImpl implements ProductService {
     /**
      * Chỉnh sửa dữ liệu editstatusproduct. Các tham số và kết quả tuân theo chữ ký phương thức.
      */
-    public void editstatusproduct(Integer product_id, String approverUsername) {
+    public void editstatusproduct(Integer product_id, String approverUsername, String approverRole) {
         if (product_id == null || product_id <= 0)
             throw new IllegalArgumentException("ID sản phẩm không hợp lệ");
         Product existing = productRepository.getProductById(product_id);
@@ -324,7 +331,7 @@ public class ProductServiceImpl implements ProductService {
         }
         LocalDateTime now = LocalDateTime.now();
         int rows = productRepository.editstatusproduct
-                (product_id, "APPROVED", now, approverUsername, now);
+                (product_id, "APPROVED", now, approverUsername, now, approverRole);
         if (rows != 1) throw new IllegalStateException
                 ("Không thể duyệt sản phẩm; trạng thái có thể đã thay đổi");
     }
@@ -343,7 +350,7 @@ public class ProductServiceImpl implements ProductService {
             throw new IllegalStateException("Chỉ sản phẩm đang chờ duyệt mới được từ chối");
         }
         LocalDateTime now = LocalDateTime.now();
-        int rows = productRepository.editstatusproduct(product_id, "REJECTED", now, approverUsername, now);
+        int rows = productRepository.editstatusproduct(product_id, "REJECTED", now, approverUsername, now, null);
         if (rows != 1) throw new IllegalStateException("Không thể từ chối sản phẩm; trạng thái có thể đã thay đổi");
     }
 
