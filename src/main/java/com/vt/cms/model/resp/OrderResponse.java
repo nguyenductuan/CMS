@@ -20,5 +20,6 @@ private LocalDateTime confirm_dealine_at;
 private LocalDateTime expectedDelivery;
 private String createdBy;
 private List<ItemDto> orderItems;
+private List<com.vt.cms.model.entity.OrderTracking> orderHistory;
 
 }
