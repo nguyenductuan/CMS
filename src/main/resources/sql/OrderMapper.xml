@@ -15,6 +15,7 @@
         <result column="created_at" property="createdAt" jdbcType="OTHER"/>
         <result column="expected_delivery" property="expectedDelivery" jdbcType="OTHER"/>
         <result column="shipping_status_code" property="shippingStatusCode" jdbcType="VARCHAR"/>
+        <result column="shipping_status_code" property="shippingStatusCode" jdbcType="VARCHAR"/>
 
 
     </resultMap>
@@ -156,6 +157,7 @@
                warehouse_code AS warehouseCode,
                shipping_provider AS shippingProvider,
                tracking_number AS trackingNumber,
+               shipping_status_code AS shippingStatusCode,
                shipping_status_code AS shippingStatusCode,
                shipper_code AS shipperCode,
                shipper_name AS shipperName,
