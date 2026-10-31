@@ -22,7 +22,7 @@ public class CreateUserRequest {
     private Integer age;
 
     @NotNull(message = "Quyền không được để trống")
-    @Pattern(regexp = "ADMIN|SELLER", flags = Pattern.Flag.CASE_INSENSITIVE,
-            message = "Quyền chỉ được là ADMIN hoặc SELLER")
+    @Pattern(regexp = "ADMIN|SELLER|BUYER", flags = Pattern.Flag.CASE_INSENSITIVE,
+            message = "Quyền chỉ được là ADMIN, SELLER hoặc BUYER")
     private String role;
 }
