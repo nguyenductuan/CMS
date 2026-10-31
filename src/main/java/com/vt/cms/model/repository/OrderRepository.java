@@ -93,6 +93,7 @@ public interface OrderRepository {
     int setReturnRejected(@Param("orderId") Integer orderId, @Param("updatedAt") java.time.LocalDateTime updatedAt, @Param("updatedBy") String updatedBy);
     int updateReturnSubStatus(@Param("orderId") Integer orderId, @Param("status") String status, @Param("updatedBy") String updatedBy, @Param("updatedAt") java.time.LocalDateTime updatedAt);
     int escalateReturnReviews(@Param("cutoff") java.time.LocalDateTime cutoff, @Param("updatedAt") java.time.LocalDateTime updatedAt, @Param("updatedBy") String updatedBy);
+    int syncReturnMethodStatus(@Param("updatedAt") java.time.LocalDateTime updatedAt, @Param("updatedBy") String updatedBy);
 
     long countorder(OrdersRequest request);
 
