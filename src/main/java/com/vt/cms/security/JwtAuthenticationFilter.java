@@ -25,7 +25,9 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             "/v1/user/create",
             "/v1/product/approve/",
             "/v1/product/reject/",
-            "/cancelorder/"
+            "/cancelorder/",
+            "/order",
+            "/v1/product/review"
     );
 
     private final JwtService jwtService;
@@ -60,6 +62,14 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             String path = request.getServletPath();
             if ("/v1/user/create".equals(path) && !"ADMIN".equals(role)) {
                 forbidden(response, "Chỉ ADMIN được tạo tài khoản");
+                return;
+            }
+            if ("/order".equals(path) && !"BUYER".equals(role)) {
+                forbidden(response, "Chỉ BUYER được tạo đơn hàng");
+                return;
+            }
+            if ("/v1/product/review".equals(path) && !"BUYER".equals(role)) {
+                forbidden(response, "Chỉ BUYER được đánh giá sản phẩm");
                 return;
             }
             if (path.startsWith("/cancelorder/") && !Set.of("ADMIN", "SELLER").contains(role)) {
