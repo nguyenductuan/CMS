@@ -62,6 +62,14 @@
         UPDATE orders SET sub_order_status=#{status}, updated_by=#{updatedBy}, updated_at=#{updatedAt}
         WHERE id=#{orderId} AND order_status='RETURN_REQUESTED'
     </update>
+    <update id="syncReturnMethodStatus">
+        UPDATE orders o INNER JOIN order_return_request r ON r.order_id=o.id
+        SET o.sub_order_status=CASE WHEN r.return_method='REFUND_IMMEDIATELY'
+            THEN 'REFUND_PENDING' ELSE 'WAITING_FOR_RETURN_SHIPMENT' END,
+            o.updated_by=#{updatedBy}, o.updated_at=#{updatedAt}
+        WHERE r.status IN ('WAITING_FOR_RETURN_SHIPMENT','REFUND_PENDING')
+          AND r.return_method IS NOT NULL AND o.order_status='RETURN_REQUESTED'
+    </update>
     <update id="escalateReturnReviews">
         UPDATE orders o INNER JOIN order_return_request r ON r.order_id=o.id
         SET o.sub_order_status='PENDING_ADMIN_REVIEW', o.updated_by=#{updatedBy}, o.updated_at=#{updatedAt}
