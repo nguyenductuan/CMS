@@ -95,7 +95,7 @@ public class OrderReturnService {
         int rows = returnRepository.adminReview(returnId, request.getApproved(), reviewer, request.getNote(), LocalDateTime.now());
         if (rows != 1) throw new IllegalStateException("Yêu cầu đã được xử lý");
         if (!request.getApproved()) orderRepository.setReturnRejected(current.getOrderId(), LocalDateTime.now(), reviewer);
-        else orderRepository.updateReturnSubStatus(current.getOrderId(), "APPROVED", reviewer, LocalDateTime.now());
+        else orderRepository.updateReturnSubStatus(current.getOrderId(), "RETURN_APPROVED", reviewer, LocalDateTime.now());
         return map(returnRepository.findById(returnId));
     }
 
