@@ -78,6 +78,11 @@ public interface OrderRepository {
     /**
      * Xác nhận confirm received. Các tham số và giá trị trả về được mô tả bởi chữ ký phương thức.
      */
+    int updateShippingStatusCode(@Param("orderId") Integer orderId,
+                                 @Param("shippingStatusCode") String shippingStatusCode,
+                                 @Param("updatedAt") java.time.LocalDateTime updatedAt,
+                                 @Param("updatedBy") String updatedBy);
+
     int confirmReceived(@Param("orderId") Integer orderId,
                         @Param("expectedStatus") String expectedStatus,
                         @Param("nextStatus") String nextStatus,
