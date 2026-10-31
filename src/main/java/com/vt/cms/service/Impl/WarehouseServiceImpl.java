@@ -1,5 +1,7 @@
 package com.vt.cms.service.Impl;
 
+
+import com.vt.cms.Exception.BusinessException;import com.vt.cms.model.enums.MessageCode;
 import com.vt.cms.model.dto.WarehouseInventoryAdjustRequest;
 import com.vt.cms.model.dto.WarehouseInventoryMovementResponse;
 import com.vt.cms.model.dto.WarehouseInventoryResponse;
@@ -37,9 +39,9 @@ public class WarehouseServiceImpl implements WarehouseService {
      * Lấy dữ liệu getdetail. Các tham số và kết quả tuân theo chữ ký phương thức.
      */
     public WarehouseResponse getdetail(Integer id) {
-        if (id == null || id <= 0) throw new IllegalArgumentException("Mã kho không hợp lệ");
+        if (id == null || id <= 0) throw new BusinessException(MessageCode.MA_KHO_KHONG_HOP_LE);
         Warehouse warehouse = warehouseRepository.getdetail(id);
-        if (warehouse == null) throw new IllegalArgumentException("Không tìm thấy kho");
+        if (warehouse == null) throw new BusinessException(MessageCode.KHONG_TIM_THAY_KHO);
         WarehouseResponse response = new WarehouseResponse();
         response.setId(warehouse.getId());
         response.setAddress_default(warehouse.isAddress_is_default());
@@ -59,7 +61,7 @@ public class WarehouseServiceImpl implements WarehouseService {
      */
     public void addwarehouse(WarehouseRequest warehouse) {
         if (warehouse == null || warehouse.getWarehouse_name() == null || warehouse.getWarehouse_name().isBlank()) {
-            throw new IllegalArgumentException("Tên kho không được để trống");
+            throw new BusinessException(MessageCode.TEN_KHO_KHONG_DUOC_DE_TRONG);
         }
         if (warehouseRepository.add(warehouse, LocalDateTime.now()) != 1) {
             throw new IllegalStateException("Không thể tạo kho");
@@ -71,8 +73,8 @@ public class WarehouseServiceImpl implements WarehouseService {
      * Thiết lập hoặc cập nhật set warehouse deleted. Các tham số và kết quả tuân theo chữ ký phương thức.
      */
     public void setWarehouseDeleted(Integer id, boolean deleted) {
-        if (id == null || id <= 0) throw new IllegalArgumentException("Mã kho không hợp lệ");
-        if (warehouseRepository.setDeleted(id, deleted) != 1) throw new IllegalArgumentException("Không tìm thấy kho");
+        if (id == null || id <= 0) throw new BusinessException(MessageCode.MA_KHO_KHONG_HOP_LE);
+        if (warehouseRepository.setDeleted(id, deleted) != 1) throw new BusinessException(MessageCode.KHONG_TIM_THAY_KHO);
     }
 
     @Override
@@ -93,10 +95,10 @@ public class WarehouseServiceImpl implements WarehouseService {
         requireActiveWarehouse(warehouseId);
         if (request == null || request.getSkuId() == null || request.getSkuId() <= 0
                 || request.getQuantityDelta() == null || request.getQuantityDelta() == 0) {
-            throw new IllegalArgumentException("SKU và số lượng điều chỉnh phải hợp lệ, số lượng không được bằng 0");
+            throw new BusinessException(MessageCode.SKU_VA_SO_LUONG_DIEU_CHINH_PHAI_HOP_LE_SO_LUONG_);
         }
         if (warehouseRepository.skuExists(request.getSkuId()) == 0) {
-            throw new IllegalArgumentException("Không tìm thấy SKU hoặc SKU đã bị xóa");
+            throw new BusinessException(MessageCode.KHONG_TIM_THAY_SKU_HOAC_SKU_DA_BI_XOA);
         }
         warehouseRepository.ensureInventoryRow(warehouseId, request.getSkuId());
         if (warehouseRepository.adjustInventory(warehouseId, request.getSkuId(), request.getQuantityDelta()) != 1) {
@@ -105,7 +107,7 @@ public class WarehouseServiceImpl implements WarehouseService {
         Integer quantityAfter = warehouseRepository.getInventoryQuantity(warehouseId, request.getSkuId());
         String reason = request.getReason() == null || request.getReason().isBlank()
                 ? "Điều chỉnh tồn kho" : request.getReason().trim();
-        if (reason.length() > 255) throw new IllegalArgumentException("Lý do điều chỉnh không được vượt quá 255 ký tự");
+        if (reason.length() > 255) throw new BusinessException(MessageCode.LY_DO_DIEU_CHINH_KHONG_DUOC_VUOT_QUA_255_KY_TU);
         warehouseRepository.insertInventoryMovement(warehouseId, request.getSkuId(),
                 request.getQuantityDelta(), quantityAfter, reason, "SYSTEM");
     }
@@ -117,8 +119,8 @@ public class WarehouseServiceImpl implements WarehouseService {
     public List<WarehouseInventoryMovementResponse> listInventoryMovements(Integer warehouseId, Integer skuId, Integer limit) {
         requireActiveWarehouse(warehouseId);
         int safeLimit = limit == null ? 50 : limit;
-        if (safeLimit < 1 || safeLimit > 200) throw new IllegalArgumentException("limit phải nằm trong khoảng 1 đến 200");
-        if (skuId != null && skuId <= 0) throw new IllegalArgumentException("SKU không hợp lệ");
+        if (safeLimit < 1 || safeLimit > 200) throw new BusinessException(MessageCode.LIMIT_PHAI_NAM_TRONG_KHOANG_1_DEN_200);
+        if (skuId != null && skuId <= 0) throw new BusinessException(MessageCode.SKU_KHONG_HOP_LE);
         return warehouseRepository.listInventoryMovements(warehouseId, skuId, safeLimit);
     }
 
@@ -127,7 +129,7 @@ public class WarehouseServiceImpl implements WarehouseService {
      */
     private void requireActiveWarehouse(Integer warehouseId) {
         if (warehouseId == null || warehouseId <= 0 || warehouseRepository.getdetail(warehouseId) == null) {
-            throw new IllegalArgumentException("Không tìm thấy kho");
+            throw new BusinessException(MessageCode.KHONG_TIM_THAY_KHO);
         }
     }
 }
