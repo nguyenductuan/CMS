@@ -39,4 +39,7 @@ public class ProductResponse {
     private String approveBy;
     private String approveByRole;
     private LocalDateTime approvedTime;
+    private BigDecimal averageRating;
+    private Long reviewCount;
+    private List<ProductReviewResponse> reviews;
 }
