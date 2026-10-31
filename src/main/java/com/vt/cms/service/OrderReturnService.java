@@ -93,10 +93,9 @@ public class OrderReturnService {
      */
     public List<OrderReturnResponse> getPending(String role) {
         String status;
-        if ("SELLER".equals(role)) status = "PENDING_SELLER_REVIEW";
-        else if ("ADMIN".equals(role)) status = "PENDING_ADMIN_REVIEW";
-        else throw new SecurityException("Chỉ SELLER hoặc ADMIN được xem danh sách chờ duyệt");
-        return returnRepository.findPending(status).stream().map(this::map).toList();
+        if ("SELLER".equals(role)) return returnRepository.findSellerPendingActions().stream().map(this::map).toList();
+        if ("ADMIN".equals(role)) return returnRepository.findPending("PENDING_ADMIN_REVIEW").stream().map(this::map).toList();
+        throw new SecurityException("Chỉ SELLER hoặc ADMIN được xem danh sách chờ duyệt");
     }
 
     /**
@@ -114,7 +113,7 @@ public class OrderReturnService {
         int rows = returnRepository.sellerReview(returnId, request.getApproved(), reviewer, request.getNote(), LocalDateTime.now());
         if (rows != 1) throw new IllegalStateException("Yêu cầu đã được xử lý");
         if (!request.getApproved()) orderRepository.setReturnRejected(current.getOrderId(), LocalDateTime.now(), reviewer);
-        else orderRepository.updateReturnSubStatus(current.getOrderId(), "WAITING_FOR_RETURN_SHIPMENT", reviewer, LocalDateTime.now());
+        else orderRepository.updateReturnSubStatus(current.getOrderId(), "PENDING_SELLER_METHOD_SELECTION", reviewer, LocalDateTime.now());
         return map(returnRepository.findById(returnId));
     }
 
@@ -133,7 +132,25 @@ public class OrderReturnService {
         int rows = returnRepository.adminReview(returnId, request.getApproved(), reviewer, request.getNote(), LocalDateTime.now());
         if (rows != 1) throw new IllegalStateException("Yêu cầu đã được xử lý");
         if (!request.getApproved()) orderRepository.setReturnRejected(current.getOrderId(), LocalDateTime.now(), reviewer);
-        else orderRepository.updateReturnSubStatus(current.getOrderId(), "WAITING_FOR_RETURN_SHIPMENT", reviewer, LocalDateTime.now());
+        else orderRepository.updateReturnSubStatus(current.getOrderId(), "PENDING_SELLER_METHOD_SELECTION", reviewer, LocalDateTime.now());
+        return map(returnRepository.findById(returnId));
+    }
+
+    /**
+     * Cho phép Seller chọn phương thức xử lý sau khi yêu cầu trả hàng được duyệt.
+     */
+    @Transactional(rollbackFor = Exception.class)
+    public OrderReturnResponse selectReturnMethod(Integer returnId, String method, String reviewer, String role) {
+        requireRole(role, "SELLER");
+        if (!List.of("RETURN_AND_REFUND", "REFUND_IMMEDIATELY").contains(method))
+            throw new IllegalArgumentException("Phương thức phải là RETURN_AND_REFUND hoặc REFUND_IMMEDIATELY");
+        OrderReturn current = requirePending(returnId, "PENDING_SELLER_METHOD_SELECTION");
+        LocalDateTime now = LocalDateTime.now();
+        if (returnRepository.selectReturnMethod(returnId, method, now) != 1)
+            throw new IllegalStateException("Yêu cầu đã được chọn phương thức hoặc hết hạn");
+        String subStatus = "RETURN_AND_REFUND".equals(method)
+                ? "WAITING_FOR_RETURN_SHIPMENT" : "REFUND_PENDING";
+        orderRepository.updateReturnSubStatus(current.getOrderId(), subStatus, reviewer, now);
         return map(returnRepository.findById(returnId));
     }
 
@@ -147,6 +164,8 @@ public class OrderReturnService {
         LocalDateTime cutoff = now.minusHours(24);
         returnRepository.escalateExpiredSellerReviews(cutoff);
         orderRepository.escalateReturnReviews(cutoff, now, "SYSTEM");
+        returnRepository.autoSelectExpiredReturnMethods(now);
+        orderRepository.syncReturnMethodStatus(now, "SYSTEM");
     }
 
     /**
@@ -182,6 +201,7 @@ public class OrderReturnService {
             out.setOrderTotal(orderSummary.getTotal());
             out.setOrderItems(orderRepository.getOrderItemsByOrderId(r.getOrderId()));
         }
+        out.setReturnMethod(r.getReturnMethod()); out.setMethodSelectionDeadline(r.getMethodSelectionDeadline()); out.setMethodSelectedAt(r.getMethodSelectedAt());
         out.setBuyerName(r.getBuyerName()); out.setPhone(r.getPhone()); out.setEmail(r.getEmail());
         out.setAddress(r.getAddress()); out.setBankName(r.getBankName()); out.setBankAccountNumber(r.getBankAccountNumber());
         out.setBankAccountHolder(r.getBankAccountHolder()); out.setReason(r.getReason()); out.setStatus(r.getStatus());
