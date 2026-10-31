@@ -19,6 +19,12 @@ spring:
       max-file-size: 10MB
       max-request-size: 10MB
 
+security:
+  jwt:
+    # Set JWT_SECRET in environment; use a random secret with at least 32 bytes.
+    secret: ${JWT_SECRET:}
+    expiration-seconds: 3600
+
 mybatis:
   configuration:
     map-underscore-to-camel-case: true
