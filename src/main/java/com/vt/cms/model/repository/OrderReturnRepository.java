@@ -11,6 +11,7 @@ public interface OrderReturnRepository {
     OrderReturn findById(@Param("returnId") Integer returnId);
     int countByOrderId(@Param("orderId") Integer orderId);
     java.util.List<OrderReturn> findPending(@Param("status") String status);
+    java.util.List<OrderReturn> findSellerPendingActions();
     int sellerReview(@Param("returnId") Integer returnId, @Param("approved") boolean approved,
                      @Param("reviewer") String reviewer, @Param("note") String note,
                      @Param("reviewedAt") LocalDateTime reviewedAt);
