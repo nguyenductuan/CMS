@@ -7,6 +7,8 @@ import com.vt.cms.model.resp.APIRessponse;
 import com.vt.cms.model.resp.BaseResponse;
 import com.vt.cms.model.resp.ProductResponse;
 import com.vt.cms.service.ProductService;
+import com.vt.cms.security.JwtAuthenticationFilter;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
@@ -36,9 +38,9 @@ public class ProductController {
     /**
      * Thực hiện xử lý nghiệp vụ approved product. Các tham số đầu vào và kết quả được xác định theo chữ ký phương thức.
      */
-    public ResponseEntity<APIRessponse> approvedProduct(@PathVariable Integer product_id){
+    public ResponseEntity<APIRessponse> approvedProduct(@PathVariable Integer product_id, HttpServletRequest request){
         log.info("Request approve product. productId={}", product_id);
-        productService.editstatusproduct(product_id);
+        productService.editstatusproduct(product_id, (String) request.getAttribute(JwtAuthenticationFilter.USERNAME_ATTRIBUTE));
         return ResponseEntity.ok(new APIRessponse(200,"Duyệt sản phẩm thành công"));
     }
     // Từ chối sản phẩm đang chờ duyệt
@@ -46,8 +48,8 @@ public class ProductController {
     /**
      * Thực hiện xử lý nghiệp vụ reject product. Các tham số đầu vào và kết quả được xác định theo chữ ký phương thức.
      */
-    public ResponseEntity<APIRessponse> rejectProduct(@PathVariable Integer product_id) {
-        productService.rejectProduct(product_id);
+    public ResponseEntity<APIRessponse> rejectProduct(@PathVariable Integer product_id, HttpServletRequest request) {
+        productService.rejectProduct(product_id, (String) request.getAttribute(JwtAuthenticationFilter.USERNAME_ATTRIBUTE));
         return ResponseEntity.ok(new APIRessponse(200, "Từ chối sản phẩm thành công"));
     }
     // Chi tiết sp
