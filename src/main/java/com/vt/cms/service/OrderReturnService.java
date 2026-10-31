@@ -84,7 +84,7 @@ public class OrderReturnService {
         int rows = returnRepository.sellerReview(returnId, request.getApproved(), reviewer, request.getNote(), LocalDateTime.now());
         if (rows != 1) throw new IllegalStateException("Yêu cầu đã được xử lý");
         if (!request.getApproved()) orderRepository.setReturnRejected(current.getOrderId(), LocalDateTime.now(), reviewer);
-        else orderRepository.updateReturnSubStatus(current.getOrderId(), "PENDING_ADMIN_REVIEW", reviewer, LocalDateTime.now());
+        else orderRepository.updateReturnSubStatus(current.getOrderId(), "WAITING_FOR_RETURN_SHIPMENT", reviewer, LocalDateTime.now());
         return map(returnRepository.findById(returnId));
     }
 
