@@ -245,7 +245,8 @@ public class OrderServiceImpl implements OrderService {
             orderItem.setOrder_id(order.getId());
         }
 
-        orderHistoryService.record(order.getId(), "001", "WAIT_PAYMENT", buyerUsername, "BUYER", "Đơn hàng đã được đặt", "Buyer tạo đơn hàng thành công");
+        orderHistoryService.record(order.getId(), "103", "WAIT_PAYMENT", buyerUsername, "BUYER", "Buyer thực hiện mua hàng", "Buyer khởi tạo yêu cầu mua hàng");
+        orderHistoryService.record(order.getId(), "104", "WAIT_PAYMENT", "SYSTEM", "SYSTEM", "Đơn hàng được tạo thành công", "Mã đơn hàng: " + order.getId());
 
         int insertedItems = orderItemRepository.insertorderitems(orderItems);
         if (insertedItems <= 0) {
