@@ -48,7 +48,8 @@ public interface ProductRepository {
                           @Param("status") String status,
                           @Param("updated_at") LocalDateTime updated_at,
                           @Param("approve_by") String approve_by,
-                          @Param("approved_time") LocalDateTime approved_time);
+                          @Param("approved_time") LocalDateTime approved_time,
+                          @Param("approve_by_role") String approve_by_role);
 
     /**
      * Xóa deleteproduct. Các tham số và giá trị trả về được mô tả bởi chữ ký phương thức.
