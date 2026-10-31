@@ -13,17 +13,37 @@
             o.expected_delivery AS expectedDelivery,
             o.shipped_at AS shippedAt,
             p.name AS productName,
+            CAST(ps.weight_gram AS DECIMAL(12,2)) AS productWeight,
+            CAST(ps.weight_gram AS DECIMAL(12,2)) * oi.quantity AS totalWeight,
+            ps.sku_code AS skuCode,
+            ps.attribute AS skuName,
+            ps.price AS originalPrice,
             oi.price AS sellingPrice,
             oi.quantity AS quantity,
             COALESCE(oi.total_price, oi.price * oi.quantity) AS orderTotal,
+            NULL AS platformDiscount,
+            NULL AS estimatedShippingFee,
+            NULL AS buyerShippingFee,
             o.total AS buyerPaidTotal,
-            o.created_by AS buyerName,
-            p.created_by AS sellerName,
-            ps.sku_code AS skuCode
+            o.deliveredAt AS completedAt,
+            NULL AS paidAt,
+            NULL AS paymentMethod,
+            NULL AS expectedRevenue,
+            COALESCE(seller.name, p.created_by) AS sellerName,
+            buyer.name AS buyerName,
+            buyer.name AS recipientName,
+            buyer.phone AS recipientPhone,
+            'VN' AS country,
+            NULL AS province,
+            NULL AS ward,
+            buyer.address AS deliveryAddress,
+            NULL AS sellerNote
         FROM orders o
         LEFT JOIN order_item oi ON oi.order_id = o.id
         LEFT JOIN products p ON p.id = oi.product_id
         LEFT JOIN product_sku ps ON ps.id = oi.sku_id
+        LEFT JOIN user buyer ON buyer.username = o.created_by
+        LEFT JOIN user seller ON seller.username = p.created_by
         <where>
             <if test="fromDate != null">AND o.created_at &gt;= #{fromDate}</if>
             <if test="toDateExclusive != null">AND o.created_at &lt; #{toDateExclusive}</if>
