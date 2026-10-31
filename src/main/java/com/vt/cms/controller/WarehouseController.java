@@ -1,5 +1,7 @@
 package com.vt.cms.controller;
 
+
+import com.vt.cms.Exception.BusinessException;import com.vt.cms.model.enums.MessageCode;
 import com.vt.cms.model.dto.WarehouseInventoryAdjustRequest;
 import com.vt.cms.model.dto.WarehouseInventoryMovementResponse;
 import com.vt.cms.model.dto.WarehouseInventoryResponse;
@@ -113,7 +115,7 @@ public class WarehouseController {
     @PostMapping({"/deletewarehouse", "/warehouse/deletewarehouse"})
     public ResponseEntity<APIRessponse> deleteWarehouseLegacy(@RequestBody Warehouse warehouse) {
         if (warehouse == null || warehouse.getId() == null) {
-            throw new IllegalArgumentException("Mã kho không được để trống");
+            throw new BusinessException(MessageCode.MA_KHO_KHONG_DUOC_DE_TRONG);
         }
         warehouseService.setWarehouseDeleted(warehouse.getId(), true);
         return ResponseEntity.ok(new APIRessponse(200, "Xóa kho thành công"));
