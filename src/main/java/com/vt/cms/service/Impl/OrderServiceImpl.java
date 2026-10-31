@@ -93,7 +93,7 @@ public class OrderServiceImpl implements OrderService {
             throw new SecurityException("Chỉ ADMIN hoặc SELLER được hủy đơn hàng");
         }
         Order current = orderRepository.getorderbyIdForUpdate(orderId);
-        if (current == null) throw new IllegalArgumentException("Không tìm thấy đơn hàng");
+        if (current == null) throw new BusinessException(MessageCode.KHONG_TIM_THAY_DON_HANG);
         OrderStatus currentStatus = current.getOrder_status();
         if (currentStatus != OrderStatus.WAIT_PAYMENT && currentStatus != OrderStatus.PAID) {
             throw new IllegalStateException("Không thể hủy đơn hàng ở trạng thái hiện tại");
