@@ -20,26 +20,21 @@ public class OrderHistoryService {
      * Mô tả trạng thái/sự kiện do đơn vị vận chuyển gửi về.
      * Dùng eventCode để phân biệt mã tracking với trạng thái nghiệp vụ của đơn hàng.
      */
-    private static final Map<String, String> SHIPPING_ACTION_MAP = Map.ofEntries(
-            Map.entry("103", "Đơn vị vận chuyển lấy hàng thành công"),
-            Map.entry("104", "Đơn vị vận chuyển lấy hàng thành công"),
-            Map.entry("101", "Đơn vị vận chuyển lấy hàng thất bại"),
-            Map.entry("200", "Đơn vị vận chuyển đang giao hàng"),
-            Map.entry("320", "Đơn vị vận chuyển đang giao hàng"),
-            Map.entry("400", "Đơn vị vận chuyển đang giao hàng"),
-            Map.entry("410", "Đơn vị vận chuyển đang giao hàng"),
-            Map.entry("500", "Đơn vị vận chuyển đang giao hàng"),
-            Map.entry("506", "Đơn vị vận chuyển đang giao hàng"),
-            Map.entry("507", "Đơn vị vận chuyển đang giao hàng"),
-            Map.entry("508", "Đơn vị vận chuyển đang giao hàng"),
-            Map.entry("509", "Đơn vị vận chuyển đang giao hàng"),
-            Map.entry("505", "Đơn hàng giao không thành công"),
-            Map.entry("RETURN_PICKUP_SUCCESS", "Đơn vị vận chuyển lấy hàng hoàn thành công"),
-            Map.entry("RETURN_PICKUP_FAILED", "Đơn vị vận chuyển lấy hàng hoàn thất bại"),
-            Map.entry("RETURN_DELIVERY_SUCCESS", "Đơn vị vận chuyển giao hàng hoàn thành công"),
-            Map.entry("RETURN_DELIVERY_FAILED", "Đơn vị vận chuyển giao hàng hoàn thất bại"),
-            Map.entry("CARRIER_DELIVERY_SUCCESS", "Đơn vị vận chuyển giao hàng thành công")
-    );
+    private static final Map<OrderTrackingStatus, String> SHIPPING_ACTION_MAP =
+            Map.ofEntries(
+                    Map.entry(OrderTrackingStatus.S103, "Đơn vị vận chuyển lấy hàng thành công"),
+                    Map.entry(OrderTrackingStatus.S104, "Đơn vị vận chuyển lấy hàng thành công"),
+                    Map.entry(OrderTrackingStatus.S101, "Đơn vị vận chuyển lấy hàng thất bại"),
+                    Map.entry(OrderTrackingStatus.S320, "Đơn vị vận chuyển đang giao hàng"),
+                    Map.entry(OrderTrackingStatus.S400, "Đơn vị vận chuyển đang giao hàng"),
+                    Map.entry(OrderTrackingStatus.S410, "Đơn vị vận chuyển đang giao hàng"),
+                    Map.entry(OrderTrackingStatus.S500, "Đơn vị vận chuyển đang giao hàng"),
+                    Map.entry(OrderTrackingStatus.S506, "Đơn vị vận chuyển đang giao hàng"),
+                    Map.entry(OrderTrackingStatus.S507, "Đơn vị vận chuyển đang giao hàng"),
+                    Map.entry(OrderTrackingStatus.S508, "Đơn vị vận chuyển đang giao hàng"),
+                    Map.entry(OrderTrackingStatus.S509, "Đơn vị vận chuyển đang giao hàng"),
+                    Map.entry(OrderTrackingStatus.S505, "Đơn hàng giao không thành công")
+            );
 
 
     /** Ghi một sự kiện lịch sử trong cùng transaction với thao tác thay đổi đơn hàng. */
@@ -114,7 +109,7 @@ public class OrderHistoryService {
 
         String eventCode = event.getEventCode();
         if (eventCode != null && !eventCode.isBlank()) {
-            String shippingAction = SHIPPING_ACTION_MAP.get(eventCode.trim().toUpperCase());
+            String shippingAction = SHIPPING_ACTION_MAP.get(toOrderTrackingStatus(eventCode));
             if (shippingAction != null) {
                 return shippingAction;
             }
