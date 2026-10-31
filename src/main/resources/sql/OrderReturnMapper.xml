@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.vt.cms.model.repository.OrderReturnRepository">
+    <resultMap id="ReturnMap" type="com.vt.cms.model.entity.OrderReturn">
+        <id column="id" property="id"/>
+        <result column="order_id" property="orderId"/>
+        <result column="buyer_id" property="buyerId"/>
+        <result column="buyer_username" property="buyerUsername"/>
+        <result column="buyer_name" property="buyerName"/>
+        <result column="phone" property="phone"/>
+        <result column="email" property="email"/>
+        <result column="address" property="address"/>
+        <result column="bank_name" property="bankName"/>
+        <result column="bank_account_number" property="bankAccountNumber"/>
+        <result column="bank_account_holder" property="bankAccountHolder"/>
+        <result column="reason" property="reason"/>
+        <result column="images_json" property="imagesJson"/>
+        <result column="videos_json" property="videosJson"/>
+        <result column="status" property="status"/>
+        <result column="seller_reviewer" property="sellerReviewer"/>
+        <result column="admin_reviewer" property="adminReviewer"/>
+        <result column="seller_note" property="sellerNote"/>
+        <result column="admin_note" property="adminNote"/>
+        <result column="created_at" property="createdAt"/>
+        <result column="seller_reviewed_at" property="sellerReviewedAt"/>
+        <result column="admin_reviewed_at" property="adminReviewedAt"/>
+    </resultMap>
+    <insert id="insert" parameterType="com.vt.cms.model.entity.OrderReturn" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO order_return_request
+        (order_id,buyer_id,buyer_username,buyer_name,phone,email,address,bank_name,bank_account_number,bank_account_holder,
+         reason,images_json,videos_json,status,created_at)
+        VALUES
+        (#{orderId},#{buyerId},#{buyerUsername},#{buyerName},#{phone},#{email},#{address},#{bankName},#{bankAccountNumber},
+         #{bankAccountHolder},#{reason},#{imagesJson},#{videosJson},'PENDING_SELLER_REVIEW',#{createdAt})
+    </insert>
+    <select id="findById" resultMap="ReturnMap">
+        SELECT * FROM order_return_request WHERE id=#{returnId}
+    </select>
+    <update id="sellerReview">
+        UPDATE order_return_request
+        SET status=CASE WHEN #{approved}=1 THEN 'PENDING_ADMIN_REVIEW' ELSE 'REJECTED' END,
+            seller_reviewer=#{reviewer}, seller_note=#{note}, seller_reviewed_at=#{reviewedAt}
+        WHERE id=#{returnId} AND status='PENDING_SELLER_REVIEW'
+    </update>
+    <update id="adminReview">
+        UPDATE order_return_request
+        SET status=CASE WHEN #{approved}=1 THEN 'APPROVED' ELSE 'REJECTED' END,
+            admin_reviewer=#{reviewer}, admin_note=#{note}, admin_reviewed_at=#{reviewedAt}
+        WHERE id=#{returnId} AND status='PENDING_ADMIN_REVIEW'
+    </update>
+    <update id="escalateExpiredSellerReviews">
+        UPDATE order_return_request
+        SET status='PENDING_ADMIN_REVIEW'
+        WHERE status='PENDING_SELLER_REVIEW' AND created_at &lt;= #{cutoff}
+    </update>
+</mapper>
