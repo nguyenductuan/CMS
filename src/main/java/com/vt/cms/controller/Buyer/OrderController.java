@@ -37,8 +37,9 @@ public class OrderController {
     /**
      * Xử lý thông tin đơn hàng order; nhận các tham số khai báo trong chữ ký hàm và trả về kết quả theo kiểu dữ liệu đã định nghĩa.
      */
-    public ResponseEntity<APIRessponse>  order(@RequestBody OrderRequest orderRequest) {
-        OrderCreateResponse orderCreateResponse =   orderService.createOrder(orderRequest);
+    public ResponseEntity<APIRessponse>  order(@RequestBody OrderRequest orderRequest, HttpServletRequest request) {
+        OrderCreateResponse orderCreateResponse = orderService.createOrder(orderRequest,
+                (String) request.getAttribute(JwtAuthenticationFilter.USERNAME_ATTRIBUTE));
         return ResponseEntity.ok(new APIRessponse(200, Order.ORDER_SUCCESS.getMessage(), orderCreateResponse));
 
     }
