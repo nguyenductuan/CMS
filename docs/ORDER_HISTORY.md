@@ -48,11 +48,14 @@ Các mã được hỗ trợ: `101`, `103`, `104`, `320`, `410`, `400`, `500`, `
 
 | Actor | Mã sự kiện | Hoạt động |
 |---|---:|---|
-| Buyer | 001 | Đơn hàng đã được đặt |
+| Buyer | 103 | Buyer thực hiện mua hàng |
+| System | 104 | Đơn hàng được tạo thành công |
 | System | 005 | Đơn hàng thanh toán thành công, Nhà bán chuẩn bị hàng |
 | Seller/System | 006 | Đơn hàng bị hủy; phần mô tả lưu lý do hủy |
 | Seller | 008 | Seller xác nhận đã chuẩn bị hàng |
 | Carrier | 101 | Lấy hàng thất bại |
+| Carrier | 200 | Đơn hàng đang giao |
+| System | 500 | Phân công giao hàng cho shipper thành công |
 | Carrier | 103, 104 | Lấy hàng thành công/đã nhận hàng |
 | Carrier | 320, 410, 400, 500, 506–509 | Đang vận chuyển/đang giao |
 | Carrier | 505 | Giao hàng không thành công |
