@@ -1,5 +1,7 @@
 package com.vt.cms.service;
 
+
+import com.vt.cms.Exception.BusinessException;import com.vt.cms.model.enums.MessageCode;
 import com.vt.cms.model.dto.LoginRequest;
 import com.vt.cms.model.entity.User;
 import com.vt.cms.model.repository.UserRepository;
@@ -25,7 +27,7 @@ public class AuthService {
         User user = userRepository.findByUsername(request.getUsername().trim());
         if (user == null || user.getPassword() == null
                 || !passwordEncoder.matches(request.getPassword(), user.getPassword())) {
-            throw new IllegalArgumentException("Tên đăng nhập hoặc mật khẩu không chính xác");
+            throw new BusinessException(MessageCode.TEN_DANG_NHAP_HOAC_MAT_KHAU_KHONG_CHINH_XAC);
         }
 
         String token = jwtService.generateToken(user.getId(), user.getUsername(), user.getRole());
