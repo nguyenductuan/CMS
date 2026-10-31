@@ -28,7 +28,7 @@
             <if test="fromDate != null">AND o.created_at &gt;= #{fromDate}</if>
             <if test="toDateExclusive != null">AND o.created_at &lt; #{toDateExclusive}</if>
         </where>
-        ORDER BY o.created_at DESC, o.id DESC, oi.id ASC
+        ORDER BY o.created_at DESC, o.id DESC, oi.product_id ASC, oi.sku_id ASC
     </select>
 
     <insert id="insertExportHistory" parameterType="com.vt.cms.model.entity.OrderExportHistory"
