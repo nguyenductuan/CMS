@@ -28,6 +28,14 @@ public class OrderReturnService {
     private final UserRepository userRepository;
     private final ObjectMapper objectMapper;
 
+    /**
+     * Kiểm tra điều kiện và tạo mới dữ liệu nghiệp vụ.
+     * @param orderId Tham số đầu vào của hàm.
+     * @param request Tham số đầu vào của hàm.
+     * @param buyerId Tham số đầu vào của hàm.
+     * @param username Tham số đầu vào của hàm.
+     * @return Kết quả xử lý.
+     */
     @Transactional(rollbackFor = Exception.class)
     public OrderReturnResponse requestReturn(Integer orderId, CreateReturnRequest request,
                                              Integer buyerId, String username) {
@@ -63,6 +71,13 @@ public class OrderReturnService {
         return map(returnRepository.findById(ret.getId()));
     }
 
+    /**
+     * Truy vấn thông tin nghiệp vụ theo tham số đầu vào.
+     * @param returnId Tham số đầu vào của hàm.
+     * @param username Tham số đầu vào của hàm.
+     * @param role Tham số đầu vào của hàm.
+     * @return Kết quả xử lý.
+     */
     public OrderReturnResponse getReturn(Integer returnId, String username, String role) {
         OrderReturn ret = returnRepository.findById(returnId);
         if (ret == null) throw new IllegalArgumentException("Không tìm thấy yêu cầu trả hàng");
@@ -71,6 +86,11 @@ public class OrderReturnService {
         return map(ret);
     }
 
+    /**
+     * Truy vấn thông tin nghiệp vụ theo tham số đầu vào.
+     * @param role Tham số đầu vào của hàm.
+     * @return Kết quả xử lý.
+     */
     public List<OrderReturnResponse> getPending(String role) {
         String status;
         if ("SELLER".equals(role)) status = "PENDING_SELLER_REVIEW";
@@ -79,6 +99,14 @@ public class OrderReturnService {
         return returnRepository.findPending(status).stream().map(this::map).toList();
     }
 
+    /**
+     * Xét duyệt yêu cầu và cập nhật trạng thái theo vai trò được phân quyền.
+     * @param returnId Tham số đầu vào của hàm.
+     * @param request Tham số đầu vào của hàm.
+     * @param reviewer Tham số đầu vào của hàm.
+     * @param role Tham số đầu vào của hàm.
+     * @return Kết quả xử lý.
+     */
     @Transactional(rollbackFor = Exception.class)
     public OrderReturnResponse sellerReview(Integer returnId, ReturnReviewRequest request, String reviewer, String role) {
         requireRole(role, "SELLER");
@@ -90,6 +118,14 @@ public class OrderReturnService {
         return map(returnRepository.findById(returnId));
     }
 
+    /**
+     * Xét duyệt yêu cầu và cập nhật trạng thái theo vai trò được phân quyền.
+     * @param returnId Tham số đầu vào của hàm.
+     * @param request Tham số đầu vào của hàm.
+     * @param reviewer Tham số đầu vào của hàm.
+     * @param role Tham số đầu vào của hàm.
+     * @return Kết quả xử lý.
+     */
     @Transactional(rollbackFor = Exception.class)
     public OrderReturnResponse adminReview(Integer returnId, ReturnReviewRequest request, String reviewer, String role) {
         requireRole(role, "ADMIN");
@@ -101,6 +137,9 @@ public class OrderReturnService {
         return map(returnRepository.findById(returnId));
     }
 
+    /**
+     * Thực hiện xử lý nghiệp vụ tự động theo điều kiện cấu hình.
+     */
     @Scheduled(fixedDelay = 60000)
     @Transactional(rollbackFor = Exception.class)
     public void escalateSellerTimeouts() {
@@ -110,14 +149,30 @@ public class OrderReturnService {
         orderRepository.escalateReturnReviews(cutoff, now, "SYSTEM");
     }
 
+    /**
+     * Thực hiện chức năng nghiệp vụ theo tên hàm.
+     * @param id Tham số đầu vào của hàm.
+     * @param status Tham số đầu vào của hàm.
+     * @return Kết quả xử lý.
+     */
     private OrderReturn requirePending(Integer id, String status) {
         OrderReturn ret = returnRepository.findById(id);
         if (ret == null || !status.equals(ret.getStatus())) throw new IllegalStateException("Yêu cầu không tồn tại hoặc không ở trạng thái chờ duyệt");
         return ret;
     }
+    /**
+     * Thực hiện chức năng nghiệp vụ theo tên hàm.
+     * @param actual Tham số đầu vào của hàm.
+     * @param expected Tham số đầu vào của hàm.
+     */
     private void requireRole(String actual, String expected) {
         if (!expected.equals(actual)) throw new SecurityException("Chỉ " + expected + " được thực hiện bước duyệt này");
     }
+    /**
+     * Thực hiện chức năng nghiệp vụ theo tên hàm.
+     * @param r Tham số đầu vào của hàm.
+     * @return Kết quả xử lý.
+     */
     private OrderReturnResponse map(OrderReturn r) {
         OrderReturnResponse out = new OrderReturnResponse();
         out.setId(r.getId()); out.setOrderId(r.getOrderId()); out.setBuyerUsername(r.getBuyerUsername());
