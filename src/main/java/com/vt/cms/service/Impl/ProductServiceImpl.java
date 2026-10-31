@@ -313,7 +313,7 @@ public class ProductServiceImpl implements ProductService {
     /**
      * Chỉnh sửa dữ liệu editstatusproduct. Các tham số và kết quả tuân theo chữ ký phương thức.
      */
-    public void editstatusproduct(Integer product_id) {
+    public void editstatusproduct(Integer product_id, String approverUsername) {
         if (product_id == null || product_id <= 0)
             throw new IllegalArgumentException("ID sản phẩm không hợp lệ");
         Product existing = productRepository.getProductById(product_id);
@@ -324,7 +324,7 @@ public class ProductServiceImpl implements ProductService {
         }
         LocalDateTime now = LocalDateTime.now();
         int rows = productRepository.editstatusproduct
-                (product_id, "APPROVED", now, "SYSTEM", now);
+                (product_id, "APPROVED", now, approverUsername, now);
         if (rows != 1) throw new IllegalStateException
                 ("Không thể duyệt sản phẩm; trạng thái có thể đã thay đổi");
     }
@@ -333,7 +333,7 @@ public class ProductServiceImpl implements ProductService {
     /**
      * Thực hiện xử lý nghiệp vụ reject product. Các tham số và kết quả tuân theo chữ ký phương thức.
      */
-    public void rejectProduct(Integer product_id) {
+    public void rejectProduct(Integer product_id, String approverUsername) {
         if (product_id == null || product_id <= 0) throw new IllegalArgumentException("ID sản phẩm không hợp lệ");
         Product existing = productRepository.getProductById(product_id);
         if (existing == null || "true".equalsIgnoreCase(existing.getIsDeleted())) {
@@ -343,7 +343,7 @@ public class ProductServiceImpl implements ProductService {
             throw new IllegalStateException("Chỉ sản phẩm đang chờ duyệt mới được từ chối");
         }
         LocalDateTime now = LocalDateTime.now();
-        int rows = productRepository.editstatusproduct(product_id, "REJECTED", now, "SYSTEM", now);
+        int rows = productRepository.editstatusproduct(product_id, "REJECTED", now, approverUsername, now);
         if (rows != 1) throw new IllegalStateException("Không thể từ chối sản phẩm; trạng thái có thể đã thay đổi");
     }
 
