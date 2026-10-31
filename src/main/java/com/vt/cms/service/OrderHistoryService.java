@@ -2,6 +2,7 @@ package com.vt.cms.service;
 
 import com.vt.cms.model.entity.OrderTracking;
 import com.vt.cms.model.repository.OrderTrackingRepository;
+import com.vt.cms.model.enums.RoleAction;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import java.time.LocalDateTime;
@@ -59,10 +60,30 @@ public class OrderHistoryService {
         List<OrderTracking> history = repository.findByOrderId(orderId);
         for (OrderTracking event : history) {
             event.setStatusName(resolveStatusName(event));
+            event.setRoleAction(getRoleAction(event));
         }
         return history;
     }
 
+    /**
+     * Xác định nhóm tác nhân thực hiện hành động trong lịch sử đơn hàng.
+     * Mã tracking của đơn vị vận chuyển được ưu tiên nhận diện là SHIPPING_UNIT.
+     * Các sự kiện khác sử dụng actorRole đã được ghi nhận; mặc định SYSTEM.
+     */
+    public RoleAction getRoleAction(OrderTracking event) {
+        if (event == null) return RoleAction.SYSTEM;
+        String eventCode = event.getEventCode();
+        if (eventCode != null && SHIPPING_ACTION_MAP.containsKey(eventCode.trim().toUpperCase())) {
+            return RoleAction.SHIPPING_UNIT;
+        }
+        String actorRole = event.getActorRole();
+        if (actorRole == null || actorRole.isBlank()) return RoleAction.SYSTEM;
+        try {
+            return RoleAction.valueOf(actorRole.trim().toUpperCase());
+        } catch (IllegalArgumentException ex) {
+            return RoleAction.SYSTEM;
+        }
+    }
     /**
      * Lấy tên trạng thái hiển thị cho một dòng lịch sử.
      * Ưu tiên mô tả mã vận chuyển, sau đó đến tiêu đề sự kiện và trạng thái đơn hàng.
