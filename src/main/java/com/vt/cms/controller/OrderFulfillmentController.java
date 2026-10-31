@@ -4,6 +4,8 @@ import com.vt.cms.model.dto.WarehouseSelectionRequest;
 import com.vt.cms.model.entity.ShippingAssignment;
 import com.vt.cms.model.resp.APIRessponse;
 import com.vt.cms.service.OrderFulfillmentService;
+import com.vt.cms.security.JwtAuthenticationFilter;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -23,9 +25,12 @@ public class OrderFulfillmentController {
      */
     public ResponseEntity<APIRessponse> selectWarehouse(
             @PathVariable Integer orderId,
-            @Valid @RequestBody WarehouseSelectionRequest request) {
+            @Valid @RequestBody WarehouseSelectionRequest request,
+            HttpServletRequest http) {
         log.info("API select warehouse. orderId={}", orderId);
-        fulfillmentService.selectWarehouse(orderId, request);
+        fulfillmentService.selectWarehouse(orderId, request,
+                (String) http.getAttribute(JwtAuthenticationFilter.USERNAME_ATTRIBUTE),
+                (String) http.getAttribute(JwtAuthenticationFilter.ROLE_ATTRIBUTE));
         return ResponseEntity.ok(new APIRessponse(200, "Đã chọn kho, đơn hàng đang chuẩn bị"));
     }
 
