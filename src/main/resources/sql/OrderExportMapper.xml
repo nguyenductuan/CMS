@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.vt.cms.model.repository.OrderExportRepository">
+    <select id="findOrdersForExport" resultType="com.vt.cms.model.dto.OrderExportRow">
+        SELECT
+            o.id AS orderId,
+            o.created_at AS orderDate,
+            o.order_status AS orderStatus,
+            o.notecancel AS buyerNote,
+            o.tracking_number AS trackingNumber,
+            o.shipping_provider AS shippingProvider,
+            o.expected_delivery AS expectedDelivery,
+            o.shipped_at AS shippedAt,
+            p.name AS productName,
+            oi.price AS sellingPrice,
+            oi.quantity AS quantity,
+            COALESCE(oi.total_price, oi.price * oi.quantity) AS orderTotal,
+            o.total AS buyerPaidTotal,
+            o.created_by AS buyerName,
+            p.created_by AS sellerName,
+            ps.sku_code AS skuCode
+        FROM orders o
+        LEFT JOIN order_item oi ON oi.order_id = o.id
+        LEFT JOIN products p ON p.id = oi.product_id
+        LEFT JOIN product_sku ps ON ps.id = oi.sku_id
+        <where>
+            <if test="fromDate != null">AND o.created_at &gt;= #{fromDate}</if>
+            <if test="toDateExclusive != null">AND o.created_at &lt; #{toDateExclusive}</if>
+        </where>
+        ORDER BY o.created_at DESC, o.id DESC, oi.id ASC
+    </select>
+
+    <insert id="insertExportHistory" parameterType="com.vt.cms.model.entity.OrderExportHistory"
+            useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO order_export_history (exported_at, tab_name, file_name, from_date, to_date, exported_by, row_count)
+        VALUES (#{exportedAt}, #{tabName}, #{fileName}, #{fromDate}, #{toDate}, #{exportedBy}, #{rowCount})
+    </insert>
+
+    <select id="findExportHistory" resultType="com.vt.cms.model.entity.OrderExportHistory">
+        SELECT id, exported_at AS exportedAt, tab_name AS tabName, file_name AS fileName,
+               from_date AS fromDate, to_date AS toDate, exported_by AS exportedBy, row_count AS rowCount
+        FROM order_export_history
+        ORDER BY exported_at DESC, id DESC
+        LIMIT #{limit}
+    </select>
+</mapper>
