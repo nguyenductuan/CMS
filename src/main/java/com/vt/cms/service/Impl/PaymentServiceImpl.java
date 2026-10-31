@@ -12,6 +12,7 @@ import com.vt.cms.model.repository.OrderRepository;
 import com.vt.cms.model.repository.PaymentRepository;
 import com.vt.cms.model.resp.PaymentResponse;
 import com.vt.cms.service.PaymentService;
+import com.vt.cms.service.OrderHistoryService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -27,6 +28,7 @@ public class PaymentServiceImpl implements PaymentService {
     private final PaymentRepository paymentRepository;
     private final OrderRepository orderRepository;
     private final CampainProductRepository campainProductRepository;
+    private final OrderHistoryService orderHistoryService;
 
     /**
      * Xử lý thanh toán payment service impl. Các tham số và kết quả tuân theo chữ ký phương thức.
@@ -34,10 +36,12 @@ public class PaymentServiceImpl implements PaymentService {
     public PaymentServiceImpl(
             PaymentRepository paymentRepository,
             OrderRepository orderRepository,
-            CampainProductRepository campainProductRepository) {
+            CampainProductRepository campainProductRepository,
+            OrderHistoryService orderHistoryService) {
         this.paymentRepository = paymentRepository;
         this.orderRepository = orderRepository;
         this.campainProductRepository = campainProductRepository;
+        this.orderHistoryService = orderHistoryService;
     }
 
     @Override
@@ -126,6 +130,7 @@ public class PaymentServiceImpl implements PaymentService {
         order.setUpdatedAt(LocalDateTime.now());
         order.setUpdated_by("SYSTEM");
         orderRepository.save(order);
+        orderHistoryService.record(order.getId(), "PAYMENT_SUCCESS", "PAID", "SYSTEM", "SYSTEM", "Đơn hàng đã thanh toán thành công, Nhà bán đang chuẩn bị hàng", "Cổng thanh toán xác nhận giao dịch thành công");
 
         log.info("Payment confirmed. orderId={}, transactionCode={}, amount={}",
                 payment.getOrderId(), paymentCallback.getTransactionCode(),
