@@ -137,7 +137,7 @@ public class ProductServiceImpl implements ProductService {
         ProductResponse product = productRepository.detailProduct(product_id);
         if (product == null || "true".equalsIgnoreCase(product.getIsDeleted())) {
             log.warn("Product detail not found. productId={}", product_id);
-            throw new IllegalArgumentException("Không tìm thấy sản phẩm: " + product_id);
+            throw new BusinessException(MessageCode.PRODUCT_NOT_FOUND);
         }
         ProductResponse response = new ProductResponse();
         response.setId(product.getId());
@@ -231,7 +231,7 @@ public class ProductServiceImpl implements ProductService {
         Product existing = productRepository.getProductById(id);
         if (existing == null || "true".equalsIgnoreCase(existing.getIsDeleted())) {
             log.warn("Update product rejected: not found. productId={}", id);
-            throw new IllegalArgumentException("Không tìm thấy sản phẩm: " + id);
+            throw new BusinessException(MessageCode.PRODUCT_NOT_FOUND);
         }
         if (!"PENDING_APPROVAL".equalsIgnoreCase(existing.getStatus())
                 && !"REJECTED".equalsIgnoreCase(existing.getStatus())) {
@@ -332,7 +332,7 @@ public class ProductServiceImpl implements ProductService {
             throw new BusinessException(MessageCode.ID_SAN_PHAM_KHONG_HOP_LE);
         Product existing = productRepository.getProductById(product_id);
         if (existing == null || "true".equalsIgnoreCase(existing.getIsDeleted()))
-            throw new IllegalArgumentException("Không tìm thấy sản phẩm: " + product_id);
+            throw new BusinessException(MessageCode.PRODUCT_NOT_FOUND);
         if (!"PENDING_APPROVAL".equalsIgnoreCase(existing.getStatus())) {
             throw new IllegalStateException("Chỉ sản phẩm đang chờ duyệt mới được duyệt");
         }
@@ -351,7 +351,7 @@ public class ProductServiceImpl implements ProductService {
         if (product_id == null || product_id <= 0) throw new BusinessException(MessageCode.ID_SAN_PHAM_KHONG_HOP_LE);
         Product existing = productRepository.getProductById(product_id);
         if (existing == null || "true".equalsIgnoreCase(existing.getIsDeleted())) {
-            throw new IllegalArgumentException("Không tìm thấy sản phẩm: " + product_id);
+            throw new BusinessException(MessageCode.PRODUCT_NOT_FOUND);
         }
         if (!"PENDING_APPROVAL".equalsIgnoreCase(existing.getStatus())) {
             throw new IllegalStateException("Chỉ sản phẩm đang chờ duyệt mới được từ chối");
@@ -371,7 +371,7 @@ public class ProductServiceImpl implements ProductService {
             throw new BusinessException(MessageCode.ID_SAN_PHAM_KHONG_HOP_LE);
         Product existing = productRepository.getProductById(product_id);
         if (existing == null || "true".equalsIgnoreCase(existing.getIsDeleted())) {
-            throw new IllegalArgumentException("Không tìm thấy sản phẩm: " + product_id);
+            throw new BusinessException(MessageCode.PRODUCT_NOT_FOUND);
         }
         if (!"PENDING_APPROVAL".equalsIgnoreCase(existing.getStatus())
                 && !"REJECTED".equalsIgnoreCase(existing.getStatus())) {
@@ -383,7 +383,7 @@ public class ProductServiceImpl implements ProductService {
         int rows = productRepository.deleteproduct(product_id);
         if (rows != 1) {
             log.warn("Delete product rejected: not found/already deleted. productId={}, rows={}", product_id, rows);
-            throw new IllegalArgumentException("Không tìm thấy sản phẩm hoặc sản phẩm đã bị xóa: " + product_id);
+            throw new BusinessException(MessageCode.PRODUCT_NOT_FOUND);
         }
         int skuRows = productSkuRepository.softDeleteByProductId(product_id);
         log.info("Delete product completed. productId={}, deletedSkuCount={}", product_id, skuRows);
