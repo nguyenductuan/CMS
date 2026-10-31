@@ -56,8 +56,10 @@ Các mã được hỗ trợ: `101`, `103`, `104`, `320`, `410`, `400`, `500`, `
 | Carrier | 103, 104 | Lấy hàng thành công/đã nhận hàng |
 | Carrier | 320, 410, 400, 500, 506–509 | Đang vận chuyển/đang giao |
 | Carrier | 505 | Giao hàng không thành công |
+| Carrier | RETURN_PICKUP_SUCCESS / RETURN_PICKUP_FAILED | Lấy hàng hoàn thành công/thất bại |
+| Carrier | RETURN_DELIVERY_SUCCESS / RETURN_DELIVERY_FAILED | Giao hàng hoàn thành công/thất bại |
 | Carrier | CARRIER_DELIVERY_SUCCESS | Giao hàng thành công theo callback giao hàng hiện có |
-| Buyer | BUYER_RECEIVED | Buyer nhấn Đã nhận hàng |
+| Buyer | 501 | Buyer nhấn Đã nhận hàng |
 | Buyer | BUYER_RETURN_REQUESTED | Buyer tạo yêu cầu Trả hàng/Hoàn tiền |
 | Buyer | BUYER_RETURN_REQUEST_CANCELLED | Buyer hủy yêu cầu trả hàng |
 | Seller | SELLER_RETURN_APPROVED / SELLER_RETURN_REJECTED | Seller phê duyệt/từ chối yêu cầu |
