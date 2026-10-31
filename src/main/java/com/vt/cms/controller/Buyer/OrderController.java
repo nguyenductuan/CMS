@@ -9,6 +9,8 @@ import com.vt.cms.model.resp.BaseResponse;
 import com.vt.cms.model.resp.OrderCreateResponse;
 import com.vt.cms.model.resp.OrderResponse;
 import com.vt.cms.service.OrderService;
+import com.vt.cms.security.JwtAuthenticationFilter;
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -45,8 +47,11 @@ public class OrderController {
     /**
      * Hủy nghiệp vụ cancelorder; nhận các tham số khai báo trong chữ ký hàm và trả về kết quả theo kiểu dữ liệu đã định nghĩa.
      */
-    public ResponseEntity<APIRessponse> cancelorder(@PathVariable Integer orderId, String notecancel) {
-        orderService.cancelOrder(orderId, notecancel);
+    public ResponseEntity<APIRessponse> cancelorder(@PathVariable Integer orderId,
+            @RequestParam(required = false) String notecancel, HttpServletRequest request) {
+        orderService.cancelOrder(orderId, notecancel,
+                (String) request.getAttribute(JwtAuthenticationFilter.USERNAME_ATTRIBUTE),
+                (String) request.getAttribute(JwtAuthenticationFilter.ROLE_ATTRIBUTE));
         return ResponseEntity.ok(new APIRessponse(200, Order.ORDER_CANCEL.getMessage()));
     }
     // Hàm chi tiết order
