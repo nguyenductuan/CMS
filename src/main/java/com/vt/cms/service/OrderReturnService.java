@@ -61,6 +61,12 @@ public class OrderReturnService {
         return map(returnRepository.findById(ret.getId()));
     }
 
+    public OrderReturnResponse getReturn(Integer returnId) {
+        OrderReturn ret = returnRepository.findById(returnId);
+        if (ret == null) throw new IllegalArgumentException("Không tìm thấy yêu cầu trả hàng");
+        return map(ret);
+    }
+
     @Transactional(rollbackFor = Exception.class)
     public OrderReturnResponse sellerReview(Integer returnId, ReturnReviewRequest request, String reviewer, String role) {
         requireRole(role, "SELLER");
