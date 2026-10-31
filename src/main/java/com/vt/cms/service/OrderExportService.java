@@ -14,6 +14,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
+import java.util.Locale;
 
 /** Xuất báo cáo Excel theo cấu trúc tab Orders và ghi nhận lịch sử xuất file. */
 @Service
@@ -41,18 +42,19 @@ public class OrderExportService {
     @Transactional
     public ExportedOrderFile export(String tabName, LocalDate from, LocalDate to, String actor) {
         String normalizedTab = (tabName == null || tabName.isBlank()) ? "Orders" : tabName.trim();
-        if (!"Orders".equalsIgnoreCase(normalizedTab))
-            throw new IllegalArgumentException("Tab xuất hiện tại chỉ hỗ trợ: Orders");
+        List<String> statuses = statusesForTab(normalizedTab);
+        String sheetName = normalizedTab.replaceAll("[\\\\/?*\\[\\]:]", "_");
+        if (sheetName.length() > 31) sheetName = sheetName.substring(0, 31);
         if ((from == null) != (to == null)) throw new IllegalArgumentException("Cần truyền cả fromDate và toDate");
         if (from != null && to.isBefore(from)) throw new IllegalArgumentException("toDate phải lớn hơn hoặc bằng fromDate");
 
         LocalDateTime fromTime = from == null ? null : from.atStartOfDay();
         LocalDateTime toExclusive = to == null ? null : to.plusDays(1).atStartOfDay();
-        var rows = repository.findOrdersForExport(fromTime, toExclusive);
+        var rows = repository.findOrdersForExport(fromTime, toExclusive, statuses);
         String fileName = from == null ? normalizedTab + ".xlsx"
                 : normalizedTab + " _" + from.format(FILE_DATE) + " - " + to.format(FILE_DATE) + ".xlsx";
         try (Workbook workbook = new XSSFWorkbook(); ByteArrayOutputStream output = new ByteArrayOutputStream()) {
-            Sheet sheet = workbook.createSheet(normalizedTab);
+            Sheet sheet = workbook.createSheet(sheetName);
             Row header = sheet.createRow(0);
             CellStyle headerStyle = workbook.createCellStyle();
             Font font = workbook.createFont(); font.setBold(true); headerStyle.setFont(font);
@@ -81,6 +83,21 @@ public class OrderExportService {
             repository.insertExportHistory(history);
             return new ExportedOrderFile(fileName, output.toByteArray(), rows.size());
         } catch (IOException e) { throw new IllegalStateException("Không thể tạo file Excel", e); }
+    }
+
+    private List<String> statusesForTab(String tabName) {
+        String key = tabName.trim().toLowerCase(Locale.ROOT);
+        return switch (key) {
+            case "orders", "tất cả", "tat_ca", "tất_cả", "all" -> List.of();
+            case "chờ thanh toán", "cho_thanh_toan" -> List.of("WAIT_PAYMENT");
+            case "đã thanh toán", "da_thanh_toan", "chờ xác nhận", "cho_xac_nhan" -> List.of("PAID");
+            case "chờ giao hàng", "cho_giao_hang" -> List.of("WAITING_FOR_DELIVERY", "PREPARING");
+            case "đang giao", "đang giao hàng", "dang_giao" -> List.of("SHIPPING");
+            case "đã giao", "da_giao" -> List.of("DELIVERED", "RECEIVED", "COMPLETED");
+            case "đã hủy", "đã huỷ", "da_huy" -> List.of("CANCELLED");
+            case "trả hàng/hoàn tiền", "trả hàng", "tra_hang" -> List.of("RETURN_REQUESTED", "REFUND_PENDING");
+            default -> throw new IllegalArgumentException("Tên tab không được hỗ trợ: " + tabName);
+        };
     }
 
     private Object[] values(com.vt.cms.model.dto.OrderExportRow x) {
