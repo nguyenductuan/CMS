@@ -18,7 +18,7 @@ public interface OrderService {
     /**
      * Tạo mới dữ liệu create order. Các tham số và kết quả tuân theo chữ ký phương thức.
      */
-    OrderCreateResponse createOrder(OrderRequest request);
+    OrderCreateResponse createOrder(OrderRequest request, String buyerUsername);
 
     /**
      * Lấy dữ liệu getdetailorder. Các tham số và kết quả tuân theo chữ ký phương thức.
