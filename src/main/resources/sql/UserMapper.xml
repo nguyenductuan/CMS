@@ -9,6 +9,12 @@
         <result column="username" property="username"/>
         <result column="password" property="password"/>
         <result column="role" property="role"/>
+        <result column="phone" property="phone"/>
+        <result column="email" property="email"/>
+        <result column="address" property="address"/>
+        <result column="bank_name" property="bankName"/>
+        <result column="bank_account_number" property="bankAccountNumber"/>
+        <result column="bank_account_holder" property="bankAccountHolder"/>
     </resultMap>
 
     <select id="getUser" resultMap="UserResultMap">
@@ -31,4 +37,9 @@
         INSERT INTO user (name, age, username, password, role)
         VALUES (#{name}, #{age}, #{username}, #{password}, #{role})
     </insert>
+    <update id="updateBuyerProfile" parameterType="com.vt.cms.model.entity.User">
+        UPDATE user SET name=#{name}, age=#{age}, phone=#{phone}, email=#{email}, address=#{address},
+            bank_name=#{bankName}, bank_account_number=#{bankAccountNumber}, bank_account_holder=#{bankAccountHolder}
+        WHERE id=#{id} AND role='BUYER'
+    </update>
 </mapper>
