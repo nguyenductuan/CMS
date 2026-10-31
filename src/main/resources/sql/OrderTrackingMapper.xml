@@ -1,16 +1,26 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.vt.cms.model.repository.OrderTrackingRepository">
-    <resultMap id="OrderResultMap1" type="com.vt.cms.model.entity.Order">
+    <resultMap id="OrderResultMap1" type="com.vt.cms.model.entity.OrderTracking">
         <id column="id" property="id" jdbcType="OTHER"/>
         <result column="order_id" property="orderId" jdbcType="OTHER"/>
-        <result column="status" property="status" jdbcType="OTHER"/>
-        <result column="title" property="title" jdbcType="OTHER"/>
+        <result column="status_code" property="statusCode"/>
+        <result column="title" property="title"/>
+        <result column="description" property="description"/>
+        <result column="actor" property="actor"/>
+        <result column="actor_role" property="actorRole"/>
+        <result column="event_code" property="eventCode"/>
+        <result column="created_at" property="createdAt"/>
 
     </resultMap>
     <insert id="insertordertracking" parameterType="com.vt.cms.model.entity.OrderTracking"
     >
-        INSERT INTO order_history (order_id, status, title)
-        VALUES (#{orderId}, #{status}, #{title})
+        INSERT INTO order_history (order_id, status, title, description, actor, actor_role, event_code, created_at)
+        VALUES (#{orderId}, #{statusCode}, #{title}, #{description}, #{actor}, #{actorRole}, #{eventCode}, #{createdAt})
     </insert>
+    <select id="findByOrderId" resultMap="OrderHistoryMap">
+        SELECT id, order_id, status AS status_code, title, description, actor, actor_role, event_code, created_at
+        FROM order_history WHERE order_id = #{orderId}
+        ORDER BY created_at ASC, id ASC
+    </select>
 </mapper>
