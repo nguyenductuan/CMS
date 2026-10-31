@@ -1,5 +1,7 @@
 package com.vt.cms.service;
 
+
+import com.vt.cms.Exception.BusinessException;import com.vt.cms.model.enums.MessageCode;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.vt.cms.model.dto.CreateReturnRequest;
@@ -41,18 +43,18 @@ public class OrderReturnService {
     public OrderReturnResponse requestReturn(Integer orderId, CreateReturnRequest request,
                                              Integer buyerId, String username) {
         if (request.getImages() != null && request.getImages().size() > 10)
-            throw new IllegalArgumentException("Tối đa 10 ảnh");
+            throw new BusinessException(MessageCode.TOI_DA_10_ANH);
         if (request.getVideos() != null && request.getVideos().size() > 3)
-            throw new IllegalArgumentException("Tối đa 3 video");
+            throw new BusinessException(MessageCode.TOI_DA_3_VIDEO);
         Order order = orderRepository.getorderbyIdForUpdate(orderId);
         if (order == null || !username.equals(order.getCreated_by()))
-            throw new IllegalArgumentException("Không tìm thấy đơn hàng của người dùng");
+            throw new BusinessException(MessageCode.KHONG_TIM_THAY_DON_HANG_CUA_NGUOI_DUNG);
         if (!List.of(OrderStatus.DELIVERED, OrderStatus.RECEIVED, OrderStatus.COMPLETED).contains(order.getOrder_status()))
             throw new IllegalStateException("Chỉ đơn đã giao/đã nhận mới được yêu cầu trả hàng");
 
         User buyer = userRepository.findByUsername(username);
         if (buyer == null || !buyerId.equals(buyer.getId()))
-            throw new IllegalArgumentException("Không xác định được tài khoản người mua");
+            throw new BusinessException(MessageCode.KHONG_XAC_DINH_DUOC_TAI_KHOAN_NGUOI_MUA);
         OrderReturn ret = new OrderReturn();
         ret.setOrderId(orderId); ret.setBuyerId(buyerId); ret.setBuyerUsername(username);
         ret.setBuyerName(buyer.getName()); ret.setPhone(buyer.getPhone()); ret.setEmail(buyer.getEmail());
@@ -62,7 +64,7 @@ public class OrderReturnService {
         try {
             ret.setImagesJson(objectMapper.writeValueAsString(request.getImages() == null ? List.of() : request.getImages()));
             ret.setVideosJson(objectMapper.writeValueAsString(request.getVideos() == null ? List.of() : request.getVideos()));
-        } catch (JsonProcessingException e) { throw new IllegalArgumentException("Media không hợp lệ", e); }
+        } catch (JsonProcessingException e) { throw new BusinessException(MessageCode.MEDIA_KHONG_HOP_LE, e); }
         int previousRequests = returnRepository.countByOrderId(orderId);
         ret.setStatus(previousRequests > 0 ? "PENDING_ADMIN_REVIEW" : "PENDING_SELLER_REVIEW");
         ret.setCreatedAt(LocalDateTime.now());
@@ -80,7 +82,7 @@ public class OrderReturnService {
     public void cancelReturnRequest(Integer returnId, String buyerUsername) {
         OrderReturn current = returnRepository.findById(returnId);
         if (current == null || !buyerUsername.equals(current.getBuyerUsername()))
-            throw new IllegalArgumentException("Không tìm thấy yêu cầu trả hàng của Buyer");
+            throw new BusinessException(MessageCode.KHONG_TIM_THAY_YEU_CAU_TRA_HANG_CUA_BUYER);
         int rows = returnRepository.cancelBuyerRequest(returnId, buyerUsername);
         if (rows != 1) throw new IllegalStateException("Chỉ được hủy yêu cầu khi đang chờ xét duyệt");
         orderRepository.setReturnRejected(current.getOrderId(), LocalDateTime.now(), buyerUsername);
@@ -97,7 +99,7 @@ public class OrderReturnService {
      */
     public OrderReturnResponse getReturn(Integer returnId, String username, String role) {
         OrderReturn ret = returnRepository.findById(returnId);
-        if (ret == null) throw new IllegalArgumentException("Không tìm thấy yêu cầu trả hàng");
+        if (ret == null) throw new BusinessException(MessageCode.KHONG_TIM_THAY_YEU_CAU_TRA_HANG);
         if ("BUYER".equals(role) && !username.equals(ret.getBuyerUsername())) throw new SecurityException("Không có quyền xem yêu cầu trả hàng này");
         if (!List.of("BUYER", "SELLER", "ADMIN").contains(role)) throw new SecurityException("Không có quyền xem yêu cầu trả hàng");
         return map(ret);
@@ -170,7 +172,7 @@ public class OrderReturnService {
     public OrderReturnResponse selectReturnMethod(Integer returnId, String method, String reviewer, String role) {
         requireRole(role, "SELLER");
         if (!List.of("RETURN_AND_REFUND", "REFUND_IMMEDIATELY").contains(method))
-            throw new IllegalArgumentException("Phương thức phải là RETURN_AND_REFUND hoặc REFUND_IMMEDIATELY");
+            throw new BusinessException(MessageCode.PHUONG_THUC_PHAI_LA_RETURN_AND_REFUND_HOAC_REFUN);
         OrderReturn current = requirePending(returnId, "PENDING_SELLER_METHOD_SELECTION");
         LocalDateTime now = LocalDateTime.now();
         if (returnRepository.selectReturnMethod(returnId, method, now) != 1)
