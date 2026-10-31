@@ -58,6 +58,15 @@
         UPDATE orders SET order_status='DELIVERED', sub_order_status='REJECTED', updated_at=#{updatedAt}, updated_by=#{updatedBy}
         WHERE id=#{orderId} AND order_status='RETURN_REQUESTED'
     </update>
+    <update id="updateReturnSubStatus">
+        UPDATE orders SET sub_order_status=#{status}, updated_by=#{updatedBy}, updated_at=#{updatedAt}
+        WHERE id=#{orderId} AND order_status='RETURN_REQUESTED'
+    </update>
+    <update id="escalateReturnReviews">
+        UPDATE orders o INNER JOIN order_return_request r ON r.order_id=o.id
+        SET o.sub_order_status='PENDING_ADMIN_REVIEW', o.updated_by=#{updatedBy}, o.updated_at=#{updatedAt}
+        WHERE r.status='PENDING_ADMIN_REVIEW' AND r.created_at &lt;= #{cutoff} AND o.order_status='RETURN_REQUESTED'
+    </update>
     <update id="save">
         UPDATE orders
         SET order_status = #{order_status},
