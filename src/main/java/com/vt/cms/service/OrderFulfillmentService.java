@@ -1,5 +1,7 @@
 package com.vt.cms.service;
 
+
+import com.vt.cms.Exception.BusinessException;import com.vt.cms.model.enums.MessageCode;
 import com.vt.cms.model.dto.WarehouseSelectionRequest;
 import com.vt.cms.model.entity.Order;
 import com.vt.cms.model.entity.ShippingAssignment;
@@ -31,7 +33,7 @@ public class OrderFulfillmentService {
     public void selectWarehouse(Integer orderId, WarehouseSelectionRequest request, String actor, String actorRole) {
         validateOrderId(orderId);
         if (request == null || request.getWarehouseCode() == null || request.getWarehouseCode().isBlank()) {
-            throw new IllegalArgumentException("Mã kho không được để trống");
+            throw new BusinessException(MessageCode.MA_KHO_KHONG_DUOC_DE_TRONG);
         }
         Order order = requireOrder(orderId);
         requireStatus(order, OrderStatus.PAID);
@@ -84,7 +86,7 @@ public class OrderFulfillmentService {
     public void markDeliverySuccessful(Integer orderId, String trackingNumber) {
         validateOrderId(orderId);
         if (trackingNumber == null || trackingNumber.isBlank()) {
-            throw new IllegalArgumentException("Mã vận đơn không được để trống");
+            throw new BusinessException(MessageCode.MA_VAN_DON_KHONG_DUOC_DE_TRONG);
         }
         int rows = orderRepository.markDeliverySuccessful(orderId, trackingNumber.trim(),
                 OrderStatus.SHIPPING.name(), OrderStatus.DELIVERED.name(), LocalDateTime.now(), "MOCK-3PL");
@@ -132,7 +134,7 @@ public class OrderFulfillmentService {
         OrderTrackingStatus trackingStatus = toOrderTrackingStatus(code);
         String title = trackingStatus == null ? null : SHIPPING_ACTION_MAP.get(trackingStatus);
         if (title == null) {
-            throw new IllegalArgumentException("Mã trạng thái vận chuyển không được hỗ trợ");
+            throw new BusinessException(MessageCode.MA_TRANG_THAI_VAN_CHUYEN_KHONG_DUOC_HO_TRO);
         }
 
         String normalizedCode = normalizeTrackingCode(trackingStatus);
@@ -181,7 +183,7 @@ public class OrderFulfillmentService {
     public void confirmReceived(Integer orderId, String customerId) {
         validateOrderId(orderId);
         if (customerId == null || customerId.isBlank()) {
-            throw new IllegalArgumentException("Không xác định được người nhận hàng");
+            throw new BusinessException(MessageCode.KHONG_XAC_DINH_DUOC_NGUOI_NHAN_HANG);
         }
         int rows = orderRepository.confirmReceived(orderId, OrderStatus.DELIVERED.name(),
                 OrderStatus.COMPLETED.name(), LocalDateTime.now(), customerId);
@@ -200,7 +202,7 @@ public class OrderFulfillmentService {
         Order order = orderRepository.getorderbyId(orderId);
         if (order == null) {
             log.warn("Order not found. orderId={}", orderId);
-            throw new IllegalArgumentException("Không tìm thấy đơn hàng: " + orderId);
+            throw new BusinessException(MessageCode.ORDER_NOT_FOUND);
         }
         return order;
     }
@@ -220,6 +222,6 @@ public class OrderFulfillmentService {
      * Kiểm tra tính hợp lệ validate order id. Các tham số và kết quả tuân theo chữ ký phương thức.
      */
     private void validateOrderId(Integer orderId) {
-        if (orderId == null || orderId <= 0) throw new IllegalArgumentException("ID đơn hàng không hợp lệ");
+        if (orderId == null || orderId <= 0) throw new BusinessException(MessageCode.ID_DON_HANG_KHONG_HOP_LE);
     }
 }
