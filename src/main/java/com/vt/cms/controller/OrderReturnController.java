@@ -77,6 +77,14 @@ public class OrderReturnController {
      * @param http Tham số phục vụ xử lý adminReview.
      * @return Kết quả xử lý của hàm.
      */
+    @PostMapping("/return/{returnId}/select-method")
+    public ResponseEntity<OrderReturnResponse> selectReturnMethod(@PathVariable Integer returnId,
+            @RequestBody java.util.Map<String, String> body, HttpServletRequest http) {
+        return ResponseEntity.ok(service.selectReturnMethod(returnId, body.get("returnMethod"),
+                (String) http.getAttribute(JwtAuthenticationFilter.USERNAME_ATTRIBUTE),
+                (String) http.getAttribute(JwtAuthenticationFilter.ROLE_ATTRIBUTE)));
+    }
+
     @PostMapping("/return/{returnId}/admin-review")
     public ResponseEntity<OrderReturnResponse> adminReview(@PathVariable Integer returnId,
             @Valid @RequestBody ReturnReviewRequest request, HttpServletRequest http) {
