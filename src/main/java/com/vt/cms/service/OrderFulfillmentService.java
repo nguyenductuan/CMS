@@ -108,7 +108,11 @@ public class OrderFulfillmentService {
                 java.util.Map.entry("507", "Đơn hàng đang giao"),
                 java.util.Map.entry("508", "Đơn hàng đang giao"),
                 java.util.Map.entry("509", "Đơn hàng đang giao"),
-                java.util.Map.entry("505", "Đơn hàng giao không thành công"));
+                java.util.Map.entry("505", "Đơn hàng giao không thành công"),
+                java.util.Map.entry("RETURN_PICKUP_SUCCESS", "Đơn vị vận chuyển lấy hàng hoàn thành công"),
+                java.util.Map.entry("RETURN_PICKUP_FAILED", "Đơn vị vận chuyển lấy hàng hoàn thất bại"),
+                java.util.Map.entry("RETURN_DELIVERY_SUCCESS", "Đơn vị vận chuyển giao hàng hoàn thành công"),
+                java.util.Map.entry("RETURN_DELIVERY_FAILED", "Đơn vị vận chuyển giao hàng hoàn thất bại"));
         String title = titles.get(code);
         if (title == null) throw new IllegalArgumentException("Mã trạng thái vận chuyển không được hỗ trợ");
         orderHistoryService.record(orderId, code, code, "CARRIER", "CARRIER", title, description);
@@ -129,7 +133,7 @@ public class OrderFulfillmentService {
             log.warn("Receive confirmation rejected. orderId={}, customerId={}", orderId, customerId);
             throw new IllegalStateException("Chỉ có thể xác nhận nhận hàng khi shipper đã giao thành công");
         }
-        orderHistoryService.record(orderId, "BUYER_RECEIVED", "COMPLETED", customerId, "BUYER", "Đơn hàng đã giao thành công", "Buyer đã nhấn nút Đã nhận hàng");
+        orderHistoryService.record(orderId, "501", "COMPLETED", customerId, "BUYER", "Đơn hàng đã giao thành công", "Buyer đã nhấn nút Đã nhận hàng");
         log.info("Customer confirmed order received; order completed. orderId={}, customerId={}", orderId, customerId);
     }
 
