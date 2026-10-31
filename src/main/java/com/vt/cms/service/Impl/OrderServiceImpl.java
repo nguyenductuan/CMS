@@ -22,6 +22,7 @@ import com.vt.cms.model.resp.SkuResponse;
 import com.vt.cms.service.InventoryService;
 import com.vt.cms.service.OrderPricingService;
 import com.vt.cms.service.OrderService;
+import com.vt.cms.service.OrderHistoryService;
 import com.vt.cms.service.ShippingFeeService;
 import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
@@ -42,6 +43,7 @@ public class OrderServiceImpl implements OrderService {
     private final OrderPricingService orderPricingService;
     private final ShippingFeeService shippingFeeService;
     private final PaymentRepository paymentRepository;
+    private final OrderHistoryService orderHistoryService;
 
     /**
      * Thực hiện xử lý nghiệp vụ order service impl. Các tham số và kết quả tuân theo chữ ký phương thức.
@@ -53,7 +55,8 @@ public class OrderServiceImpl implements OrderService {
             InventoryService inventoryService,
             OrderPricingService orderPricingService,
             ShippingFeeService shippingFeeService,
-            PaymentRepository paymentRepository) {
+            PaymentRepository paymentRepository,
+            OrderHistoryService orderHistoryService) {
         this.orderRepository = orderRepository;
         this.productRepository = productRepository;
         this.orderItemRepository = orderItemRepository;
@@ -61,6 +64,7 @@ public class OrderServiceImpl implements OrderService {
         this.orderPricingService = orderPricingService;
         this.shippingFeeService = shippingFeeService;
         this.paymentRepository = paymentRepository;
+        this.orderHistoryService = orderHistoryService;
     }
 
     @Override
@@ -75,6 +79,7 @@ public class OrderServiceImpl implements OrderService {
         // Lấy danh sách item của order
         List<ItemDto> orderItems = orderRepository.getOrderItemsByOrderId(orderId);
         order.setOrderItems(orderItems);
+        order.setOrderHistory(orderHistoryService.getHistory((int) orderId));
         return order;
     }
 
@@ -109,6 +114,7 @@ public class OrderServiceImpl implements OrderService {
         if (paid && paymentRepository.markRefundPendingByOrderId(orderId) < 1) {
             throw new IllegalStateException("Không tìm thấy giao dịch đã thanh toán để chuyển trạng thái hoàn tiền");
         }
+        orderHistoryService.record(orderId, paid ? "ORDER_CANCELLED_REFUND" : "ORDER_CANCELLED", order.getOrder_status().name(), actorUsername, actorRole, paid ? "Đơn hàng đã hủy, chờ hoàn tiền" : "Đơn hàng đã bị hủy", "Lý do: " + (notecancel == null ? "Không có lý do" : notecancel));
     }
 
     @Override
@@ -238,6 +244,8 @@ public class OrderServiceImpl implements OrderService {
         for (OrderItem orderItem : orderItems) {
             orderItem.setOrder_id(order.getId());
         }
+
+        orderHistoryService.record(order.getId(), "ORDER_PLACED", "WAIT_PAYMENT", buyerUsername, "BUYER", "Đơn hàng đã được đặt", "Buyer tạo đơn hàng thành công");
 
         int insertedItems = orderItemRepository.insertorderitems(orderItems);
         if (insertedItems <= 0) {
