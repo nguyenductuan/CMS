@@ -3,6 +3,7 @@ package com.vt.cms.service;
 import com.vt.cms.model.entity.OrderTracking;
 import com.vt.cms.model.repository.OrderTrackingRepository;
 import com.vt.cms.model.enums.RoleAction;
+import com.vt.cms.model.enums.OrderTrackingStatus;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import java.time.LocalDateTime;
@@ -61,30 +62,47 @@ public class OrderHistoryService {
         List<OrderTracking> history = repository.findByOrderId(orderId);
         for (OrderTracking event : history) {
             event.setStatusName(resolveStatusName(event));
-            event.setRoleAction(getRoleAction(event));
+            event.setRoleAction(getRoleAction(toOrderTrackingStatus(event.getEventCode())));
         }
         return history;
     }
 
     /**
-     * Xác định nhóm tác nhân thực hiện hành động trong lịch sử đơn hàng.
-     * Mã tracking của đơn vị vận chuyển được ưu tiên nhận diện là SHIPPING_UNIT.
-     * Các sự kiện khác sử dụng actorRole đã được ghi nhận; mặc định SYSTEM.
+     * Xác định nhóm tác nhân theo mã trạng thái vận chuyển.
+     * Các mã của đơn vị vận chuyển được phân loại là SHIPPING_UNIT;
+     * các mã còn lại mặc định là SYSTEM, theo quy tắc nghiệp vụ hiện tại.
      */
-    public RoleAction getRoleAction(OrderTracking event) {
-        if (event == null) return RoleAction.SYSTEM;
-        String eventCode = event.getEventCode();
-        if (eventCode != null && SHIPPING_ACTION_MAP.containsKey(eventCode.trim().toUpperCase())) {
+    public RoleAction getRoleAction(OrderTrackingStatus status) {
+        if (status == OrderTrackingStatus.S103
+                || status == OrderTrackingStatus.S104
+                || status == OrderTrackingStatus.S320
+                || status == OrderTrackingStatus.S400
+                || status == OrderTrackingStatus.S410
+                || status == OrderTrackingStatus.S500
+                || status == OrderTrackingStatus.S506
+                || status == OrderTrackingStatus.S507
+                || status == OrderTrackingStatus.S508
+                || status == OrderTrackingStatus.S509) {
             return RoleAction.SHIPPING_UNIT;
         }
-        String actorRole = event.getActorRole();
-        if (actorRole == null || actorRole.isBlank()) return RoleAction.SYSTEM;
+        return RoleAction.SYSTEM;
+    }
+
+    /**
+     * Chuyển mã sự kiện dạng String trong database sang enum.
+     * Các sự kiện nghiệp vụ không phải mã vận chuyển trả về null.
+     */
+    private OrderTrackingStatus toOrderTrackingStatus(String eventCode) {
+        if (eventCode == null || eventCode.isBlank()) {
+            return null;
+        }
         try {
-            return RoleAction.valueOf(actorRole.trim().toUpperCase());
+            return OrderTrackingStatus.valueOf("S" + eventCode.trim());
         } catch (IllegalArgumentException ex) {
-            return RoleAction.SYSTEM;
+            return null;
         }
     }
+
     /**
      * Lấy tên trạng thái hiển thị cho một dòng lịch sử.
      * Ưu tiên mô tả mã vận chuyển, sau đó đến tiêu đề sự kiện và trạng thái đơn hàng.
