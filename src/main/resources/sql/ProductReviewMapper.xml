@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.vt.cms.model.repository.ProductReviewRepository">
+    <resultMap id="ReviewMap" type="com.vt.cms.model.entity.ProductReview">
+        <id column="id" property="id"/>
+        <result column="order_id" property="orderId"/>
+        <result column="product_id" property="productId"/>
+        <result column="sku_id" property="skuId"/>
+        <result column="sku_code" property="skuCode"/>
+        <result column="user_id" property="userId"/>
+        <result column="username" property="username"/>
+        <result column="rating" property="rating"/>
+        <result column="content" property="content"/>
+        <result column="images_json" property="imagesJson"/>
+        <result column="videos_json" property="videosJson"/>
+        <result column="created_at" property="createdAt"/>
+    </resultMap>
+
+    <select id="isEligibleOrderItem" resultType="int">
+        SELECT COUNT(1)
+        FROM orders o
+        INNER JOIN order_item oi ON oi.order_id = o.id
+        INNER JOIN product_sku sku ON sku.id = oi.sku_id AND sku.product_id = oi.product_id
+        WHERE o.id = #{orderId}
+          AND o.created_by = #{username}
+          AND o.order_status IN ('DELIVERED', 'RECEIVED', 'COMPLETED')
+          AND oi.product_id = #{productId}
+          AND oi.sku_id = #{skuId}
+    </select>
+
+    <select id="countByOrderAndSku" resultType="int">
+        SELECT COUNT(1) FROM product_review
+        WHERE order_id = #{orderId} AND sku_id = #{skuId}
+    </select>
+
+    <insert id="insertReview" parameterType="com.vt.cms.model.entity.ProductReview"
+            useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO product_review
+        (order_id, product_id, sku_id, user_id, username, rating, content, images_json, videos_json, created_at)
+        VALUES
+        (#{orderId}, #{productId}, #{skuId}, #{userId}, #{username}, #{rating}, #{content},
+         #{imagesJson}, #{videosJson}, #{createdAt})
+    </insert>
+
+    <select id="findByProductId" resultMap="ReviewMap">
+        SELECT r.id, r.order_id, r.product_id, r.sku_id, s.sku_code,
+               r.user_id, r.username, r.rating, r.content,
+               r.images_json, r.videos_json, r.created_at
+        FROM product_review r
+        LEFT JOIN product_sku s ON s.id = r.sku_id
+        WHERE r.product_id = #{productId}
+        ORDER BY r.created_at DESC
+    </select>
+
+    <select id="averageRating" resultType="java.math.BigDecimal">
+        SELECT AVG(rating) FROM product_review WHERE product_id = #{productId}
+    </select>
+</mapper>
