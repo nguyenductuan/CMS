@@ -26,6 +26,8 @@ public class Order {
     private String warehouseCode;
     private String shippingProvider;
     private String trackingNumber;
+    /** Mã trạng thái vận chuyển đối tác, tách biệt với trạng thái nghiệp vụ order_status. */
+    private String shippingStatusCode;
     private String shipperCode;
     private String shipperName;
     private String shipperPhone;
