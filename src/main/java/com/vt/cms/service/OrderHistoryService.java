@@ -23,6 +23,7 @@ public class OrderHistoryService {
             Map.entry("103", "Đơn vị vận chuyển lấy hàng thành công"),
             Map.entry("104", "Đơn vị vận chuyển lấy hàng thành công"),
             Map.entry("101", "Đơn vị vận chuyển lấy hàng thất bại"),
+            Map.entry("200", "Đơn vị vận chuyển đang giao hàng"),
             Map.entry("320", "Đơn vị vận chuyển đang giao hàng"),
             Map.entry("400", "Đơn vị vận chuyển đang giao hàng"),
             Map.entry("410", "Đơn vị vận chuyển đang giao hàng"),
