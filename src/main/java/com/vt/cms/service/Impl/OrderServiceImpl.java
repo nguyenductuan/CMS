@@ -114,7 +114,7 @@ public class OrderServiceImpl implements OrderService {
         if (paid && paymentRepository.markRefundPendingByOrderId(orderId) < 1) {
             throw new IllegalStateException("Không tìm thấy giao dịch đã thanh toán để chuyển trạng thái hoàn tiền");
         }
-        orderHistoryService.record(orderId, paid ? "ORDER_CANCELLED_REFUND" : "ORDER_CANCELLED", order.getOrder_status().name(), actorUsername, actorRole, paid ? "Đơn hàng đã hủy, chờ hoàn tiền" : "Đơn hàng đã bị hủy", "Lý do: " + (notecancel == null ? "Không có lý do" : notecancel));
+        orderHistoryService.record(orderId, paid ? "006" : "006", order.getOrder_status().name(), actorUsername, actorRole, paid ? "Đơn hàng đã hủy, chờ hoàn tiền" : "Đơn hàng đã bị hủy", "Lý do: " + (notecancel == null ? "Không có lý do" : notecancel));
     }
 
     @Override
@@ -245,7 +245,7 @@ public class OrderServiceImpl implements OrderService {
             orderItem.setOrder_id(order.getId());
         }
 
-        orderHistoryService.record(order.getId(), "ORDER_PLACED", "WAIT_PAYMENT", buyerUsername, "BUYER", "Đơn hàng đã được đặt", "Buyer tạo đơn hàng thành công");
+        orderHistoryService.record(order.getId(), "001", "WAIT_PAYMENT", buyerUsername, "BUYER", "Đơn hàng đã được đặt", "Buyer tạo đơn hàng thành công");
 
         int insertedItems = orderItemRepository.insertorderitems(orderItems);
         if (insertedItems <= 0) {
