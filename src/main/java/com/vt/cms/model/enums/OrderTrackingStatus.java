@@ -17,5 +17,9 @@ public enum OrderTrackingStatus {
     S506,
     S507,
     S508,
-    S509
+    S509,
+    RETURN_PICKUP_SUCCESS,
+    RETURN_PICKUP_FAILED,
+    RETURN_DELIVERY_SUCCESS,
+    RETURN_DELIVERY_FAILED
 }
