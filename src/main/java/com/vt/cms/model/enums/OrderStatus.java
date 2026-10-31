@@ -12,6 +12,10 @@ public enum OrderStatus {
     CANCELLED("CANCELLED", "Đã hủy"),
     REFUND_PENDING("REFUND_PENDING", "Chờ hoàn tiền"),
     RETURN_REQUESTED("RETURN_REQUESTED", "Đang yêu cầu trả hàng"),
+    PENDING_SELLER_REVIEW("PENDING_SELLER_REVIEW", "Chờ Seller xét duyệt"),
+    PENDING_ADMIN_REVIEW("PENDING_ADMIN_REVIEW", "Chờ Admin xét duyệt"),
+    RETURN_APPROVED("RETURN_APPROVED", "Đã duyệt trả hàng"),
+    RETURN_REJECTED("RETURN_REJECTED", "Từ chối trả hàng"),
     FAILED("FAILED", "Thất bại");
 
 
