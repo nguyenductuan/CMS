@@ -1,5 +1,7 @@
 package com.vt.cms.service;
 
+
+import com.vt.cms.Exception.BusinessException;import com.vt.cms.model.enums.MessageCode;
 import com.vt.cms.model.entity.OrderExportHistory;
 import com.vt.cms.model.repository.OrderExportRepository;
 import com.vt.cms.model.entity.OrderExportHistory;
@@ -45,8 +47,8 @@ public class OrderExportService {
         List<String> statuses = statusesForTab(normalizedTab);
         String sheetName = normalizedTab.replaceAll("[\\\\/?*\\[\\]:]", "_");
         if (sheetName.length() > 31) sheetName = sheetName.substring(0, 31);
-        if ((from == null) != (to == null)) throw new IllegalArgumentException("Cần truyền cả fromDate và toDate");
-        if (from != null && to.isBefore(from)) throw new IllegalArgumentException("toDate phải lớn hơn hoặc bằng fromDate");
+        if ((from == null) != (to == null)) throw new BusinessException(MessageCode.CAN_TRUYEN_CA_FROMDATE_VA_TODATE);
+        if (from != null && to.isBefore(from)) throw new BusinessException(MessageCode.TODATE_PHAI_LON_HON_HOAC_BANG_FROMDATE);
 
         LocalDateTime fromTime = from == null ? null : from.atStartOfDay();
         LocalDateTime toExclusive = to == null ? null : to.plusDays(1).atStartOfDay();
