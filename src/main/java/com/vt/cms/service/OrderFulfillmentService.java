@@ -89,6 +89,31 @@ public class OrderFulfillmentService {
         log.info("Carrier reports delivery successful. orderId={}, trackingNumber={}", orderId, trackingNumber);
     }
 
+    /**
+     * Ghi nhận trạng thái vận chuyển do đơn vị vận chuyển gửi về.
+     * Hỗ trợ mã 101, 103, 104, 320, 410, 400, 500, 506, 507, 508, 509 và 505.
+     */
+    @Transactional(rollbackFor = Exception.class)
+    public void recordCarrierTrackingEvent(Integer orderId, String code, String description) {
+        validateOrderId(orderId);
+        java.util.Map<String, String> titles = java.util.Map.ofEntries(
+                java.util.Map.entry("101", "Đơn vị vận chuyển lấy hàng thất bại"),
+                java.util.Map.entry("103", "Đơn vị vận chuyển lấy hàng thành công"),
+                java.util.Map.entry("104", "Đơn vị vận chuyển đã nhận hàng"),
+                java.util.Map.entry("320", "Đơn hàng đang được vận chuyển"),
+                java.util.Map.entry("410", "Đơn hàng đang giao"),
+                java.util.Map.entry("400", "Đơn hàng đang giao"),
+                java.util.Map.entry("500", "Đơn hàng đang giao"),
+                java.util.Map.entry("506", "Đơn hàng đang giao"),
+                java.util.Map.entry("507", "Đơn hàng đang giao"),
+                java.util.Map.entry("508", "Đơn hàng đang giao"),
+                java.util.Map.entry("509", "Đơn hàng đang giao"),
+                java.util.Map.entry("505", "Đơn hàng giao không thành công"));
+        String title = titles.get(code);
+        if (title == null) throw new IllegalArgumentException("Mã trạng thái vận chuyển không được hỗ trợ");
+        orderHistoryService.record(orderId, code, code, "CARRIER", "CARRIER", title, description);
+    }
+
     @Transactional(rollbackFor = Exception.class)
     /**
      * Xác nhận nghiệp vụ confirm received. Các tham số và kết quả tuân theo chữ ký phương thức.
