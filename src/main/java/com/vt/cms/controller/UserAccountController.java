@@ -17,6 +17,12 @@ import org.springframework.web.bind.annotation.*;
 public class UserAccountController {
     private final UserAccountService userAccountService;
 
+    /**
+     * Tạo mới và lưu dữ liệu nghiệp vụ.
+     * @param request Tham số phục vụ xử lý createAccount.
+     * @param httpRequest Tham số phục vụ xử lý createAccount.
+     * @return Kết quả xử lý của hàm.
+     */
     @PostMapping("/create")
     public ResponseEntity<BaseResponse<User>> createAccount(@Valid @RequestBody CreateUserRequest request,
                                                               HttpServletRequest httpRequest) {
