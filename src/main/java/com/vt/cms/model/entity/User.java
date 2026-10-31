@@ -1,5 +1,6 @@
 package com.vt.cms.model.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
 
@@ -7,8 +8,12 @@ import lombok.Data;
 public class User {
     @JsonProperty("id")
     private Integer id;
-    @JsonProperty ("name")
+    @JsonProperty("name")
     private String name;
     @JsonProperty("age")
     private Integer age;
+    private String username;
+    @JsonIgnore
+    private String password;
+    private String role;
 }
