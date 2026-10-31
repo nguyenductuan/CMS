@@ -29,7 +29,9 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             "/order",
             "/v1/product/review",
             "/v1/order/",
-            "/v1/buyer/profile"
+            "/v1/buyer/profile",
+            "/order/export",
+            "/order/export-history"
     );
 
     private final JwtService jwtService;
@@ -62,6 +64,10 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             }
 
             String path = request.getServletPath();
+            if (("/order/export".equals(path) || "/order/export-history".equals(path)) && !"ADMIN".equals(role)) {
+                forbidden(response, "Chỉ ADMIN được xuất và xem lịch sử báo cáo đơn hàng");
+                return;
+            }
             if ("/v1/user/create".equals(path) && !"ADMIN".equals(role)) {
                 forbidden(response, "Chỉ ADMIN được tạo tài khoản");
                 return;
