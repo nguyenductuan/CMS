@@ -24,6 +24,7 @@ public class Product {
     private String cancelAt;
     private  String cancelBy;
     private  String approveBy;
+    private String approveByRole;
     private  LocalDateTime approvedTime;
 }
 
