@@ -15,6 +15,7 @@ public enum OrderStatus {
     PENDING_SELLER_REVIEW("PENDING_SELLER_REVIEW", "Chờ Seller xét duyệt"),
     PENDING_ADMIN_REVIEW("PENDING_ADMIN_REVIEW", "Chờ Admin xét duyệt"),
     WAITING_FOR_RETURN_SHIPMENT("WAITING_FOR_RETURN_SHIPMENT", "Chờ giao hàng hoàn trả"),
+    PENDING_SELLER_METHOD_SELECTION("PENDING_SELLER_METHOD_SELECTION", "Chờ Seller chọn phương thức xử lý"),
     RETURN_APPROVED("RETURN_APPROVED", "Đã duyệt trả hàng"),
     RETURN_REJECTED("RETURN_REJECTED", "Từ chối trả hàng"),
     FAILED("FAILED", "Thất bại");
