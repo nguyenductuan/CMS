@@ -63,8 +63,7 @@ public class OrderFulfillmentService {
             log.warn("Dispatch rejected due to concurrent status change. orderId={}", orderId);
             throw new IllegalStateException("Không thể bàn giao vận chuyển: trạng thái đơn hàng đã thay đổi");
         }
-        orderRepository.updateShippingStatusCode(orderId, "500", LocalDateTime.now(), "SYSTEM");
-        orderHistoryService.record(orderId, "500", "SHIPPING", "SYSTEM", "SYSTEM",
+        orderHistoryService.record(orderId, "SHIPPER_ASSIGNED", "SHIPPING", "SYSTEM", "SYSTEM",
                 "Phân công giao hàng cho shipper thành công",
                 "Đơn vị vận chuyển: " + assignment.getProvider() + "; shipper: " + assignment.getShipperName()
                         + "; mã vận đơn: " + assignment.getTrackingNumber());
@@ -89,8 +88,8 @@ public class OrderFulfillmentService {
             log.warn("Delivery callback rejected. orderId={}, trackingNumber={}", orderId, trackingNumber);
             throw new IllegalStateException("Không tìm thấy vận đơn đang giao hoặc trạng thái không hợp lệ");
         }
-        orderRepository.updateShippingStatusCode(orderId, "501", LocalDateTime.now(), "MOCK-3PL");
-        orderHistoryService.record(orderId, "501", "DELIVERED", "MOCK-3PL", "CARRIER", "Đơn vị vận chuyển giao hàng thành công", "Mã vận đơn: " + trackingNumber);
+        orderRepository.updateShippingStatusCode(orderId, "CARRIER_DELIVERY_SUCCESS", LocalDateTime.now(), "MOCK-3PL");
+        orderHistoryService.record(orderId, "CARRIER_DELIVERY_SUCCESS", "DELIVERED", "MOCK-3PL", "CARRIER", "Giao hàng thành công theo callback giao hàng", "Mã vận đơn: " + trackingNumber);
         log.info("Carrier reports delivery successful. orderId={}, trackingNumber={}", orderId, trackingNumber);
     }
 
@@ -103,13 +102,12 @@ public class OrderFulfillmentService {
         validateOrderId(orderId);
         java.util.Map<String, String> titles = java.util.Map.ofEntries(
                 java.util.Map.entry("101", "Đơn vị vận chuyển lấy hàng thất bại"),
-                java.util.Map.entry("103", "Buyer thực hiện mua hàng"),
-                java.util.Map.entry("104", "Đơn hàng được tạo thành công"),
-                java.util.Map.entry("200", "Đơn hàng đang giao"),
-                java.util.Map.entry("500", "Phân công giao hàng cho shipper thành công"),
+                java.util.Map.entry("103", "Đơn vị vận chuyển lấy hàng thành công"),
+                java.util.Map.entry("104", "Đơn vị vận chuyển đã nhận hàng"),
                 java.util.Map.entry("320", "Đơn hàng đang được vận chuyển"),
                 java.util.Map.entry("410", "Đơn hàng đang giao"),
                 java.util.Map.entry("400", "Đơn hàng đang giao"),
+                java.util.Map.entry("500", "Đơn hàng đang vận chuyển/đang giao"),
                 java.util.Map.entry("506", "Đơn hàng đang giao"),
                 java.util.Map.entry("507", "Đơn hàng đang giao"),
                 java.util.Map.entry("508", "Đơn hàng đang giao"),
@@ -141,7 +139,7 @@ public class OrderFulfillmentService {
             log.warn("Receive confirmation rejected. orderId={}, customerId={}", orderId, customerId);
             throw new IllegalStateException("Chỉ có thể xác nhận nhận hàng khi shipper đã giao thành công");
         }
-        orderHistoryService.record(orderId, "501", "COMPLETED", customerId, "BUYER", "Đơn hàng đã giao thành công", "Buyer đã nhấn nút Đã nhận hàng");
+        orderHistoryService.record(orderId, "501", "COMPLETED", customerId, "BUYER", "Buyer nhấn Đã nhận hàng", "Buyer xác nhận đã nhận được hàng");
         log.info("Customer confirmed order received; order completed. orderId={}, customerId={}", orderId, customerId);
     }
 
