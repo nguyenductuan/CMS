@@ -14,5 +14,9 @@ public class OrderTracking {
     private String statusName;
     private String title;
     private String description;
+    private String actor;
+    private String actorRole;
+    private String eventCode;
+    private java.time.LocalDateTime createdAt;
 
 }
