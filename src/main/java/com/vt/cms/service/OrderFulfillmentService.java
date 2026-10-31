@@ -33,7 +33,7 @@ public class OrderFulfillmentService {
         requireStatus(order, OrderStatus.PAID);
 
         int rows = orderRepository.selectWarehouse(orderId, request.getWarehouseCode().trim(),
-                LocalDateTime.now(), "SYSTEM");
+                LocalDateTime.now(), actor);
         if (rows != 1) {
             log.warn("Warehouse selection rejected due to concurrent status change. orderId={}", orderId);
             throw new IllegalStateException("Không thể chọn kho: trạng thái đơn hàng đã thay đổi");
@@ -63,7 +63,7 @@ public class OrderFulfillmentService {
             log.warn("Dispatch rejected due to concurrent status change. orderId={}", orderId);
             throw new IllegalStateException("Không thể bàn giao vận chuyển: trạng thái đơn hàng đã thay đổi");
         }
-        orderHistoryService.record(orderId, "CARRIER_PICKUP_SUCCESS", "SHIPPING", assignment.getProvider(), "CARRIER", "Đơn vị vận chuyển đã lấy hàng thành công", "Mã vận đơn: " + assignment.getTrackingNumber());
+        orderHistoryService.record(orderId, "103", "SHIPPING", assignment.getProvider(), "CARRIER", "Đơn vị vận chuyển đã lấy hàng thành công", "Mã vận đơn: " + assignment.getTrackingNumber());
         log.info("Order dispatched. orderId={}, provider={}, trackingNumber={}, shipperCode={}",
                 orderId, assignment.getProvider(), assignment.getTrackingNumber(), assignment.getShipperCode());
         return assignment;
