@@ -4,6 +4,7 @@ import com.vt.cms.model.enums.TrackingStatus;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import lombok.Data;
+import com.fasterxml.jackson.annotation.JsonFormat;
 
 @Data
 public class OrderTracking {
@@ -17,6 +18,7 @@ public class OrderTracking {
     private String actor;
     private String actorRole;
     private String eventCode;
+    @JsonFormat(pattern = "dd/MM/yyyy HH:mm")
     private java.time.LocalDateTime createdAt;
 
 }
