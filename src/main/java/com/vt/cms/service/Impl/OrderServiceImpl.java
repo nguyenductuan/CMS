@@ -12,6 +12,7 @@ import com.vt.cms.model.enums.OrderStatus;
 import com.vt.cms.model.repository.OrderItemRepository;
 import com.vt.cms.model.repository.OrderRepository;
 import com.vt.cms.model.repository.ProductRepository;
+import com.vt.cms.model.repository.PaymentRepository;
 import com.vt.cms.model.resp.BaseResponse;
 
 import com.vt.cms.model.resp.OrderCreateResponse;
@@ -40,6 +41,7 @@ public class OrderServiceImpl implements OrderService {
     private final InventoryService inventoryService;
     private final OrderPricingService orderPricingService;
     private final ShippingFeeService shippingFeeService;
+    private final PaymentRepository paymentRepository;
 
     /**
      * Thực hiện xử lý nghiệp vụ order service impl. Các tham số và kết quả tuân theo chữ ký phương thức.
@@ -50,13 +52,15 @@ public class OrderServiceImpl implements OrderService {
             OrderItemRepository orderItemRepository,
             InventoryService inventoryService,
             OrderPricingService orderPricingService,
-            ShippingFeeService shippingFeeService) {
+            ShippingFeeService shippingFeeService,
+            PaymentRepository paymentRepository) {
         this.orderRepository = orderRepository;
         this.productRepository = productRepository;
         this.orderItemRepository = orderItemRepository;
         this.inventoryService = inventoryService;
         this.orderPricingService = orderPricingService;
         this.shippingFeeService = shippingFeeService;
+        this.paymentRepository = paymentRepository;
     }
 
     @Override
@@ -79,16 +83,31 @@ public class OrderServiceImpl implements OrderService {
      * Hủy nghiệp vụ cancel order. Các tham số và kết quả tuân theo chữ ký phương thức.
      */
     @Transactional
-    public void cancelOrder(int orderId, String notecancel) {
+    public void cancelOrder(int orderId, String notecancel, String actorUsername, String actorRole) {
+        if (!"ADMIN".equals(actorRole) && !"SELLER".equals(actorRole)) {
+            throw new SecurityException("Chỉ ADMIN hoặc SELLER được hủy đơn hàng");
+        }
+        Order current = orderRepository.getorderbyIdForUpdate(orderId);
+        if (current == null) throw new IllegalArgumentException("Không tìm thấy đơn hàng");
+        OrderStatus currentStatus = current.getOrder_status();
+        if (currentStatus != OrderStatus.WAIT_PAYMENT && currentStatus != OrderStatus.PAID) {
+            throw new IllegalStateException("Không thể hủy đơn hàng ở trạng thái hiện tại");
+        }
+        boolean paid = currentStatus == OrderStatus.PAID;
+        LocalDateTime now = LocalDateTime.now();
         Order order = new Order();
         order.setId(orderId);
-        order.setOrder_status(OrderStatus.CANCELLED);
+        order.setOrder_status(paid ? OrderStatus.REFUND_PENDING : OrderStatus.CANCELLED);
         order.setNotecancel(notecancel);
-        order.setUpdatedAt(LocalDateTime.now());
-        order.setCancelled_by("SYSTEM");
-        int updatedRows = orderRepository.cancelOrder(order);
-        if (updatedRows != 1) {
-            throw new IllegalStateException("Không thể hủy đơn hàng ở trạng thái hiện tại hoặc không tìm thấy đơn hàng");
+        order.setCancel_at(now);
+        order.setUpdatedAt(now);
+        order.setUpdated_by(actorUsername);
+        order.setCancelled_by(actorUsername);
+        if (orderRepository.cancelOrder(order) != 1) {
+            throw new IllegalStateException("Đơn hàng đã thay đổi trạng thái, không thể hủy");
+        }
+        if (paid && paymentRepository.markRefundPendingByOrderId(orderId) < 1) {
+            throw new IllegalStateException("Không tìm thấy giao dịch đã thanh toán để chuyển trạng thái hoàn tiền");
         }
     }
 
