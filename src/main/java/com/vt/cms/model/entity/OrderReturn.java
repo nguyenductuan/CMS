@@ -21,6 +21,9 @@ public class OrderReturn {
     private String imagesJson;
     private String videosJson;
     private String status;
+    private String returnMethod;
+    private LocalDateTime methodSelectionDeadline;
+    private LocalDateTime methodSelectedAt;
     private String sellerReviewer;
     private String adminReviewer;
     private String sellerNote;
