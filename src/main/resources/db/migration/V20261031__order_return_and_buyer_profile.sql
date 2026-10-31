@@ -32,6 +32,3 @@ ALTER TABLE user
     ADD COLUMN bank_name VARCHAR(120) NULL,
     ADD COLUMN bank_account_number VARCHAR(50) NULL,
     ADD COLUMN bank_account_holder VARCHAR(150) NULL;
-
-ALTER TABLE orders
-    ADD COLUMN sub_order_status VARCHAR(40) NULL;
