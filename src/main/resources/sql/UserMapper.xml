@@ -18,7 +18,7 @@
     </resultMap>
 
     <select id="getUser" resultMap="UserResultMap">
-        SELECT id, name, age, username, role, phone, email, address, bank_name, bank_account_number, bank_account_holder FROM user
+        SELECT id, name, age, username, role FROM user
     </select>
 
     <select id="detailUser" resultMap="UserResultMap">
