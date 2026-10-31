@@ -11,6 +11,7 @@ public enum OrderStatus {
     COMPLETED("COMPLETED", "Đã hoàn thành"),
     CANCELLED("CANCELLED", "Đã hủy"),
     REFUND_PENDING("REFUND_PENDING", "Chờ hoàn tiền"),
+    RETURN_REQUESTED("RETURN_REQUESTED", "Đang yêu cầu trả hàng"),
     FAILED("FAILED", "Thất bại");
 
 
