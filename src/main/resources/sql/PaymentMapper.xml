@@ -42,4 +42,8 @@
         WHERE transactionCode = #{transactionCode}
           AND UPPER(status) = 'PENDING'
     </update>
+    <update id="markRefundPendingByOrderId">
+        UPDATE payment SET status = 'REFUND_PENDING'
+        WHERE order_id = #{orderId} AND UPPER(status) = 'SUCCESS'
+    </update>
 </mapper>
