@@ -112,7 +112,30 @@ public enum MessageCode {
     SKU_KHONG_HOP_LE("SKU_KHONG_HOP_LE", "SKU không hợp lệ"),
     ORDER_NOT_FOUND("ORDER_NOT_FOUND", "Không tìm thấy đơn hàng:"),
     INVALID_EXPORT_TAB("INVALID_EXPORT_TAB", "Tên tab không được hỗ trợ:"),
-    CAMPAIGN_NOT_FOUND("CAMPAIGN_NOT_FOUND", "Không tìm thấy chiến dịch:");
+    CAMPAIGN_NOT_FOUND("CAMPAIGN_NOT_FOUND", "Không tìm thấy chiến dịch:"),
+    REQUEST_IS_REQUIRED("REQUEST_IS_REQUIRED", "Request is required"),
+    TEN_CHIEN_DICH_KHONG_DUOC_DE_TRONG("TEN_CHIEN_DICH_KHONG_DUOC_DE_TRONG", "Tên chiến dịch không được để trống"),
+    TONG_TON_KHO_CHIEN_DICH_PHAI_0("TONG_TON_KHO_CHIEN_DICH_PHAI_0", "Tổng tồn kho chiến dịch phải >= 0"),
+    START_TIME_AND_END_TIME_ARE_REQUIRED("START_TIME_AND_END_TIME_ARE_REQUIRED", "Start time and end time are required"),
+    START_TIME_MUST_BE_BEFORE_OR_EQUAL_TO_END_TIME("START_TIME_MUST_BE_BEFORE_OR_EQUAL_TO_END_TIME", "Start time must be before or equal to end time"),
+    CAMPAIGN_MUST_CONTAIN_AT_LEAST_ONE_PRODUCT("CAMPAIGN_MUST_CONTAIN_AT_LEAST_ONE_PRODUCT", "Campaign must contain at least one product"),
+    PRODUCT_ID_MUST_BE_VALID("PRODUCT_ID_MUST_BE_VALID", "Product ID must be valid"),
+    EACH_CAMPAIGN_PRODUCT_MUST_CONTAIN_AT_LEAST_ONE_("EACH_CAMPAIGN_PRODUCT_MUST_CONTAIN_AT_LEAST_ONE_", "Each campaign product must contain at least one SKU"),
+    SKU_ID_IS_REQUIRED("SKU_ID_IS_REQUIRED", "SKU ID is required"),
+    DUPLICATE_SKU_ID("DUPLICATE_SKU_ID", "Duplicate SKU ID: "),
+    DISCOUNT_IS_REQUIRED("DISCOUNT_IS_REQUIRED", "Discount is required"),
+    DISCOUNT_MUST_BE_AN_INTEGER("DISCOUNT_MUST_BE_AN_INTEGER", "Discount must be an integer"),
+    DISCOUNT_MUST_NOT_EXCEED_100("DISCOUNT_MUST_NOT_EXCEED_100", "Discount must not exceed 100%"),
+    THONG_TIN_SAN_PHAM_KHONG_DUOC_DE_TRONG("THONG_TIN_SAN_PHAM_KHONG_DUOC_DE_TRONG", "Thông tin sản phẩm không được để trống"),
+    TEN_SAN_PHAM_KHONG_DUOC_DE_TRONG("TEN_SAN_PHAM_KHONG_DUOC_DE_TRONG", "Tên sản phẩm không được để trống"),
+    SAN_PHAM_PHAI_CO_IT_NHAT_MOT_SKU("SAN_PHAM_PHAI_CO_IT_NHAT_MOT_SKU", "Sản phẩm phải có ít nhất một SKU"),
+    THONG_TIN_SKU_KHONG_DUOC_DE_TRONG("THONG_TIN_SKU_KHONG_DUOC_DE_TRONG", "Thông tin SKU không được để trống"),
+    MA_SKU_BI_TRUNG_TRONG_REQUEST("MA_SKU_BI_TRUNG_TRONG_REQUEST", "Mã SKU bị trùng trong request: "),
+    GIA_SKU_PHAI_LON_HON_0("GIA_SKU_PHAI_LON_HON_0", "Giá SKU phải lớn hơn 0: "),
+    TON_KHO_SKU_PHAI_0("TON_KHO_SKU_PHAI_0", "Tồn kho SKU phải >= 0: "),
+    ANH_SKU_KHONG_DUOC_DE_TRONG("ANH_SKU_KHONG_DUOC_DE_TRONG", "Ảnh SKU không được để trống: "),
+    THIEU("THIEU", "Thiếu "),
+    DU_LIEU_SAN_PHAM_KHONG_THE_CHUYEN_DOI_SANG_JSON("DU_LIEU_SAN_PHAM_KHONG_THE_CHUYEN_DOI_SANG_JSON", "Dữ liệu sản phẩm không thể chuyển đổi sang JSON");
 
     private final String code;
     private final String message;
