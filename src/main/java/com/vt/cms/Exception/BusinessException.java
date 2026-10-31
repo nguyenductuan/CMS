@@ -14,6 +14,11 @@ public class BusinessException extends RuntimeException {
         this.code = messageCode.getCode();
     }
 
+    public BusinessException(MessageCode messageCode, Throwable cause) {
+        super(messageCode.getMessage(), cause);
+        this.code = messageCode.getCode();
+    }
+
     /**
      * Lấy dữ liệu get code. Tham số và kết quả tuân theo chữ ký phương thức.
      */
