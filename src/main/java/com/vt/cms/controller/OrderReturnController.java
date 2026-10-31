@@ -25,9 +25,16 @@ public class OrderReturnController {
                 (String) http.getAttribute(JwtAuthenticationFilter.USERNAME_ATTRIBUTE)));
     }
 
+    @GetMapping("/return/pending")
+    public ResponseEntity<java.util.List<OrderReturnResponse>> getPending(HttpServletRequest http) {
+        return ResponseEntity.ok(service.getPending((String) http.getAttribute(JwtAuthenticationFilter.ROLE_ATTRIBUTE)));
+    }
+
     @GetMapping("/return/{returnId}")
-    public ResponseEntity<OrderReturnResponse> getReturn(@PathVariable Integer returnId) {
-        return ResponseEntity.ok(service.getReturn(returnId));
+    public ResponseEntity<OrderReturnResponse> getReturn(@PathVariable Integer returnId, HttpServletRequest http) {
+        return ResponseEntity.ok(service.getReturn(returnId,
+                (String) http.getAttribute(JwtAuthenticationFilter.USERNAME_ATTRIBUTE),
+                (String) http.getAttribute(JwtAuthenticationFilter.ROLE_ATTRIBUTE)));
     }
 
     @PostMapping("/return/{returnId}/seller-review")
