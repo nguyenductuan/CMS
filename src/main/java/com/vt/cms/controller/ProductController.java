@@ -40,7 +40,9 @@ public class ProductController {
      */
     public ResponseEntity<APIRessponse> approvedProduct(@PathVariable Integer product_id, HttpServletRequest request){
         log.info("Request approve product. productId={}", product_id);
-        productService.editstatusproduct(product_id, (String) request.getAttribute(JwtAuthenticationFilter.USERNAME_ATTRIBUTE));
+        productService.editstatusproduct(product_id,
+                (String) request.getAttribute(JwtAuthenticationFilter.USERNAME_ATTRIBUTE),
+                (String) request.getAttribute(JwtAuthenticationFilter.ROLE_ATTRIBUTE));
         return ResponseEntity.ok(new APIRessponse(200,"Duyệt sản phẩm thành công"));
     }
     // Từ chối sản phẩm đang chờ duyệt
