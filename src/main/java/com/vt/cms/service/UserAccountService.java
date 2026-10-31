@@ -1,5 +1,7 @@
 package com.vt.cms.service;
 
+
+import com.vt.cms.Exception.BusinessException;import com.vt.cms.model.enums.MessageCode;
 import com.vt.cms.model.dto.CreateUserRequest;
 import com.vt.cms.model.entity.User;
 import com.vt.cms.model.repository.UserRepository;
@@ -20,7 +22,7 @@ public class UserAccountService {
     public User createAccount(CreateUserRequest request) {
         String username = request.getUsername().trim();
         if (userRepository.findByUsername(username) != null) {
-            throw new IllegalArgumentException("Tên đăng nhập đã tồn tại");
+            throw new BusinessException(MessageCode.TEN_DANG_NHAP_DA_TON_TAI);
         }
 
         User user = new User();
