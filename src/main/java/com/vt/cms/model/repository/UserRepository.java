@@ -12,4 +12,5 @@ public interface UserRepository {
     int createUser(User user);
     User detailUser(Integer id);
     User findByUsername(@Param("username") String username);
+    int updateBuyerProfile(User user);
 }
