@@ -51,7 +51,7 @@
     </select>
 
     <update id="setReturnRequested">
-        UPDATE orders SET order_status='RETURN_REQUESTED', sub_order_status='PENDING_SELLER_REVIEW', updated_at=#{updatedAt}, updated_by=#{updatedBy}
+        UPDATE orders SET order_status='RETURN_REQUESTED', sub_order_status=#{subStatus}, updated_at=#{updatedAt}, updated_by=#{updatedBy}
         WHERE id=#{orderId} AND created_by=#{buyerUsername} AND order_status IN ('DELIVERED','RECEIVED','COMPLETED')
     </update>
     <update id="setReturnRejected">
