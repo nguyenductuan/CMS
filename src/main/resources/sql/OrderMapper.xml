@@ -55,7 +55,7 @@
         WHERE id=#{orderId} AND created_by=#{buyerUsername} AND order_status IN ('DELIVERED','RECEIVED','COMPLETED')
     </update>
     <update id="setReturnRejected">
-        UPDATE orders SET order_status='DELIVERED', sub_order_status='REJECTED', updated_at=#{updatedAt}, updated_by=#{updatedBy}
+        UPDATE orders SET order_status='DELIVERED', sub_order_status='RETURN_REJECTED', updated_at=#{updatedAt}, updated_by=#{updatedBy}
         WHERE id=#{orderId} AND order_status='RETURN_REQUESTED'
     </update>
     <update id="updateReturnSubStatus">
@@ -130,7 +130,7 @@
     <select id="getorderbyid" resultType="com.vt.cms.model.resp.OrderResponse">
         SELECT
             id AS orderId,
-            order_status AS order_status,
+            order_status AS orderStatus,
             created_at AS order_date,
             total AS total,
             expected_delivery AS expected_delivery,
