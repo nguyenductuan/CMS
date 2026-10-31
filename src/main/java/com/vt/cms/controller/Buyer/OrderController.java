@@ -9,6 +9,8 @@ import com.vt.cms.model.resp.BaseResponse;
 import com.vt.cms.model.resp.OrderCreateResponse;
 import com.vt.cms.model.resp.OrderResponse;
 import com.vt.cms.service.OrderService;
+import com.vt.cms.service.OrderHistoryService;
+import com.vt.cms.model.entity.OrderTracking;
 import com.vt.cms.security.JwtAuthenticationFilter;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.http.ResponseEntity;
@@ -20,9 +22,11 @@ import java.util.List;
 @RestController
 public class OrderController {
     private final OrderService orderService;
+    private final OrderHistoryService orderHistoryService;
 
-    public OrderController(OrderService orderService) {
+    public OrderController(OrderService orderService, OrderHistoryService orderHistoryService) {
         this.orderService = orderService;
+        this.orderHistoryService = orderHistoryService;
     }
     //Hàm lấy danh sách order
     @GetMapping("order-list")
@@ -55,6 +59,12 @@ public class OrderController {
                 (String) request.getAttribute(JwtAuthenticationFilter.ROLE_ATTRIBUTE));
         return ResponseEntity.ok(new APIRessponse(200, Order.ORDER_CANCEL.getMessage()));
     }
+    /** Lấy lịch sử tác động đơn hàng theo thứ tự thời gian tăng dần. */
+    @GetMapping("/order/{id}/history")
+    public ResponseEntity<List<OrderTracking>> orderHistory(@PathVariable Integer id) {
+        return ResponseEntity.ok(orderHistoryService.getHistory(id));
+    }
+
     // Hàm chi tiết order
     @GetMapping("/order/{id}")
     /**
