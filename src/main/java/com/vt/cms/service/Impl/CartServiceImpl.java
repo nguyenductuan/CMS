@@ -1,5 +1,7 @@
 package com.vt.cms.service.Impl;
 
+
+import com.vt.cms.Exception.BusinessException;import com.vt.cms.model.enums.MessageCode;
 import com.vt.cms.model.dto.AddCartRequest;
 import com.vt.cms.model.dto.DeleteRequest;
 import com.vt.cms.model.entity.Cart;
@@ -64,16 +66,16 @@ public class CartServiceImpl implements CartService {
      */
     public int deleteproductAndCart(DeleteRequest request) {
         if (request == null) {
-            throw new IllegalArgumentException("Yêu cầu xóa giỏ hàng không được để trống");
+            throw new BusinessException(MessageCode.YEU_CAU_XOA_GIO_HANG_KHONG_DUOC_DE_TRONG);
         }
         validateUserId(request.getUserid());
 
         List<Integer> productIds = request.getProductids();
         if (productIds == null || productIds.isEmpty()) {
-            throw new IllegalArgumentException("Danh sách product ID không được để trống");
+            throw new BusinessException(MessageCode.DANH_SACH_PRODUCT_ID_KHONG_DUOC_DE_TRONG);
         }
         if (productIds.stream().anyMatch(id -> id == null || id <= 0)) {
-            throw new IllegalArgumentException("Tất cả product ID phải lớn hơn 0");
+            throw new BusinessException(MessageCode.TAT_CA_PRODUCT_ID_PHAI_LON_HON_0);
         }
 
         Cart cart = cartRepository.finByUserId(request.getUserid());
@@ -109,12 +111,12 @@ public class CartServiceImpl implements CartService {
 
         ProductResponse product = productRepository.detailProduct(request.getProductId());
         if (product == null) {
-            throw new IllegalArgumentException("Sản phẩm không tồn tại");
+            throw new BusinessException(MessageCode.SAN_PHAM_KHONG_TON_TAI);
         }
 
         Product_Sku sku = productSkuRepository.findNotDeletedById(request.getSkuId());
         if (sku == null || !Objects.equals(sku.getProduct_id(), request.getProductId())) {
-            throw new IllegalArgumentException("SKU không tồn tại hoặc không thuộc sản phẩm đã chọn");
+            throw new BusinessException(MessageCode.SKU_KHONG_TON_TAI_HOAC_KHONG_THUOC_SAN_PHAM_DA_C);
         }
         if (sku.getPrice() == null || sku.getPrice().compareTo(BigDecimal.ZERO) < 0) {
             throw new IllegalStateException("Giá SKU không hợp lệ");
@@ -123,7 +125,7 @@ public class CartServiceImpl implements CartService {
             throw new IllegalStateException("Tồn kho SKU không hợp lệ");
         }
         if (request.getQuantity() > sku.getStock()) {
-            throw new IllegalArgumentException("Số lượng yêu cầu vượt quá tồn kho SKU");
+            throw new BusinessException(MessageCode.SO_LUONG_YEU_CAU_VUOT_QUA_TON_KHO_SKU);
         }
 
         Cart cart = cartRepository.finByUserId(request.getUserId());
@@ -179,10 +181,10 @@ public class CartServiceImpl implements CartService {
         try {
             updatedQuantity = Math.addExact(currentQuantity, request.getQuantity());
         } catch (ArithmeticException ex) {
-            throw new IllegalArgumentException("Số lượng sản phẩm vượt giới hạn cho phép", ex);
+            throw new BusinessException(MessageCode.SO_LUONG_SAN_PHAM_VUOT_GIOI_HAN_CHO_PHEP, ex);
         }
         if (updatedQuantity > sku.getStock()) {
-            throw new IllegalArgumentException("Tổng số lượng SKU trong giỏ vượt quá tồn kho");
+            throw new BusinessException(MessageCode.TONG_SO_LUONG_SKU_TRONG_GIO_VUOT_QUA_TON_KHO);
         }
 
         existingItem.setQuantity(updatedQuantity);
@@ -198,17 +200,17 @@ public class CartServiceImpl implements CartService {
      */
     private void validateAddToCart(AddCartRequest request) {
         if (request == null) {
-            throw new IllegalArgumentException("Yêu cầu không được để trống");
+            throw new BusinessException(MessageCode.YEU_CAU_KHONG_DUOC_DE_TRONG);
         }
         validateUserId(request.getUserId());
         if (request.getProductId() == null || request.getProductId() <= 0) {
-            throw new IllegalArgumentException("Product ID phải lớn hơn 0");
+            throw new BusinessException(MessageCode.PRODUCT_ID_PHAI_LON_HON_0);
         }
         if (request.getSkuId() == null || request.getSkuId() <= 0) {
-            throw new IllegalArgumentException("SKU ID phải lớn hơn 0");
+            throw new BusinessException(MessageCode.SKU_ID_PHAI_LON_HON_0);
         }
         if (request.getQuantity() == null || request.getQuantity() <= 0) {
-            throw new IllegalArgumentException("Số lượng sản phẩm phải lớn hơn 0");
+            throw new BusinessException(MessageCode.SO_LUONG_SAN_PHAM_PHAI_LON_HON_0);
         }
     }
 
@@ -217,7 +219,7 @@ public class CartServiceImpl implements CartService {
      */
     private void validateUserId(Integer userId) {
         if (userId == null || userId <= 0) {
-            throw new IllegalArgumentException("User ID phải lớn hơn 0");
+            throw new BusinessException(MessageCode.USER_ID_PHAI_LON_HON_0);
         }
     }
 }
