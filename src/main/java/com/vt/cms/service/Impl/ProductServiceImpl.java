@@ -1,5 +1,7 @@
 package com.vt.cms.service.Impl;
 
+
+import com.vt.cms.Exception.BusinessException;import com.vt.cms.model.enums.MessageCode;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -224,7 +226,7 @@ public class ProductServiceImpl implements ProductService {
      * Chỉnh sửa dữ liệu editproduct. Các tham số và kết quả tuân theo chữ ký phương thức.
      */
     public void editproduct(Integer id, CreateProductRequest request) {
-        if (id == null || id <= 0) throw new IllegalArgumentException("ID sản phẩm không hợp lệ");
+        if (id == null || id <= 0) throw new BusinessException(MessageCode.ID_SAN_PHAM_KHONG_HOP_LE);
         productRequestValidator.validate(request);
         Product existing = productRepository.getProductById(id);
         if (existing == null || "true".equalsIgnoreCase(existing.getIsDeleted())) {
@@ -254,9 +256,9 @@ public class ProductServiceImpl implements ProductService {
      * Lấy danh sách listproduct. Các tham số và kết quả tuân theo chữ ký phương thức.
      */
     public BaseResponse<PagingResponse<List<ProductResponse>>> listproduct(OrdersRequest request) {
-        if (request == null) throw new IllegalArgumentException("Thông tin phân trang không được để trống");
-        if (request.getPageNo() == null || request.getPageNo() < 0) throw new IllegalArgumentException("pageNo phải >= 0");
-        if (request.getPageSize() == null || request.getPageSize() < 1 || request.getPageSize() > 100) throw new IllegalArgumentException("pageSize phải nằm trong khoảng 1..100");
+        if (request == null) throw new BusinessException(MessageCode.THONG_TIN_PHAN_TRANG_KHONG_DUOC_DE_TRONG);
+        if (request.getPageNo() == null || request.getPageNo() < 0) throw new BusinessException(MessageCode.PAGENO_PHAI_0);
+        if (request.getPageSize() == null || request.getPageSize() < 1 || request.getPageSize() > 100) throw new BusinessException(MessageCode.PAGESIZE_PHAI_NAM_TRONG_KHOANG_1_100);
         List<ProductResponse> product = productRepository.listproduct(request);
 
         for (ProductResponse item : product) {
@@ -327,7 +329,7 @@ public class ProductServiceImpl implements ProductService {
      */
     public void editstatusproduct(Integer product_id, String approverUsername, String approverRole) {
         if (product_id == null || product_id <= 0)
-            throw new IllegalArgumentException("ID sản phẩm không hợp lệ");
+            throw new BusinessException(MessageCode.ID_SAN_PHAM_KHONG_HOP_LE);
         Product existing = productRepository.getProductById(product_id);
         if (existing == null || "true".equalsIgnoreCase(existing.getIsDeleted()))
             throw new IllegalArgumentException("Không tìm thấy sản phẩm: " + product_id);
@@ -346,7 +348,7 @@ public class ProductServiceImpl implements ProductService {
      * Thực hiện xử lý nghiệp vụ reject product. Các tham số và kết quả tuân theo chữ ký phương thức.
      */
     public void rejectProduct(Integer product_id, String approverUsername) {
-        if (product_id == null || product_id <= 0) throw new IllegalArgumentException("ID sản phẩm không hợp lệ");
+        if (product_id == null || product_id <= 0) throw new BusinessException(MessageCode.ID_SAN_PHAM_KHONG_HOP_LE);
         Product existing = productRepository.getProductById(product_id);
         if (existing == null || "true".equalsIgnoreCase(existing.getIsDeleted())) {
             throw new IllegalArgumentException("Không tìm thấy sản phẩm: " + product_id);
@@ -366,7 +368,7 @@ public class ProductServiceImpl implements ProductService {
      */
     public void deleteproduct(Integer product_id) {
         if (product_id == null || product_id <= 0)
-            throw new IllegalArgumentException("ID sản phẩm không hợp lệ");
+            throw new BusinessException(MessageCode.ID_SAN_PHAM_KHONG_HOP_LE);
         Product existing = productRepository.getProductById(product_id);
         if (existing == null || "true".equalsIgnoreCase(existing.getIsDeleted())) {
             throw new IllegalArgumentException("Không tìm thấy sản phẩm: " + product_id);
