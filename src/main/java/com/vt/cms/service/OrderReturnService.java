@@ -27,6 +27,7 @@ public class OrderReturnService {
     private final OrderReturnRepository returnRepository;
     private final UserRepository userRepository;
     private final ObjectMapper objectMapper;
+    private final OrderHistoryService orderHistoryService;
 
     /**
      * Kiểm tra điều kiện và tạo mới dữ liệu nghiệp vụ.
@@ -68,6 +69,7 @@ public class OrderReturnService {
         if (returnRepository.insert(ret) != 1) throw new IllegalStateException("Không tạo được yêu cầu trả hàng");
         if (orderRepository.setReturnRequested(orderId, username, LocalDateTime.now(), username, ret.getStatus()) != 1)
             throw new IllegalStateException("Đơn hàng đã thay đổi trạng thái");
+        orderHistoryService.record(orderId, "BUYER_RETURN_REQUESTED", ret.getStatus(), username, "BUYER", "Người mua tạo yêu cầu Trả hàng/Hoàn tiền", "Lý do: " + ret.getReason());
         return map(returnRepository.findById(ret.getId()));
     }
 
@@ -112,8 +114,13 @@ public class OrderReturnService {
         OrderReturn current = requirePending(returnId, "PENDING_SELLER_REVIEW");
         int rows = returnRepository.sellerReview(returnId, request.getApproved(), reviewer, request.getNote(), LocalDateTime.now());
         if (rows != 1) throw new IllegalStateException("Yêu cầu đã được xử lý");
-        if (!request.getApproved()) orderRepository.setReturnRejected(current.getOrderId(), LocalDateTime.now(), reviewer);
-        else orderRepository.updateReturnSubStatus(current.getOrderId(), "PENDING_SELLER_METHOD_SELECTION", reviewer, LocalDateTime.now());
+        if (!request.getApproved()) {
+            orderRepository.setReturnRejected(current.getOrderId(), LocalDateTime.now(), reviewer);
+            orderHistoryService.record(current.getOrderId(), "SELLER_RETURN_REJECTED", "DELIVERED", reviewer, "SELLER", "Seller từ chối yêu cầu Trả hàng/Hoàn tiền", request.getNote());
+        } else {
+            orderRepository.updateReturnSubStatus(current.getOrderId(), "PENDING_SELLER_METHOD_SELECTION", reviewer, LocalDateTime.now());
+            orderHistoryService.record(current.getOrderId(), "SELLER_RETURN_APPROVED", "PENDING_SELLER_METHOD_SELECTION", reviewer, "SELLER", "Seller phê duyệt yêu cầu Trả hàng/Hoàn tiền", request.getNote());
+        }
         return map(returnRepository.findById(returnId));
     }
 
@@ -131,8 +138,13 @@ public class OrderReturnService {
         OrderReturn current = requirePending(returnId, "PENDING_ADMIN_REVIEW");
         int rows = returnRepository.adminReview(returnId, request.getApproved(), reviewer, request.getNote(), LocalDateTime.now());
         if (rows != 1) throw new IllegalStateException("Yêu cầu đã được xử lý");
-        if (!request.getApproved()) orderRepository.setReturnRejected(current.getOrderId(), LocalDateTime.now(), reviewer);
-        else orderRepository.updateReturnSubStatus(current.getOrderId(), "PENDING_SELLER_METHOD_SELECTION", reviewer, LocalDateTime.now());
+        if (!request.getApproved()) {
+            orderRepository.setReturnRejected(current.getOrderId(), LocalDateTime.now(), reviewer);
+            orderHistoryService.record(current.getOrderId(), "ADMIN_RETURN_REJECTED", "DELIVERED", reviewer, "ADMIN", "Admin từ chối yêu cầu Trả hàng/Hoàn tiền", request.getNote());
+        } else {
+            orderRepository.updateReturnSubStatus(current.getOrderId(), "PENDING_SELLER_METHOD_SELECTION", reviewer, LocalDateTime.now());
+            orderHistoryService.record(current.getOrderId(), "ADMIN_RETURN_APPROVED", "PENDING_SELLER_METHOD_SELECTION", reviewer, "ADMIN", "Admin phê duyệt yêu cầu; chuyển Seller chọn phương thức", request.getNote());
+        }
         return map(returnRepository.findById(returnId));
     }
 
@@ -151,6 +163,7 @@ public class OrderReturnService {
         String subStatus = "RETURN_AND_REFUND".equals(method)
                 ? "WAITING_FOR_RETURN_SHIPMENT" : "REFUND_PENDING";
         orderRepository.updateReturnSubStatus(current.getOrderId(), subStatus, reviewer, now);
+        orderHistoryService.record(current.getOrderId(), "SELLER_RETURN_METHOD_SELECTED", subStatus, reviewer, "SELLER", "Seller chọn phương thức " + method, "Phương thức xử lý yêu cầu trả hàng: " + method);
         return map(returnRepository.findById(returnId));
     }
 
