@@ -130,7 +130,7 @@ public class PaymentServiceImpl implements PaymentService {
         order.setUpdatedAt(LocalDateTime.now());
         order.setUpdated_by("SYSTEM");
         orderRepository.save(order);
-        orderHistoryService.record(order.getId(), "PAYMENT_SUCCESS", "PAID", "SYSTEM", "SYSTEM", "Đơn hàng đã thanh toán thành công, Nhà bán đang chuẩn bị hàng", "Cổng thanh toán xác nhận giao dịch thành công");
+        orderHistoryService.record(order.getId(), "005", "PAID", "SYSTEM", "SYSTEM", "Đơn hàng đã thanh toán thành công, Nhà bán đang chuẩn bị hàng", "Cổng thanh toán xác nhận giao dịch thành công");
 
         log.info("Payment confirmed. orderId={}, transactionCode={}, amount={}",
                 payment.getOrderId(), paymentCallback.getTransactionCode(),
