@@ -11,4 +11,5 @@ public interface PaymentRepository {
     Payment findByTransactionCodeForUpdate(@Param("transactionCode") String transactionCode);
     int countPendingByOrderId(@Param("orderId") Integer orderId);
     int markSuccessIfPending(@Param("transactionCode") String transactionCode);
+    int markRefundPendingByOrderId(@Param("orderId") Integer orderId);
 }
