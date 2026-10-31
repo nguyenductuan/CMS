@@ -15,7 +15,6 @@
         <result column="created_at" property="createdAt" jdbcType="OTHER"/>
         <result column="expected_delivery" property="expectedDelivery" jdbcType="OTHER"/>
         <result column="shipping_status_code" property="shippingStatusCode" jdbcType="VARCHAR"/>
-        <result column="shipping_status_code" property="shippingStatusCode" jdbcType="VARCHAR"/>
 
 
     </resultMap>
