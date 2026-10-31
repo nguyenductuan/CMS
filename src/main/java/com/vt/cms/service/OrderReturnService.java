@@ -74,6 +74,21 @@ public class OrderReturnService {
     }
 
     /**
+     * Buyer hủy yêu cầu trả hàng khi yêu cầu vẫn đang chờ Seller hoặc Admin xét duyệt.
+     */
+    @Transactional(rollbackFor = Exception.class)
+    public void cancelReturnRequest(Integer returnId, String buyerUsername) {
+        OrderReturn current = returnRepository.findById(returnId);
+        if (current == null || !buyerUsername.equals(current.getBuyerUsername()))
+            throw new IllegalArgumentException("Không tìm thấy yêu cầu trả hàng của Buyer");
+        int rows = returnRepository.cancelBuyerRequest(returnId, buyerUsername);
+        if (rows != 1) throw new IllegalStateException("Chỉ được hủy yêu cầu khi đang chờ xét duyệt");
+        orderRepository.setReturnRejected(current.getOrderId(), LocalDateTime.now(), buyerUsername);
+        orderHistoryService.record(current.getOrderId(), "BUYER_RETURN_REQUEST_CANCELLED", "DELIVERED",
+                buyerUsername, "BUYER", "Người mua hủy yêu cầu Trả hàng/Hoàn tiền", "Yêu cầu #" + returnId);
+    }
+
+    /**
      * Truy vấn thông tin nghiệp vụ theo tham số đầu vào.
      * @param returnId Tham số đầu vào của hàm.
      * @param username Tham số đầu vào của hàm.
