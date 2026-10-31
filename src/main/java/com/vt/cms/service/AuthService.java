@@ -1,0 +1,30 @@
+package com.vt.cms.service;
+
+import com.vt.cms.model.dto.LoginRequest;
+import com.vt.cms.model.entity.User;
+import com.vt.cms.model.repository.UserRepository;
+import com.vt.cms.model.resp.LoginResponse;
+import com.auth0.jwt.exceptions.JWTVerificationException;
+import lombok.RequiredArgsConstructor;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.stereotype.Service;
+
+@Service
+@RequiredArgsConstructor
+public class AuthService {
+    private final UserRepository userRepository;
+    private final JwtService jwtService;
+    private final BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
+
+    public LoginResponse login(LoginRequest request) {
+        User user = userRepository.findByUsername(request.getUsername().trim());
+        if (user == null || user.getPassword() == null
+                || !passwordEncoder.matches(request.getPassword(), user.getPassword())) {
+            throw new IllegalArgumentException("Tên đăng nhập hoặc mật khẩu không chính xác");
+        }
+
+        String token = jwtService.generateToken(user.getId(), user.getUsername(), user.getRole());
+        return new LoginResponse(token, "Bearer", jwtService.getExpirationSeconds(),
+                user.getId(), user.getUsername(), user.getRole());
+    }
+}
