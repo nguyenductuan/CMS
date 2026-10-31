@@ -89,7 +89,7 @@ public interface OrderRepository {
      */
     List<Itemorderdetail> getOrderItemsByOrderId1(long orderId);
     int cancelOrder(Order order);
-    int setReturnRequested(@Param("orderId") Integer orderId, @Param("buyerUsername") String buyerUsername, @Param("updatedAt") java.time.LocalDateTime updatedAt, @Param("updatedBy") String updatedBy);
+    int setReturnRequested(@Param("orderId") Integer orderId, @Param("buyerUsername") String buyerUsername, @Param("updatedAt") java.time.LocalDateTime updatedAt, @Param("updatedBy") String updatedBy, @Param("subStatus") String subStatus);
     int setReturnRejected(@Param("orderId") Integer orderId, @Param("updatedAt") java.time.LocalDateTime updatedAt, @Param("updatedBy") String updatedBy);
     int updateReturnSubStatus(@Param("orderId") Integer orderId, @Param("status") String status, @Param("updatedBy") String updatedBy, @Param("updatedAt") java.time.LocalDateTime updatedAt);
     int escalateReturnReviews(@Param("cutoff") java.time.LocalDateTime cutoff, @Param("updatedAt") java.time.LocalDateTime updatedAt, @Param("updatedBy") String updatedBy);
