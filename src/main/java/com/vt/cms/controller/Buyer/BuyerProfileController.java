@@ -26,7 +26,9 @@ public class BuyerProfileController {
         user.setBankName(request.getBankName()); user.setBankAccountNumber(request.getBankAccountNumber());
         user.setBankAccountHolder(request.getBankAccountHolder());
         if (userRepository.updateBuyerProfile(user) != 1) throw new IllegalStateException("Không cập nhật được hồ sơ BUYER");
-        user.setPassword(null);
-        return ResponseEntity.ok(user);
+        User updated = userRepository.detailUser(userId);
+        if (updated == null) throw new IllegalStateException("Không tìm thấy tài khoản BUYER");
+        updated.setPassword(null);
+        return ResponseEntity.ok(updated);
     }
 }
