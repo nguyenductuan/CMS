@@ -36,4 +36,7 @@ public class ProductResponse {
     private String typeProductsName;
     private List<SkuRequest> skus;
     private String status;
+    private String approveBy;
+    private String approveByRole;
+    private LocalDateTime approvedTime;
 }
