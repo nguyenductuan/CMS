@@ -1,5 +1,4 @@
--- Allow customer accounts to use BUYER role.
-ALTER TABLE user MODIFY COLUMN role VARCHAR(20) NOT NULL DEFAULT 'BUYER';
+-- The existing role column is VARCHAR; BUYER is assigned through the account-creation API.
 
 -- One review per SKU in a given order. Media are stored as JSON URL arrays.
 CREATE TABLE product_review (
