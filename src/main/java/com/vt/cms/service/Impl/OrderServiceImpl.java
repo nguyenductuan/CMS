@@ -169,7 +169,7 @@ public class OrderServiceImpl implements OrderService {
     /**
      * Tạo mới dữ liệu create order. Các tham số và kết quả tuân theo chữ ký phương thức.
      */
-    public OrderCreateResponse createOrder(OrderRequest request) {
+    public OrderCreateResponse createOrder(OrderRequest request, String buyerUsername) {
         if (request == null || request.getOrder() == null || request.getOrder().isEmpty()) {
             throw new BusinessException(MessageCode.INVALID_ORDER);
         }
@@ -226,7 +226,8 @@ public class OrderServiceImpl implements OrderService {
         order.setOrder_status(OrderStatus.WAIT_PAYMENT);
         order.setCreatedAt(LocalDateTime.now());
         order.setExpectedDelivery(getEstimatedDeliveryTime());
-        order.setCreated_by("SYSTEM");
+        if (buyerUsername == null || buyerUsername.isBlank()) throw new SecurityException("Tài khoản mua hàng không hợp lệ");
+        order.setCreated_by(buyerUsername);
 
 
         int insertedOrders = orderRepository.insertorder(order);
