@@ -5,7 +5,7 @@
 `GET /order/export`
 
 Query parameters:
-- `tabName`: tên tab; mặc định `Orders`. Hiện tại hỗ trợ tab `Orders`.
+- `tabName`: tên tab; mặc định `Orders`. Hỗ trợ các tab: `Orders`/`Tất cả`, `Chờ thanh toán`, `Đã thanh toán`/`Chờ xác nhận`, `Chờ giao hàng`, `Đang giao`, `Đã giao`, `Đã hủy`, `Trả hàng/Hoàn tiền`. Mỗi tab tự lọc theo trạng thái đơn tương ứng.
 - `fromDate`: ngày bắt đầu, định dạng `yyyy-MM-dd`, không bắt buộc.
 - `toDate`: ngày kết thúc, định dạng `yyyy-MM-dd`, không bắt buộc. Phải truyền cùng `fromDate`.
 
@@ -18,7 +18,7 @@ Ví dụ không lọc ngày:
 `GET /order/export?tabName=Orders`
 
 Tên file:
-- Có khoảng thời gian: `Orders _01-10-2026 - 31-10-2026.xlsx`
+- Có khoảng thời gian: `Orders _01-10-2026 - 31-10-2026.xlsx` (dùng dấu `-` thay cho `/` trong phần ngày)
 - Không chọn thời gian: `Orders.xlsx`
 
 Dấu gạch ngang được dùng thay cho dấu `/` trong tên file vì dấu gạch chéo là ký tự phân tách thư mục trên nhiều hệ điều hành. Ngày trong tên file vẫn theo thứ tự ngày-tháng-năm.
