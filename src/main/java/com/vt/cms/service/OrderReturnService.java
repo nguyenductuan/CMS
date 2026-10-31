@@ -103,6 +103,12 @@ public class OrderReturnService {
     private OrderReturnResponse map(OrderReturn r) {
         OrderReturnResponse out = new OrderReturnResponse();
         out.setId(r.getId()); out.setOrderId(r.getOrderId()); out.setBuyerUsername(r.getBuyerUsername());
+        var orderSummary = orderRepository.getorderbyid(r.getOrderId());
+        if (orderSummary != null) {
+            out.setOrderStatus(orderSummary.getOrder_status());
+            out.setOrderTotal(orderSummary.getTotal());
+            out.setOrderItems(orderRepository.getOrderItemsByOrderId(r.getOrderId()));
+        }
         out.setBuyerName(r.getBuyerName()); out.setPhone(r.getPhone()); out.setEmail(r.getEmail());
         out.setAddress(r.getAddress()); out.setBankName(r.getBankName()); out.setBankAccountNumber(r.getBankAccountNumber());
         out.setBankAccountHolder(r.getBankAccountHolder()); out.setReason(r.getReason()); out.setStatus(r.getStatus());
