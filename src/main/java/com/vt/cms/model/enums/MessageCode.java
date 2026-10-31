@@ -112,7 +112,7 @@ public enum MessageCode {
     SKU_KHONG_HOP_LE("SKU_KHONG_HOP_LE", "SKU không hợp lệ"),
     ORDER_NOT_FOUND("ORDER_NOT_FOUND", "Không tìm thấy đơn hàng:"),
     INVALID_EXPORT_TAB("INVALID_EXPORT_TAB", "Tên tab không được hỗ trợ:"),
-    CAMPAIGN_NOT_FOUND("CAMPAIGN_NOT_FOUND", "Không tìm thấy chiến dịch:"),
+    CAMPAIGN_NOT_FOUND("CAMPAIGN_NOT_FOUND", "Không tìm thấy chiến dịch:");
 
     private final String code;
     private final String message;
