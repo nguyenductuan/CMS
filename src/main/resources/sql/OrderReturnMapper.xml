@@ -32,8 +32,11 @@
          reason,images_json,videos_json,status,created_at)
         VALUES
         (#{orderId},#{buyerId},#{buyerUsername},#{buyerName},#{phone},#{email},#{address},#{bankName},#{bankAccountNumber},
-         #{bankAccountHolder},#{reason},#{imagesJson},#{videosJson},'PENDING_SELLER_REVIEW',#{createdAt})
+         #{bankAccountHolder},#{reason},#{imagesJson},#{videosJson},#{status},#{createdAt})
     </insert>
+    <select id="countByOrderId" resultType="int">
+        SELECT COUNT(*) FROM order_return_request WHERE order_id=#{orderId}
+    </select>
     <select id="findById" resultMap="ReturnMap">
         SELECT * FROM order_return_request WHERE id=#{returnId}
     </select>
@@ -48,7 +51,7 @@
     </update>
     <update id="adminReview">
         UPDATE order_return_request
-        SET status=CASE WHEN #{approved}=1 THEN 'APPROVED' ELSE 'REJECTED' END,
+        SET status=CASE WHEN #{approved}=1 THEN 'WAITING_FOR_RETURN_SHIPMENT' ELSE 'REJECTED' END,
             admin_reviewer=#{reviewer}, admin_note=#{note}, admin_reviewed_at=#{reviewedAt}
         WHERE id=#{returnId} AND status='PENDING_ADMIN_REVIEW'
     </update>
