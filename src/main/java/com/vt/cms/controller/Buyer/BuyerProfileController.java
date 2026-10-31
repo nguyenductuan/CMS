@@ -16,6 +16,12 @@ import org.springframework.web.bind.annotation.*;
 public class BuyerProfileController {
     private final UserRepository userRepository;
 
+    /**
+     * Cập nhật thông tin hoặc trạng thái theo nghiệp vụ.
+     * @param request Tham số phục vụ xử lý updateProfile.
+     * @param http Tham số phục vụ xử lý updateProfile.
+     * @return Kết quả xử lý của hàm.
+     */
     @PutMapping("/profile")
     public ResponseEntity<User> updateProfile(@Valid @RequestBody UpdateBuyerProfileRequest request,
                                                HttpServletRequest http) {
