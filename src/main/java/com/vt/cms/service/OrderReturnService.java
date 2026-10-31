@@ -54,9 +54,11 @@ public class OrderReturnService {
             ret.setImagesJson(objectMapper.writeValueAsString(request.getImages() == null ? List.of() : request.getImages()));
             ret.setVideosJson(objectMapper.writeValueAsString(request.getVideos() == null ? List.of() : request.getVideos()));
         } catch (JsonProcessingException e) { throw new IllegalArgumentException("Media không hợp lệ", e); }
+        int previousRequests = returnRepository.countByOrderId(orderId);
+        ret.setStatus(previousRequests > 0 ? "PENDING_ADMIN_REVIEW" : "PENDING_SELLER_REVIEW");
         ret.setCreatedAt(LocalDateTime.now());
         if (returnRepository.insert(ret) != 1) throw new IllegalStateException("Không tạo được yêu cầu trả hàng");
-        if (orderRepository.setReturnRequested(orderId, username, LocalDateTime.now(), username) != 1)
+        if (orderRepository.setReturnRequested(orderId, username, LocalDateTime.now(), username, ret.getStatus()) != 1)
             throw new IllegalStateException("Đơn hàng đã thay đổi trạng thái");
         return map(returnRepository.findById(ret.getId()));
     }
@@ -95,7 +97,7 @@ public class OrderReturnService {
         int rows = returnRepository.adminReview(returnId, request.getApproved(), reviewer, request.getNote(), LocalDateTime.now());
         if (rows != 1) throw new IllegalStateException("Yêu cầu đã được xử lý");
         if (!request.getApproved()) orderRepository.setReturnRejected(current.getOrderId(), LocalDateTime.now(), reviewer);
-        else orderRepository.updateReturnSubStatus(current.getOrderId(), "RETURN_APPROVED", reviewer, LocalDateTime.now());
+        else orderRepository.updateReturnSubStatus(current.getOrderId(), "WAITING_FOR_RETURN_SHIPMENT", reviewer, LocalDateTime.now());
         return map(returnRepository.findById(returnId));
     }
 
