@@ -1,5 +1,7 @@
 package com.vt.cms.service;
 
+
+import com.vt.cms.Exception.BusinessException;import com.vt.cms.model.enums.MessageCode;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.vt.cms.model.dto.CreateReviewRequest;
@@ -22,12 +24,12 @@ public class ProductReviewService {
     @Transactional(rollbackFor = Exception.class)
     public ProductReviewResponse createReview(CreateReviewRequest request, Integer userId, String username) {
         if (request.getImages() != null && request.getImages().size() > 10)
-            throw new IllegalArgumentException("Tối đa 10 ảnh cho mỗi đánh giá");
+            throw new BusinessException(MessageCode.TOI_DA_10_ANH_CHO_MOI_DANH_GIA);
         if (request.getVideos() != null && request.getVideos().size() > 3)
-            throw new IllegalArgumentException("Tối đa 3 video cho mỗi đánh giá");
+            throw new BusinessException(MessageCode.TOI_DA_3_VIDEO_CHO_MOI_DANH_GIA);
         if (repository.isEligibleOrderItem(request.getOrderId(), request.getProductId(),
                 request.getSkuId(), username) != 1)
-            throw new IllegalArgumentException("Chỉ chủ đơn hàng đã giao/đã nhận mới được đánh giá đúng SKU của đơn");
+            throw new BusinessException(MessageCode.CHI_CHU_DON_HANG_DA_GIAO_DA_NHAN_MOI_DUOC_DANH_G);
         if (repository.countByOrderAndSku(request.getOrderId(), request.getSkuId()) > 0)
             throw new IllegalStateException("SKU này trong đơn hàng đã được đánh giá");
 
@@ -43,7 +45,7 @@ public class ProductReviewService {
             review.setImagesJson(objectMapper.writeValueAsString(request.getImages() == null ? List.of() : request.getImages()));
             review.setVideosJson(objectMapper.writeValueAsString(request.getVideos() == null ? List.of() : request.getVideos()));
         } catch (JsonProcessingException e) {
-            throw new IllegalArgumentException("Danh sách media không hợp lệ", e);
+            throw new BusinessException(MessageCode.DANH_SACH_MEDIA_KHONG_HOP_LE, e);
         }
         review.setCreatedAt(LocalDateTime.now());
         if (repository.insertReview(review) != 1)
