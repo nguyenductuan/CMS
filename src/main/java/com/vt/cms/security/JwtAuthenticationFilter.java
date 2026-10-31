@@ -12,6 +12,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
+import java.util.Set;
 
 @Component
 @RequiredArgsConstructor
@@ -20,20 +21,28 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     public static final String USERNAME_ATTRIBUTE = "authenticatedUsername";
     public static final String ROLE_ATTRIBUTE = "authenticatedRole";
 
+    private static final Set<String> PROTECTED_PATHS = Set.of(
+            "/v1/user/create",
+            "/v1/product/approve/",
+            "/v1/product/reject/"
+    );
+
     private final JwtService jwtService;
 
     @Override
     protected boolean shouldNotFilter(HttpServletRequest request) {
-        return !("POST".equalsIgnoreCase(request.getMethod())
-                && "/v1/user/create".equals(request.getServletPath()));
+        String path = request.getServletPath();
+        if ("/v1/auth/login".equals(path)) return true;
+        return PROTECTED_PATHS.stream().noneMatch(prefix ->
+                prefix.endsWith("/") ? path.startsWith(prefix) : path.equals(prefix));
     }
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response,
                                     FilterChain filterChain) throws ServletException, IOException {
         String header = request.getHeader("Authorization");
-        if (header == null || !header.startsWith("Bearer ")) {
-            unauthorized(response, "Thiếu JWT Bearer token");
+        if (header == null || !header.startsWith("Bearer ") || header.substring(7).isBlank()) {
+            unauthorized(response, "Vui lòng gửi JWT trong header Authorization: Bearer <token>");
             return;
         }
         try {
@@ -42,10 +51,19 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             Integer userId = jwt.getClaim("userId").asInt();
             String username = jwt.getClaim("username").asString();
 
-            if (userId == null || username == null || !"ADMIN".equals(role)) {
-                response.setStatus(HttpServletResponse.SC_FORBIDDEN);
-                response.setContentType("application/json;charset=UTF-8");
-                response.getWriter().write("{\"message\":\"Chỉ ADMIN được tạo tài khoản\"}");
+            if (userId == null || username == null || role == null) {
+                unauthorized(response, "JWT thiếu thông tin tài khoản hoặc quyền");
+                return;
+            }
+
+            String path = request.getServletPath();
+            if ("/v1/user/create".equals(path) && !"ADMIN".equals(role)) {
+                forbidden(response, "Chỉ ADMIN được tạo tài khoản");
+                return;
+            }
+            if ((path.startsWith("/v1/product/approve/") || path.startsWith("/v1/product/reject/"))
+                    && !Set.of("ADMIN", "SELLER").contains(role)) {
+                forbidden(response, "Không có quyền duyệt hoặc từ chối sản phẩm");
                 return;
             }
 
@@ -60,6 +78,12 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     private void unauthorized(HttpServletResponse response, String message) throws IOException {
         response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+        response.setContentType("application/json;charset=UTF-8");
+        response.getWriter().write("{\"message\":\"" + message + "\"}");
+    }
+
+    private void forbidden(HttpServletResponse response, String message) throws IOException {
+        response.setStatus(HttpServletResponse.SC_FORBIDDEN);
         response.setContentType("application/json;charset=UTF-8");
         response.getWriter().write("{\"message\":\"" + message + "\"}");
     }
