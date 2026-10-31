@@ -64,7 +64,7 @@ public class OrderFulfillmentService {
             throw new IllegalStateException("Không thể bàn giao vận chuyển: trạng thái đơn hàng đã thay đổi");
         }
         orderHistoryService.record(orderId, "CARRIER_PICKUP_SUCCESS", "SHIPPING", assignment.getProvider(), "CARRIER", "Đơn vị vận chuyển đã lấy hàng thành công", "Mã vận đơn: " + assignment.getTrackingNumber());
-        log.info("Order dispatched. orderId={}, provider={}, trackingNumber={}, shipperCode={},",
+        log.info("Order dispatched. orderId={}, provider={}, trackingNumber={}, shipperCode={}",
                 orderId, assignment.getProvider(), assignment.getTrackingNumber(), assignment.getShipperCode());
         return assignment;
     }
