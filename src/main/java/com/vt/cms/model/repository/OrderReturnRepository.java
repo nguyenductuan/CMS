@@ -15,6 +15,7 @@ public interface OrderReturnRepository {
     int sellerReview(@Param("returnId") Integer returnId, @Param("approved") boolean approved,
                      @Param("reviewer") String reviewer, @Param("note") String note,
                      @Param("reviewedAt") LocalDateTime reviewedAt);
+    int cancelBuyerRequest(@Param("returnId") Integer returnId, @Param("buyerUsername") String buyerUsername);
     int adminReview(@Param("returnId") Integer returnId, @Param("approved") boolean approved,
                     @Param("reviewer") String reviewer, @Param("note") String note,
                     @Param("reviewedAt") LocalDateTime reviewedAt);
