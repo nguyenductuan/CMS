@@ -263,7 +263,7 @@ public class CampainServiceImpl implements CampainService {
         }
         Campain campaign = campainRepository.getCampainById(campain_id);
         if (campaign == null || "true".equalsIgnoreCase(campaign.getIsDeleted())) {
-            throw new IllegalArgumentException("Không tìm thấy chiến dịch: " + campain_id);
+            throw new BusinessException(MessageCode.CAMPAIGN_NOT_FOUND);
         }
         if (campaign.getStatus() != CampainStatus.PENDING_APPROVAL
                 || (status != CampainStatus.APPROVED && status != CampainStatus.REJECTED)) {
