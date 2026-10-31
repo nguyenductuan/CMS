@@ -9,6 +9,7 @@ import java.time.LocalDateTime;
 public interface OrderReturnRepository {
     int insert(OrderReturn request);
     OrderReturn findById(@Param("returnId") Integer returnId);
+    java.util.List<OrderReturn> findPending(@Param("status") String status);
     int sellerReview(@Param("returnId") Integer returnId, @Param("approved") boolean approved,
                      @Param("reviewer") String reviewer, @Param("note") String note,
                      @Param("reviewedAt") LocalDateTime reviewedAt);
