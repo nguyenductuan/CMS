@@ -113,8 +113,6 @@ public enum MessageCode {
     ORDER_NOT_FOUND("ORDER_NOT_FOUND", "Không tìm thấy đơn hàng:"),
     INVALID_EXPORT_TAB("INVALID_EXPORT_TAB", "Tên tab không được hỗ trợ:"),
     CAMPAIGN_NOT_FOUND("CAMPAIGN_NOT_FOUND", "Không tìm thấy chiến dịch:"),
-    PRODUCT_NOT_FOUND("PRODUCT_NOT_FOUND", "Không tìm thấy sản phẩm:"),
-    PRODUCT_NOT_FOUND("PRODUCT_NOT_FOUND", "Không tìm thấy sản phẩm hoặc sản phẩm đã bị xóa:");
 
     private final String code;
     private final String message;
