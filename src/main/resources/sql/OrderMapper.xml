@@ -23,7 +23,7 @@
             useGeneratedKeys="true"
             keyProperty="id">
         INSERT INTO orders (total, order_status, shipping_status_code, created_at, expected_delivery, created_by)
-        VALUES (#{total}, #{order_status}, '104', #{createdAt}, #{expectedDelivery}, #{created_by})
+        VALUES (#{total}, #{order_status}, NULL, #{createdAt}, #{expectedDelivery}, #{created_by})
     </insert>
 
     <select id="getdetailById"
