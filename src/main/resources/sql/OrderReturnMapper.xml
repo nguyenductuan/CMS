@@ -40,6 +40,11 @@
     <select id="countByOrderId" resultType="int">
         SELECT COUNT(*) FROM order_return_request WHERE order_id=#{orderId}
     </select>
+    <select id="findSellerPendingActions" resultMap="ReturnMap">
+        SELECT * FROM order_return_request
+        WHERE status IN ('PENDING_SELLER_REVIEW','PENDING_SELLER_METHOD_SELECTION')
+        ORDER BY created_at ASC
+    </select>
     <select id="findById" resultMap="ReturnMap">
         SELECT * FROM order_return_request WHERE id=#{returnId}
     </select>
