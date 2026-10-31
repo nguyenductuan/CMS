@@ -37,6 +37,14 @@ public class OrderReturnController {
      * @param http Tham số phục vụ xử lý getPending.
      * @return Kết quả xử lý của hàm.
      */
+    /** Buyer hủy yêu cầu Trả hàng/Hoàn tiền khi yêu cầu còn chờ xét duyệt. */
+    @PostMapping("/return/{returnId}/cancel")
+    public ResponseEntity<Void> cancelReturnRequest(@PathVariable Integer returnId, HttpServletRequest http) {
+        service.cancelReturnRequest(returnId,
+                (String) http.getAttribute(JwtAuthenticationFilter.USERNAME_ATTRIBUTE));
+        return ResponseEntity.noContent().build();
+    }
+
     @GetMapping("/return/pending")
     public ResponseEntity<java.util.List<OrderReturnResponse>> getPending(HttpServletRequest http) {
         return ResponseEntity.ok(service.getPending((String) http.getAttribute(JwtAuthenticationFilter.ROLE_ATTRIBUTE)));
