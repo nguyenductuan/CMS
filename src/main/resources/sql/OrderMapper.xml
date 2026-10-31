@@ -14,6 +14,7 @@
         <result column="created_by" property="created_by" jdbcType="OTHER"/>
         <result column="created_at" property="createdAt" jdbcType="OTHER"/>
         <result column="expected_delivery" property="expectedDelivery" jdbcType="OTHER"/>
+        <result column="shipping_status_code" property="shippingStatusCode" jdbcType="VARCHAR"/>
 
 
     </resultMap>
@@ -21,8 +22,8 @@
     <insert id="insertorder" parameterType="com.vt.cms.model.entity.Order"
             useGeneratedKeys="true"
             keyProperty="id">
-        INSERT INTO orders (total, order_status, created_at, 	expected_delivery,	created_by)
-        VALUES (#{total}, #{order_status}, #{createdAt}, #{expectedDelivery}, #{created_by})
+        INSERT INTO orders (total, order_status, shipping_status_code, created_at, expected_delivery, created_by)
+        VALUES (#{total}, #{order_status}, '104', #{createdAt}, #{expectedDelivery}, #{created_by})
     </insert>
 
     <select id="getdetailById"
@@ -139,6 +140,7 @@
         SELECT
             id AS orderId,
             order_status AS orderStatus,
+            shipping_status_code AS shippingStatusCode,
             created_at AS order_date,
             total AS total,
             expected_delivery AS expected_delivery,
@@ -154,6 +156,7 @@
                warehouse_code AS warehouseCode,
                shipping_provider AS shippingProvider,
                tracking_number AS trackingNumber,
+               shipping_status_code AS shippingStatusCode,
                shipper_code AS shipperCode,
                shipper_name AS shipperName,
                shipper_phone AS shipperPhone,
@@ -251,6 +254,12 @@
         WHERE id = #{orderId}
           AND tracking_number = #{trackingNumber}
           AND order_status = #{expectedStatus}
+    </update>
+
+    <update id="updateShippingStatusCode">
+        UPDATE orders
+        SET shipping_status_code = #{shippingStatusCode}, updated_at = #{updatedAt}, updated_by = #{updatedBy}
+        WHERE id = #{orderId}
     </update>
 
     <update id="confirmReceived">
