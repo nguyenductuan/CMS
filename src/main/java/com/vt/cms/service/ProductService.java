@@ -33,7 +33,7 @@ public interface ProductService {
     /**
      * Chỉnh sửa editstatusproduct. Tham số và kết quả tuân theo chữ ký phương thức.
      */
-    void editstatusproduct(Integer product_id, String approverUsername);
+    void editstatusproduct(Integer product_id, String approverUsername, String approverRole);
 
     /**
      * Thực hiện reject product. Tham số và kết quả tuân theo chữ ký phương thức.
