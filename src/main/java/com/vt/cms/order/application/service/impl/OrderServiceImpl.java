@@ -10,7 +10,7 @@ public class OrderServiceImpl implements OrderService {
     public void preparedOrder(PreparedOrderRequest request, boolean isSellerOrder) {
 
     }
-//            PreparedOrderRequest request, boolean isSellerOrder) {
+//            PreparedOrderReqpuest request, boolean isSellerOrder) {
 //                String requestId = RequestUtils.extractRequestId();
 //                List<Order> orders =
 //                        orderRepository.findAllByIdsAndSubOrderStatus(
