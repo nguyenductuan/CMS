@@ -1,4 +1,4 @@
-package com.vt.cms.controller.Buyer;
+package com.vt.cms.controller.buyer;
 
 import com.vt.cms.model.resp.ProductDetailResponse;
 import com.vt.cms.service.ProductService;
