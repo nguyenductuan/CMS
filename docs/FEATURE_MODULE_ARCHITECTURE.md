@@ -1,8 +1,8 @@
 # Feature module architecture
 
-The `order`, `payment`, and `cart` features are organized as vertical modules.
+The `order`, `payment`, and `cart` features are organized as vertical modules, and `docs/REFACTOR_PACKAGE_MAP.md` records the proposed package/file ownership map for the remaining legacy packages.
 
-```
+```text
 api -> application -> domain
 infrastructure -> domain/application ports
 ```
@@ -10,18 +10,13 @@ infrastructure -> domain/application ports
 ## Layers
 
 - `api`: HTTP controllers and transport mapping.
-- `application/service`: use-case contracts and orchestration.
-- `application/dto`: commands/results at the application boundary.
-- `domain/entity`: business model and invariants.
-- `domain/repository`: persistence ports owned by the core.
-- `infrastructure/persistence`: MyBatis/JPA adapters.
+- `application`: use-case contracts, DTOs, validation, and orchestration.
+- `domain`: business model, invariants, and ports owned by the core.
+- `infrastructure`: framework-specific persistence mappings and integrations.
 
 ## Compatibility migration
 
-The existing controllers, DTOs, service implementations, and repositories are still
-referenced by other features. Module-owned application contracts have therefore been
-introduced, and the legacy service interfaces extend those contracts. Existing Spring
-beans and HTTP routes remain unchanged during this first extraction step.
+Existing controllers, DTOs, service implementations, and repositories have callers across features. Migrate one feature at a time and preserve old interfaces as temporary adapters where needed. Existing Spring beans, HTTP routes, payloads, and database schema must remain unchanged during package moves.
 
 ## Dependency rules
 
@@ -30,10 +25,8 @@ beans and HTTP routes remain unchanged during this first extraction step.
 3. API adapters validate/translate requests and call application use cases.
 4. Infrastructure contains framework-specific persistence mappings.
 5. Cross-module calls use application contracts, not another module's infrastructure.
+6. Do not duplicate Spring beans while old and new packages coexist.
 
 ## Transition status
 
-This commit establishes package boundaries and compatibility contracts. The existing
-service implementations still contain orchestration and persistence dependencies; moving
-those implementations, controllers, and SQL mappings is a subsequent migration that must
-be covered by compile and integration tests. No endpoint paths or database schema changed.
+The current repository is in a mixed transitional state: `order`, `payment`, and `cart` contain some feature-oriented packages, while many controllers, services, DTOs, entities, repositories, and MyBatis XML mappings remain in legacy packages. The package map is a migration plan; package moves require updating imports, mapper discovery, and tests atomically. No endpoint paths or database schema should change as part of this refactor.
