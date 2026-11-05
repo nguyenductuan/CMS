@@ -1,4 +1,4 @@
-package com.vt.cms.order.domain.repsitory;
+package com.vt.cms.order.domain.repository;
 
 import com.vt.cms.model.dto.ItemDto;
 import com.vt.cms.model.dto.OrdersRequest;

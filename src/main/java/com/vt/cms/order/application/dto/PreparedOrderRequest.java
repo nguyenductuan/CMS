@@ -1,4 +1,13 @@
 package com.vt.cms.order.application.dto;
-import com.vt.cms.model.dto.OrderRequest;
-/** Authenticated order command at the application boundary. */
-public record PreparedOrderRequest(OrderRequest orderRequest,String buyerUsername) {}
+
+import jakarta.validation.constraints.NotEmpty;
+import lombok.Data;
+
+import java.util.List;
+
+@Data
+public class PreparedOrderRequest {
+    @NotEmpty
+    private List<Long> orderId;
+    private String note;
+}
