@@ -57,6 +57,9 @@ public class CheckoutServiceImpl implements CheckoutService {
         response.setItems(items);
         response.setTotalPrice(productTotal.add(shippingFee));
         response.setPaymentMethod("QR");
+        response.setRecipientName(request.getRecipientName().trim());
+        response.setRecipientPhone(request.getRecipientPhone().trim());
+        response.setDeliveryAddress(request.getDeliveryAddress().trim());
         return response;
     }
 
@@ -64,7 +67,13 @@ public class CheckoutServiceImpl implements CheckoutService {
      * Kiểm tra tính hợp lệ validate request. Các tham số và kết quả tuân theo chữ ký phương thức.
      */
     private void validateRequest(CheckoutPreviewRequest request) {
-        if (request == null || request.getItems() == null || request.getItems().isEmpty()) {
+        if (request == null || request.getItems() == null || request.getItems().isEmpty()
+                || request.getRecipientName() == null || request.getRecipientName().isBlank()
+                || request.getRecipientPhone() == null || request.getRecipientPhone().isBlank()
+                || request.getDeliveryAddress() == null || request.getDeliveryAddress().isBlank()
+                || request.getRecipientName().length() > 150
+                || request.getRecipientPhone().length() > 30
+                || request.getDeliveryAddress().length() > 500) {
             throw new BusinessException(MessageCode.INVALID_ORDER);
         }
         for (ItemRequest item : request.getItems()) {
