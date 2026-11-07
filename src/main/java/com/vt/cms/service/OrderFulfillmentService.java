@@ -134,7 +134,7 @@ public class OrderFulfillmentService {
         }
 
         long codAmount = order.getTotal() == null ? 0L : order.getTotal().longValue();
-        Integer weight = order.getProductweight() == null ? null : order.getProductweight().intValue();
+        Integer weight = null; // Chưa có cột trọng lượng đơn hàng được xác nhận trong schema hiện tại.
         MockShipmentResponse shipment = viettelPostMockClient.createShipment(
                 new MockCreateShipmentRequest(String.valueOf(orderId), order.getRecipientName(),
                         order.getRecipientPhone(), order.getDeliveryAddress(), codAmount, weight));
