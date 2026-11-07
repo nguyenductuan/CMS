@@ -31,3 +31,9 @@ mybatis:
     log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
   mapper-locations: classpath:sql/**/*.xml
 
+
+# Enable only in local/dev environments; mock shipments are stored in memory.
+viettel:
+  mock:
+    enabled: ${VIETTEL_MOCK_ENABLED:true}
+    base-url: ${VIETTEL_MOCK_BASE_URL:http://localhost:8080}
