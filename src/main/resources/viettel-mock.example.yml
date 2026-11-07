@@ -1,0 +1,6 @@
+# Merge these properties into application-local.yml (do not replace the whole file).
+viettel:
+  mock:
+    enabled: true
+    webhook-url: http://localhost:8080/internal/webhooks/viettelpost
+    webhook-token: CHANGE_ME_TO_THE_SAME_TOKEN_AS_WEBHOOK
