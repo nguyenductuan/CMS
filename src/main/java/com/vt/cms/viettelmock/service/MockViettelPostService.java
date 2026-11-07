@@ -17,7 +17,7 @@ public class MockViettelPostService {
     private final Map<String, String> orderNumbersByReference = new ConcurrentHashMap<>();
     private final AtomicLong sequence = new AtomicLong();
 
-    public MockShipmentResponse create(MockCreateShipmentRequest request) {
+    public synchronized MockShipmentResponse create(MockCreateShipmentRequest request) {
         String existingNumber = orderNumbersByReference.get(request.orderReference());
         if (existingNumber != null) {
             return shipments.get(existingNumber);
