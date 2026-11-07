@@ -22,8 +22,14 @@
     <insert id="insertorder" parameterType="com.vt.cms.model.entity.Order"
             useGeneratedKeys="true"
             keyProperty="id">
-        INSERT INTO orders (total, order_status, shipping_status_code, created_at, expected_delivery, created_by)
-        VALUES (#{total}, #{order_status}, NULL, #{createdAt}, #{expectedDelivery}, #{created_by})
+        INSERT INTO orders (
+            total, order_status, shipping_status_code, created_at, expected_delivery, created_by,
+            recipient_name, recipient_phone, delivery_address
+        )
+        VALUES (
+            #{total}, #{order_status}, NULL, #{createdAt}, #{expectedDelivery}, #{created_by},
+            #{recipientName}, #{recipientPhone}, #{deliveryAddress}
+        )
     </insert>
 
     <select id="getdetailById"
@@ -144,7 +150,10 @@
             created_at AS order_date,
             total AS total,
             expected_delivery AS expected_delivery,
-            created_by AS createdBy
+            created_by AS createdBy,
+            recipient_name AS recipientName,
+            recipient_phone AS recipientPhone,
+            delivery_address AS deliveryAddress
         FROM orders
         WHERE id = #{orderId}
     </select>
@@ -205,7 +214,10 @@
             o.total AS total,
             o.created_at AS orderDate,
             o.expected_delivery AS expectedDelivery,
-            o.created_by AS createdBy
+            o.created_by AS createdBy,
+            o.recipient_name AS recipientName,
+            o.recipient_phone AS recipientPhone,
+            o.delivery_address AS deliveryAddress
         FROM orders o
         <where>
             <if test="status != null and status.trim() != ''">
