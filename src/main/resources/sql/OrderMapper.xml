@@ -18,6 +18,15 @@
         <result column="created_at" property="createdAt" jdbcType="OTHER"/>
         <result column="expected_delivery" property="expectedDelivery" jdbcType="OTHER"/>
         <result column="shipping_status_code" property="shippingStatusCode" jdbcType="VARCHAR"/>
+        <result column="warehouseCode" property="warehouseCode" jdbcType="VARCHAR"/>
+        <result column="shippingProvider" property="shippingProvider" jdbcType="VARCHAR"/>
+        <result column="trackingNumber" property="trackingNumber" jdbcType="VARCHAR"/>
+        <result column="shipperCode" property="shipperCode" jdbcType="VARCHAR"/>
+        <result column="shipperName" property="shipperName" jdbcType="VARCHAR"/>
+        <result column="shipperPhone" property="shipperPhone" jdbcType="VARCHAR"/>
+        <result column="shippedAt" property="shippedAt" jdbcType="OTHER"/>
+        <result column="carrierDeliveredAt" property="carrierDeliveredAt" jdbcType="OTHER"/>
+        <result column="customerReceivedAt" property="customerReceivedAt" jdbcType="OTHER"/>
 
 
     </resultMap>
@@ -181,7 +190,7 @@
         WHERE id = #{orderId}
     </select>
     <select id="getorderbyIdForUpdate" resultMap="OrderResultMap">
-        SELECT id, total, productweight, order_status, sub_order_status,
+        SELECT id, total, order_status, sub_order_status,
                deliveredAt, cancel_at, notecancel, created_by, created_at,
                expected_delivery, updated_at, updated_by,
                recipient_name, recipient_phone, delivery_address
