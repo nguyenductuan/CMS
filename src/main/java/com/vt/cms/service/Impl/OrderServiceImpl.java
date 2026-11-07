@@ -176,7 +176,13 @@ public class OrderServiceImpl implements OrderService {
      * Tạo mới dữ liệu create order. Các tham số và kết quả tuân theo chữ ký phương thức.
      */
     public OrderCreateResponse createOrder(OrderRequest request, String buyerUsername) {
-        if (request == null || request.getOrder() == null || request.getOrder().isEmpty()) {
+        if (request == null || request.getOrder() == null || request.getOrder().isEmpty()
+                || request.getRecipientName() == null || request.getRecipientName().isBlank()
+                || request.getRecipientPhone() == null || request.getRecipientPhone().isBlank()
+                || request.getDeliveryAddress() == null || request.getDeliveryAddress().isBlank()
+                || request.getRecipientName().length() > 150
+                || request.getRecipientPhone().length() > 30
+                || request.getDeliveryAddress().length() > 500) {
             throw new BusinessException(MessageCode.INVALID_ORDER);
         }
 
@@ -234,7 +240,9 @@ public class OrderServiceImpl implements OrderService {
         order.setExpectedDelivery(getEstimatedDeliveryTime());
         if (buyerUsername == null || buyerUsername.isBlank()) throw new SecurityException("Tài khoản mua hàng không hợp lệ");
         order.setCreated_by(buyerUsername);
-
+        order.setRecipientName(request.getRecipientName().trim());
+        order.setRecipientPhone(request.getRecipientPhone().trim());
+        order.setDeliveryAddress(request.getDeliveryAddress().trim());
 
         int insertedOrders = orderRepository.insertorder(order);
         if (insertedOrders <= 0 || order.getId() == null) {
