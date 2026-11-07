@@ -4,6 +4,10 @@ package com.vt.cms.service;
 import com.vt.cms.Exception.BusinessException;
 import com.vt.cms.model.enums.MessageCode;
 import com.vt.cms.model.dto.WarehouseSelectionRequest;
+import com.vt.cms.model.dto.BulkOrderPreparationRequest;
+import com.vt.cms.viettelmock.client.ViettelPostMockClient;
+import com.vt.cms.viettelmock.dto.MockCreateShipmentRequest;
+import com.vt.cms.viettelmock.dto.MockShipmentResponse;
 import com.vt.cms.model.entity.Order;
 import com.vt.cms.model.entity.ShippingAssignment;
 import com.vt.cms.model.enums.OrderStatus;
@@ -24,7 +28,7 @@ import java.time.LocalDateTime;
 @Slf4j
 public class OrderFulfillmentService {
     private final OrderRepository orderRepository;
-    private final MockShippingProvider mockShippingProvider;
+    private final ViettelPostMockClient viettelPostMockClient;
     private final OrderHistoryService orderHistoryService;
 
     @Transactional(rollbackFor = Exception.class)
@@ -61,11 +65,27 @@ public class OrderFulfillmentService {
             throw new IllegalStateException("Đơn hàng chưa được chọn kho");
         }
 
-        ShippingAssignment assignment = mockShippingProvider.assignShipper(orderId, order.getWarehouseCode());
+        if (order.getTrackingNumber() != null && !order.getTrackingNumber().isBlank()) {
+            return new ShippingAssignment(order.getShippingProvider(), order.getTrackingNumber(),
+                    order.getShipperCode(), order.getShipperName(), order.getShipperPhone());
+        }
+        if (order.getRecipientName() == null || order.getRecipientName().isBlank()
+                || order.getRecipientPhone() == null || order.getRecipientPhone().isBlank()
+                || order.getDeliveryAddress() == null || order.getDeliveryAddress().isBlank()) {
+            throw new IllegalStateException("Đơn hàng " + orderId + " thiếu thông tin người nhận");
+        }
+
+        long codAmount = order.getTotal() == null ? 0L : order.getTotal().longValue();
+        Integer weight = order.getProductweight() == null ? null : order.getProductweight().intValue();
+        MockShipmentResponse shipment = viettelPostMockClient.createShipment(
+                new MockCreateShipmentRequest(String.valueOf(orderId), order.getRecipientName(),
+                        order.getRecipientPhone(), order.getDeliveryAddress(), codAmount, weight));
+        ShippingAssignment assignment = new ShippingAssignment("VIETTEL_POST_MOCK",
+                shipment.orderNumber(), null, null, null);
         int rows = orderRepository.assignShipper(orderId, OrderStatus.PREPARING.name(),
                 OrderStatus.SHIPPING.name(), assignment.getProvider(), assignment.getTrackingNumber(),
                 assignment.getShipperCode(), assignment.getShipperName(), assignment.getShipperPhone(),
-                LocalDateTime.now(), "MOCK-3PL");
+                LocalDateTime.now(), "VIETTEL_POST_MOCK");
         if (rows != 1) {
             log.warn("Dispatch rejected due to concurrent status change. orderId={}", orderId);
             throw new IllegalStateException("Không thể bàn giao vận chuyển: trạng thái đơn hàng đã thay đổi");
