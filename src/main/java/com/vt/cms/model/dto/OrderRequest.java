@@ -1,6 +1,5 @@
 package com.vt.cms.model.dto;
 
-
 import lombok.Data;
 
 import java.util.List;
@@ -8,7 +7,8 @@ import java.util.List;
 @Data
 public class OrderRequest {
     private List<OrderItemRequest> order;
-//    private List<ShippingRequest> shipping;
     private Double totalamount;
+    private String recipientName;
+    private String recipientPhone;
+    private String deliveryAddress;
 }
-
