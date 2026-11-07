@@ -2,7 +2,6 @@ package com.vt.cms.order.api;
 
 import com.vt.cms.model.dto.BulkOrderPreparationRequest;
 import com.vt.cms.model.resp.APIRessponse;
-import com.vt.cms.order.application.service.OrderService;
 import com.vt.cms.service.OrderFulfillmentService;
 import com.vt.cms.security.JwtAuthenticationFilter;
 import jakarta.servlet.http.HttpServletRequest;
@@ -17,7 +16,6 @@ import org.springframework.web.bind.annotation.*;
 @RequiredArgsConstructor
 @Slf4j
 public class SellerOrderController {
-    private final OrderService orderService;
     private final OrderFulfillmentService fulfillmentService;
 
     /**
