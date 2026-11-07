@@ -5,6 +5,10 @@
     <resultMap id="OrderResultMap" type="com.vt.cms.model.entity.Order">
         <id column="id" property="id" jdbcType="OTHER"/>
         <result column="total" property="total" jdbcType="OTHER"/>
+        <result column="productweight" property="productweight" jdbcType="OTHER"/>
+        <result column="recipient_name" property="recipientName" jdbcType="VARCHAR"/>
+        <result column="recipient_phone" property="recipientPhone" jdbcType="VARCHAR"/>
+        <result column="delivery_address" property="deliveryAddress" jdbcType="VARCHAR"/>
         <result column="order_status" property="order_status" jdbcType="OTHER"/>
         <result column="sub_order_status" property="sub_order_status" jdbcType="OTHER"/>
 
@@ -159,9 +163,10 @@
     </select>
 
     <select id="getorderbyId" resultMap="OrderResultMap">
-        SELECT id, total, order_status, sub_order_status,
+        SELECT id, total, productweight, order_status, sub_order_status,
                deliveredAt, cancel_at, notecancel, created_by, created_at,
                expected_delivery, updated_at, updated_by,
+               recipient_name, recipient_phone, delivery_address,
                warehouse_code AS warehouseCode,
                shipping_provider AS shippingProvider,
                tracking_number AS trackingNumber,
@@ -177,9 +182,10 @@
         WHERE id = #{orderId}
     </select>
     <select id="getorderbyIdForUpdate" resultMap="OrderResultMap">
-        SELECT id, total, order_status, sub_order_status,
+        SELECT id, total, productweight, order_status, sub_order_status,
                deliveredAt, cancel_at, notecancel, created_by, created_at,
-               expected_delivery, updated_at, updated_by
+               expected_delivery, updated_at, updated_by,
+               recipient_name, recipient_phone, delivery_address
         FROM orders
         WHERE id = #{orderId}
         FOR UPDATE
