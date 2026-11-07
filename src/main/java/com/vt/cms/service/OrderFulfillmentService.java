@@ -31,6 +31,64 @@ public class OrderFulfillmentService {
     private final ViettelPostMockClient viettelPostMockClient;
     private final OrderHistoryService orderHistoryService;
 
+    /**
+     * Chuẩn bị nhiều đơn cùng một kho; mỗi đơn được tạo vận đơn riêng.
+     * Kết quả từng đơn độc lập để một đơn lỗi không chặn các đơn còn lại.
+     */
+    public java.util.List<java.util.Map<String, Object>> prepareMany(
+            BulkOrderPreparationRequest request, String actor, String actorRole) {
+        if (request == null || request.getOrderIds() == null || request.getOrderIds().isEmpty()) {
+            throw new IllegalArgumentException("Danh sách orderIds không được để trống");
+        }
+        if (request.getWarehouseCode() == null || request.getWarehouseCode().isBlank()) {
+            throw new IllegalArgumentException("warehouseCode không được để trống");
+        }
+        if (request.getOrderIds().stream().anyMatch(java.util.Objects::isNull)
+                || request.getOrderIds().stream().distinct().count() != request.getOrderIds().size()) {
+            throw new IllegalArgumentException("orderIds không được chứa null hoặc trùng lặp");
+        }
+
+        java.util.List<java.util.Map<String, Object>> results = new java.util.ArrayList<>();
+        for (Integer orderId : request.getOrderIds()) {
+            java.util.Map<String, Object> result = new java.util.LinkedHashMap<>();
+            result.put("orderId", orderId);
+            try {
+                Order order = requireOrder(orderId);
+                ShippingAssignment assignment;
+                if (order.getOrder_status() == OrderStatus.SHIPPING
+                        && order.getTrackingNumber() != null && !order.getTrackingNumber().isBlank()) {
+                    assignment = new ShippingAssignment(order.getShippingProvider(), order.getTrackingNumber(),
+                            order.getShipperCode(), order.getShipperName(), order.getShipperPhone());
+                } else {
+                    if (order.getOrder_status() == OrderStatus.PAID) {
+                        selectWarehouse(orderId, warehouseRequest(request.getWarehouseCode()), actor, actorRole);
+                    } else if (order.getOrder_status() != OrderStatus.PREPARING) {
+                        throw new IllegalStateException("Đơn phải ở trạng thái PAID hoặc PREPARING");
+                    } else if (order.getWarehouseCode() != null
+                            && !request.getWarehouseCode().equals(order.getWarehouseCode())) {
+                        throw new IllegalStateException("Đơn đã được gán kho khác: " + order.getWarehouseCode());
+                    }
+                    assignment = dispatchToShipper(orderId);
+                }
+                result.put("success", true);
+                result.put("provider", assignment.getProvider());
+                result.put("trackingNumber", assignment.getTrackingNumber());
+            } catch (Exception ex) {
+                result.put("success", false);
+                result.put("message", ex.getMessage());
+                log.warn("Bulk preparation failed for orderId={}: {}", orderId, ex.getMessage());
+            }
+            results.add(result);
+        }
+        return results;
+    }
+
+    private WarehouseSelectionRequest warehouseRequest(String warehouseCode) {
+        WarehouseSelectionRequest request = new WarehouseSelectionRequest();
+        request.setWarehouseCode(warehouseCode);
+        return request;
+    }
+
     @Transactional(rollbackFor = Exception.class)
     /**
      * Thực hiện xử lý nghiệp vụ select warehouse. Các tham số và kết quả tuân theo chữ ký phương thức.
