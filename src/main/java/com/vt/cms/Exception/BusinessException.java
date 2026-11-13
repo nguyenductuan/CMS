@@ -1,6 +1,7 @@
 package com.vt.cms.Exception;
 
-import com.vt.cms.model.enums.MessageCode;
+import com.vt.cms.base.enums.MessageCode;
+
 
 public class BusinessException extends RuntimeException {
 

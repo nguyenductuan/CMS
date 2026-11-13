@@ -1,6 +1,6 @@
 package com.vt.cms.service;
 
-import com.vt.cms.model.entity.Shipping;
+import com.vt.cms.Shipping.domian.enity.Shipping;
 
 import java.util.List;
 

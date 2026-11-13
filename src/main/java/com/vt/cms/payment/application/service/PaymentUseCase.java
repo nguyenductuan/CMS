@@ -1,7 +1,8 @@
 package com.vt.cms.payment.application.service;
 import com.vt.cms.model.dto.PaymentCallback;
 import com.vt.cms.model.dto.PaymentRequest;
-import com.vt.cms.model.resp.PaymentResponse;
+import com.vt.cms.payment.application.dto.response.PaymentResponse;
+
 /** Application boundary for payment creation and provider callbacks. */
 public interface PaymentUseCase {
  void paymentCallback(PaymentCallback paymentCallback);

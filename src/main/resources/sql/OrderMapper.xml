@@ -5,9 +5,6 @@
     <resultMap id="OrderResultMap" type="com.vt.cms.model.entity.Order">
         <id column="id" property="id" jdbcType="OTHER"/>
         <result column="total" property="total" jdbcType="OTHER"/>
-        <result column="recipient_name" property="recipientName" jdbcType="VARCHAR"/>
-        <result column="recipient_phone" property="recipientPhone" jdbcType="VARCHAR"/>
-        <result column="delivery_address" property="deliveryAddress" jdbcType="VARCHAR"/>
         <result column="order_status" property="order_status" jdbcType="OTHER"/>
         <result column="sub_order_status" property="sub_order_status" jdbcType="OTHER"/>
 
@@ -18,15 +15,6 @@
         <result column="created_at" property="createdAt" jdbcType="OTHER"/>
         <result column="expected_delivery" property="expectedDelivery" jdbcType="OTHER"/>
         <result column="shipping_status_code" property="shippingStatusCode" jdbcType="VARCHAR"/>
-        <result column="warehouseCode" property="warehouseCode" jdbcType="VARCHAR"/>
-        <result column="shippingProvider" property="shippingProvider" jdbcType="VARCHAR"/>
-        <result column="trackingNumber" property="trackingNumber" jdbcType="VARCHAR"/>
-        <result column="shipperCode" property="shipperCode" jdbcType="VARCHAR"/>
-        <result column="shipperName" property="shipperName" jdbcType="VARCHAR"/>
-        <result column="shipperPhone" property="shipperPhone" jdbcType="VARCHAR"/>
-        <result column="shippedAt" property="shippedAt" jdbcType="OTHER"/>
-        <result column="carrierDeliveredAt" property="carrierDeliveredAt" jdbcType="OTHER"/>
-        <result column="customerReceivedAt" property="customerReceivedAt" jdbcType="OTHER"/>
 
 
     </resultMap>
@@ -34,14 +22,8 @@
     <insert id="insertorder" parameterType="com.vt.cms.model.entity.Order"
             useGeneratedKeys="true"
             keyProperty="id">
-        INSERT INTO orders (
-            total, order_status, shipping_status_code, created_at, expected_delivery, created_by,
-            recipient_name, recipient_phone, delivery_address
-        )
-        VALUES (
-            #{total}, #{order_status}, NULL, #{createdAt}, #{expectedDelivery}, #{created_by},
-            #{recipientName}, #{recipientPhone}, #{deliveryAddress}
-        )
+        INSERT INTO orders (total, order_status, shipping_status_code, created_at, expected_delivery, created_by)
+        VALUES (#{total}, #{order_status}, NULL, #{createdAt}, #{expectedDelivery}, #{created_by})
     </insert>
 
     <select id="getdetailById"
@@ -162,10 +144,7 @@
             created_at AS order_date,
             total AS total,
             expected_delivery AS expected_delivery,
-            created_by AS createdBy,
-            recipient_name AS recipientName,
-            recipient_phone AS recipientPhone,
-            delivery_address AS deliveryAddress
+            created_by AS createdBy
         FROM orders
         WHERE id = #{orderId}
     </select>
@@ -174,7 +153,6 @@
         SELECT id, total, order_status, sub_order_status,
                deliveredAt, cancel_at, notecancel, created_by, created_at,
                expected_delivery, updated_at, updated_by,
-               recipient_name, recipient_phone, delivery_address,
                warehouse_code AS warehouseCode,
                shipping_provider AS shippingProvider,
                tracking_number AS trackingNumber,
@@ -192,8 +170,7 @@
     <select id="getorderbyIdForUpdate" resultMap="OrderResultMap">
         SELECT id, total, order_status, sub_order_status,
                deliveredAt, cancel_at, notecancel, created_by, created_at,
-               expected_delivery, updated_at, updated_by,
-               recipient_name, recipient_phone, delivery_address
+               expected_delivery, updated_at, updated_by
         FROM orders
         WHERE id = #{orderId}
         FOR UPDATE
@@ -228,10 +205,7 @@
             o.total AS total,
             o.created_at AS orderDate,
             o.expected_delivery AS expectedDelivery,
-            o.created_by AS createdBy,
-            o.recipient_name AS recipientName,
-            o.recipient_phone AS recipientPhone,
-            o.delivery_address AS deliveryAddress
+            o.created_by AS createdBy
         FROM orders o
         <where>
             <if test="status != null and status.trim() != ''">

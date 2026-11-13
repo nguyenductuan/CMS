@@ -1,26 +1,27 @@
-package com.vt.cms.service.Impl;
-
-import com.vt.cms.model.entity.Shipping;
-import com.vt.cms.model.repository.ShippingRepository;
-import com.vt.cms.service.ShippingService;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.stereotype.Service;
-
-import java.util.List;
-
-@Service
-@RequiredArgsConstructor
-@Slf4j
-public class ShippingServiceImpl implements ShippingService {
-    private final ShippingRepository shippingRepository;
-
-    @Override
-    /**
-     * Lấy dữ liệu get shipping. Các tham số và kết quả tuân theo chữ ký phương thức.
-     */
-    public List<Shipping> getShipping() {
-        List<Shipping> shippingMethods = shippingRepository.getShipping();
-        return shippingMethods == null ? List.of() : shippingMethods;
-    }
-}
+//package com.vt.cms.service.Impl;
+//
+//import com.vt.cms.Shipping.domian.enity.Shipping;
+//import com.vt.cms.Shipping.domian.repository.ShippingRepository;
+//
+//import com.vt.cms.service.ShippingService;
+//import lombok.RequiredArgsConstructor;
+//import lombok.extern.slf4j.Slf4j;
+//import org.springframework.stereotype.Service;
+//
+//import java.util.List;
+//
+//@Service
+//@RequiredArgsConstructor
+//@Slf4j
+//public class ShippingServiceImpl implements ShippingService {
+//    private final ShippingRepository shippingRepository;
+//
+//    @Override
+//    /**
+//     * Lấy dữ liệu get shipping. Các tham số và kết quả tuân theo chữ ký phương thức.
+//     */
+//    public List<Shipping> getShipping() {
+//        List<Shipping> shippingMethods = shippingRepository.getShipping();
+//        return shippingMethods == null ? List.of() : shippingMethods;
+//    }
+//}

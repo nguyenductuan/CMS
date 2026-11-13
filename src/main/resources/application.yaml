@@ -22,7 +22,7 @@ spring:
 security:
   jwt:
     # Set JWT_SECRET in environment; use a random secret with at least 32 bytes.
-    secret: ${JWT_SECRET:}
+    secret:  "MySuperSecretKeyForJwtAuthentication2026"
     expiration-seconds: 3600
 
 mybatis:

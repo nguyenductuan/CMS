@@ -1,6 +1,6 @@
 package com.vt.cms.Exception;
 
-import com.vt.cms.model.resp.APIRessponse;
+import com.vt.cms.base.response.APIRessponse;
 import jakarta.validation.ConstraintViolationException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;

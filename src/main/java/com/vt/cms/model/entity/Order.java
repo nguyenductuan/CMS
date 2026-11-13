@@ -26,6 +26,7 @@ public class Order {
     private String warehouseCode;
     private String shippingProvider;
     private String trackingNumber;
+    /** Mã trạng thái vận chuyển đối tác, tách biệt với trạng thái nghiệp vụ order_status. */
     private String shippingStatusCode;
     private String shipperCode;
     private String shipperName;
@@ -34,12 +35,7 @@ public class Order {
     private LocalDateTime carrierDeliveredAt;
     private LocalDateTime customerReceivedAt;
 
-    /** Thông tin người nhận được chụp lại theo từng đơn hàng tại thời điểm checkout. */
-    private String recipientName;
-    private String recipientPhone;
-    private String deliveryAddress;
-
-    private String created_by;
+    private  String created_by;
     private String cancelled_by;
     private String notecancel;
     @Enumerated(EnumType.STRING)
@@ -48,6 +44,7 @@ public class Order {
     private String updated_by;
     private List<OrderItem> orderItems;
     private LocalDateTime expectedDelivery;
-    private Double DeliveryLatitude;
-    private Double DeliveryLongitude;
+    private  Double DeliveryLatitude;
+    private  Double DeliveryLongitude;
+
 }

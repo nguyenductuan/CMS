@@ -1,9 +1,9 @@
 package com.vt.cms.mapper;
 
-import com.vt.cms.model.entity.Cart;
-import com.vt.cms.model.entity.Shipping;
-import com.vt.cms.model.entity.User;
-import com.vt.cms.model.resp.*;
+import com.vt.cms.Shipping.domian.enity.Shipping;
+import com.vt.cms.account.domain.enity.User;
+import com.vt.cms.cart.application.dto.resp.CartResponse;
+import com.vt.cms.cart.domain.entity.Cart;
 import org.mapstruct.Mapper;
 
 import java.util.List;
@@ -35,6 +35,6 @@ public interface Modelmapper {
     /**
      * Chuyển đổi dữ liệu convert order. Tham số và kết quả tuân theo chữ ký phương thức.
      */
-    OrderResponse convertOrder(OrderResponse order);
+//    OrderResponse convertOrder(OrderResponse order);
 
 }

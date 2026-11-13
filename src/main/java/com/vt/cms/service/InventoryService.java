@@ -1,10 +1,11 @@
 package com.vt.cms.service;
 
 import com.vt.cms.Exception.BusinessException;
+import com.vt.cms.base.enums.MessageCode;
 import com.vt.cms.model.dto.SkuOrderRequest;
-import com.vt.cms.model.entity.ProductDetail;
-import com.vt.cms.model.enums.MessageCode;
-import com.vt.cms.model.resp.SkuResponse;
+
+import com.vt.cms.product.application.dto.response.SkuResponse;
+import com.vt.cms.product.domain.entity.ProductDetail;
 import org.springframework.stereotype.Service;
 
 import java.util.HashMap;

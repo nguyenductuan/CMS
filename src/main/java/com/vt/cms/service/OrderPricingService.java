@@ -1,8 +1,9 @@
 package com.vt.cms.service;
 
 import com.vt.cms.Exception.BusinessException;
-import com.vt.cms.model.enums.MessageCode;
-import com.vt.cms.model.resp.SkuResponse;
+import com.vt.cms.base.enums.MessageCode;
+
+import com.vt.cms.product.application.dto.response.SkuResponse;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;

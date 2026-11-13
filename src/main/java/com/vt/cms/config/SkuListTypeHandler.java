@@ -2,7 +2,7 @@ package com.vt.cms.config;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.vt.cms.model.resp.SkuResponse;
+import com.vt.cms.product.application.dto.response.SkuResponse;
 import org.apache.ibatis.type.BaseTypeHandler;
 import org.apache.ibatis.type.JdbcType;
 

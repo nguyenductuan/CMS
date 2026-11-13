@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="com.vt.cms.model.repository.ProductRepository">
-    <resultMap id="ProductResultMap" type="com.vt.cms.model.entity.ProductDetail">
+<mapper namespace="com.vt.cms.product.domain.repository.ProductRepository">
+    <resultMap id="ProductResultMap" type="com.vt.cms.product.domain.entity.Product">
 
         <!-- Product -->
         <id column="id"
@@ -190,7 +190,7 @@
 
     </select>
 
-    <select id="detailProduct"  resultType="com.vt.cms.model.resp.ProductResponse">
+    <select id="detailProduct"  resultType="com.vt.cms.product.application.dto.response.ProductResponse">
         SELECT id,
                name,
                created_at,
@@ -216,7 +216,7 @@
           AND is_deleted = 'false'
     </select>
 
-    <select id="getProductById" resultType="com.vt.cms.model.entity.Product">
+    <select id="getProductById" resultType="com.vt.cms.product.domain.entity.Product">
         SELECT id,
                name,
                created_at,
@@ -258,7 +258,7 @@
           AND status IN ('PENDING_APPROVAL', 'REJECTED')
     </update>
     <select id="listproduct"
-            resultType="com.vt.cms.model.resp.ProductResponse">
+            resultType="com.vt.cms.product.application.dto.response.ProductResponse">
         SELECT
         p.id,
         p.name,
@@ -319,7 +319,7 @@
             AND LOWER(p.name) LIKE CONCAT('%', LOWER(#{keyword}), '%')
         </if>
     </select>
-    <insert id="insertproduct" parameterType="com.vt.cms.model.entity.Product"
+    <insert id="insertproduct" parameterType="com.vt.cms.product.domain.entity.Product"
             useGeneratedKeys="true"
             keyProperty="id">
         INSERT INTO products (name,
@@ -337,15 +337,15 @@
         VALUES (#{name},
                 #{description},
                 #{status},
-                #{created_at},
-                #{created_by},
-                #{json_images},
-                #{json_medias},
-                #{json_attributes},
-                #{json_attributes_name},
-                #{type_products},
-                #{type_products_name},
-                #{is_deleted})
+                #{createdAt},
+                #{createdBy},
+                #{jsonImages},
+                #{jsonMedias},
+                #{jsonAttributes},
+                #{jsonAttributesName},
+                #{typeProducts},
+                #{typeProductsName},
+                #{isDeleted})
     </insert>
 
 

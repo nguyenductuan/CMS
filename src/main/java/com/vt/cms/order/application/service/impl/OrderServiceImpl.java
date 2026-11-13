@@ -1,6 +1,6 @@
 package com.vt.cms.order.application.service.impl;
 
-import com.vt.cms.order.application.dto.PreparedOrderRequest;
+import com.vt.cms.order.application.dto.request.PreparedOrderRequest;
 import com.vt.cms.order.application.service.OrderService;
 import org.springframework.stereotype.Service;
 

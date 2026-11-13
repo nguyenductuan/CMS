@@ -1,0 +1,16 @@
+//package com.vt.cms.order.domain.repository;
+//
+//import com.vt.cms.model.dto.OrderExportRow;
+//import org.apache.ibatis.annotations.Mapper;
+//import org.apache.ibatis.annotations.Param;
+//import java.time.LocalDateTime;
+//import java.util.List;
+//
+//@Mapper
+//public interface OrderExportRepository {
+//    List<OrderExportRow> findOrdersForExport(@Param("fromDate") LocalDateTime fromDate,
+//                                              @Param("toDateExclusive") LocalDateTime toDateExclusive,
+//                                              @Param("statuses") List<String> statuses);
+//    int insertExportHistory(OrderExportHistory history);
+//    List<OrderExportHistory> findExportHistory(@Param("limit") Integer limit);
+//}

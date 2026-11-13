@@ -4,10 +4,6 @@ package com.vt.cms.service;
 import com.vt.cms.Exception.BusinessException;
 import com.vt.cms.model.enums.MessageCode;
 import com.vt.cms.model.dto.WarehouseSelectionRequest;
-import com.vt.cms.model.dto.BulkOrderPreparationRequest;
-import com.vt.cms.viettelmock.client.ViettelPostMockClient;
-import com.vt.cms.viettelmock.dto.MockCreateShipmentRequest;
-import com.vt.cms.viettelmock.dto.MockShipmentResponse;
 import com.vt.cms.model.entity.Order;
 import com.vt.cms.model.entity.ShippingAssignment;
 import com.vt.cms.model.enums.OrderStatus;
@@ -28,66 +24,8 @@ import java.time.LocalDateTime;
 @Slf4j
 public class OrderFulfillmentService {
     private final OrderRepository orderRepository;
-    private final ViettelPostMockClient viettelPostMockClient;
+    private final MockShippingProvider mockShippingProvider;
     private final OrderHistoryService orderHistoryService;
-
-    /**
-     * Chuẩn bị nhiều đơn cùng một kho; mỗi đơn được tạo vận đơn riêng.
-     * Kết quả từng đơn độc lập để một đơn lỗi không chặn các đơn còn lại.
-     */
-    public java.util.List<java.util.Map<String, Object>> prepareMany(
-            BulkOrderPreparationRequest request, String actor, String actorRole) {
-        if (request == null || request.getOrderIds() == null || request.getOrderIds().isEmpty()) {
-            throw new IllegalArgumentException("Danh sách orderIds không được để trống");
-        }
-        if (request.getWarehouseCode() == null || request.getWarehouseCode().isBlank()) {
-            throw new IllegalArgumentException("warehouseCode không được để trống");
-        }
-        if (request.getOrderIds().stream().anyMatch(java.util.Objects::isNull)
-                || request.getOrderIds().stream().distinct().count() != request.getOrderIds().size()) {
-            throw new IllegalArgumentException("orderIds không được chứa null hoặc trùng lặp");
-        }
-
-        java.util.List<java.util.Map<String, Object>> results = new java.util.ArrayList<>();
-        for (Integer orderId : request.getOrderIds()) {
-            java.util.Map<String, Object> result = new java.util.LinkedHashMap<>();
-            result.put("orderId", orderId);
-            try {
-                Order order = requireOrder(orderId);
-                ShippingAssignment assignment;
-                if (order.getOrder_status() == OrderStatus.SHIPPING
-                        && order.getTrackingNumber() != null && !order.getTrackingNumber().isBlank()) {
-                    assignment = new ShippingAssignment(order.getShippingProvider(), order.getTrackingNumber(),
-                            order.getShipperCode(), order.getShipperName(), order.getShipperPhone());
-                } else {
-                    if (order.getOrder_status() == OrderStatus.PAID) {
-                        selectWarehouse(orderId, warehouseRequest(request.getWarehouseCode()), actor, actorRole);
-                    } else if (order.getOrder_status() != OrderStatus.PREPARING) {
-                        throw new IllegalStateException("Đơn phải ở trạng thái PAID hoặc PREPARING");
-                    } else if (order.getWarehouseCode() != null
-                            && !request.getWarehouseCode().equals(order.getWarehouseCode())) {
-                        throw new IllegalStateException("Đơn đã được gán kho khác: " + order.getWarehouseCode());
-                    }
-                    assignment = dispatchToShipper(orderId);
-                }
-                result.put("success", true);
-                result.put("provider", assignment.getProvider());
-                result.put("trackingNumber", assignment.getTrackingNumber());
-            } catch (Exception ex) {
-                result.put("success", false);
-                result.put("message", ex.getMessage());
-                log.warn("Bulk preparation failed for orderId={}: {}", orderId, ex.getMessage());
-            }
-            results.add(result);
-        }
-        return results;
-    }
-
-    private WarehouseSelectionRequest warehouseRequest(String warehouseCode) {
-        WarehouseSelectionRequest request = new WarehouseSelectionRequest();
-        request.setWarehouseCode(warehouseCode);
-        return request;
-    }
 
     @Transactional(rollbackFor = Exception.class)
     /**
@@ -123,27 +61,11 @@ public class OrderFulfillmentService {
             throw new IllegalStateException("Đơn hàng chưa được chọn kho");
         }
 
-        if (order.getTrackingNumber() != null && !order.getTrackingNumber().isBlank()) {
-            return new ShippingAssignment(order.getShippingProvider(), order.getTrackingNumber(),
-                    order.getShipperCode(), order.getShipperName(), order.getShipperPhone());
-        }
-        if (order.getRecipientName() == null || order.getRecipientName().isBlank()
-                || order.getRecipientPhone() == null || order.getRecipientPhone().isBlank()
-                || order.getDeliveryAddress() == null || order.getDeliveryAddress().isBlank()) {
-            throw new IllegalStateException("Đơn hàng " + orderId + " thiếu thông tin người nhận");
-        }
-
-        long codAmount = order.getTotal() == null ? 0L : order.getTotal().longValue();
-        Integer weight = null; // Chưa có cột trọng lượng đơn hàng được xác nhận trong schema hiện tại.
-        MockShipmentResponse shipment = viettelPostMockClient.createShipment(
-                new MockCreateShipmentRequest(String.valueOf(orderId), order.getRecipientName(),
-                        order.getRecipientPhone(), order.getDeliveryAddress(), codAmount, weight));
-        ShippingAssignment assignment = new ShippingAssignment("VIETTEL_POST_MOCK",
-                shipment.orderNumber(), null, null, null);
+        ShippingAssignment assignment = mockShippingProvider.assignShipper(orderId, order.getWarehouseCode());
         int rows = orderRepository.assignShipper(orderId, OrderStatus.PREPARING.name(),
                 OrderStatus.SHIPPING.name(), assignment.getProvider(), assignment.getTrackingNumber(),
                 assignment.getShipperCode(), assignment.getShipperName(), assignment.getShipperPhone(),
-                LocalDateTime.now(), "VIETTEL_POST_MOCK");
+                LocalDateTime.now(), "MOCK-3PL");
         if (rows != 1) {
             log.warn("Dispatch rejected due to concurrent status change. orderId={}", orderId);
             throw new IllegalStateException("Không thể bàn giao vận chuyển: trạng thái đơn hàng đã thay đổi");

@@ -1,10 +1,8 @@
 package com.vt.cms.order.api;
 
-import com.vt.cms.model.dto.BulkOrderPreparationRequest;
 import com.vt.cms.model.resp.APIRessponse;
-import com.vt.cms.service.OrderFulfillmentService;
-import com.vt.cms.security.JwtAuthenticationFilter;
-import jakarta.servlet.http.HttpServletRequest;
+import com.vt.cms.order.application.service.OrderService;
+
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -16,21 +14,15 @@ import org.springframework.web.bind.annotation.*;
 @RequiredArgsConstructor
 @Slf4j
 public class SellerOrderController {
-    private final OrderFulfillmentService fulfillmentService;
-
-    /**
-     * Chuẩn bị nhiều đơn cùng một kho và tạo vận đơn Viettel Post MOCK cho từng đơn.
-     */
+    public final OrderService orderService;
     @PutMapping("/prepared")
-    public ResponseEntity<APIRessponse> preparedOrder(
-            @Valid @RequestBody BulkOrderPreparationRequest request,
-            HttpServletRequest http) {
-        String actor = (String) http.getAttribute(JwtAuthenticationFilter.USERNAME_ATTRIBUTE);
-        String actorRole = (String) http.getAttribute(JwtAuthenticationFilter.ROLE_ATTRIBUTE);
-        var results = fulfillmentService.prepareMany(request, actor, actorRole);
-        long success = results.stream().filter(item -> Boolean.TRUE.equals(item.get("success"))).count();
-        return ResponseEntity.ok(new APIRessponse(200,
-                "Đã xử lý " + results.size() + " đơn; tạo vận đơn thành công " + success + " đơn",
-                results));
+    /**
+     * Chẩn bị đơn hàng
+     */
+    public ResponseEntity<APIRessponse> preparedOrder(@PathVariable Integer orderId,@Valid @RequestBody PreparedOrderRequest1 request){
+        log.info("API prepared order. orderId={}", orderId);
+        orderService.preparedOrder(request, true);
+        return ResponseEntity.ok(new APIRessponse(200, "Đã chọn kho, đơn hàng đang chuẩn bị"));
     }
+
 }

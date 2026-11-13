@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="com.vt.cms.model.repository.CampainRepository">
+<mapper namespace="com.vt.cms.campain.domain.repository.CampainRepository">
 
-    <resultMap id="CampainResultMap" type="com.vt.cms.model.entity.Campain">
+    <resultMap id="CampainResultMap" type="com.vt.cms.campain.domain.enity.Campain">
         <id column="id" property="campainid" jdbcType="INTEGER"/>
         <result column="created_at" property="createdAt" jdbcType="TIMESTAMP"/>
         <result column="created_by" property="createdBy" jdbcType="VARCHAR"/>
@@ -20,7 +20,7 @@
         <result column="description" property="description" jdbcType="VARCHAR"/>
 
     </resultMap>
-    <select id="getCampainById" resultType="com.vt.cms.model.entity.Campain">
+    <select id="getCampainById" resultType="com.vt.cms.campain.domain.enity.Campain">
         SELECT *
         FROM campaign
         WHERE id = #{campain_id} AND is_deleted = 'false'
@@ -37,29 +37,29 @@
         WHERE id = #{campain_id} AND is_deleted = 'false'
           AND status IN ('PENDING_APPROVAL', 'REJECTED')
     </delete>
-    <select id="getlistcampain" resultType="com.vt.cms.model.resp.CampainResponse">
-        SELECT c.id AS id,
-               CONCAT('CMP-', c.id) AS code,
-               c.name AS name,
-               c.description AS description,
-               c.start_time AS startTime,
-               c.end_time AS endTime,
-               c.status AS status,
-               c.discount AS discount,
-               COALESCE((
-                   SELECT GROUP_CONCAT(DISTINCT p.name ORDER BY p.name SEPARATOR ', ')
-                   FROM campain_product cp
-                   INNER JOIN products p ON p.id = cp.product_id
-                   WHERE cp.campaign_id = c.id
-                     AND cp.is_deleted = 'false'
-                     AND p.is_deleted = 'false'
-               ), '') AS products
-        FROM campaign c
-        WHERE c.is_deleted = 'false'
-        ORDER BY c.created_at DESC, c.id DESC
-    </select>
+<!--    <select id="getlistcampain" resultType="com.vt.cms.campain.application.dto.response.CampainResponse">-->
+<!--        SELECT c.id AS id,-->
+<!--               CONCAT('CMP-', c.id) AS code,-->
+<!--               c.name AS name,-->
+<!--               c.description AS description,-->
+<!--               c.start_time AS startTime,-->
+<!--               c.end_time AS endTime,-->
+<!--               c.status AS status,-->
+<!--               c.discount AS discount,-->
+<!--               COALESCE((-->
+<!--                   SELECT GROUP_CONCAT(DISTINCT p.name ORDER BY p.name SEPARATOR ', ')-->
+<!--                   FROM campain_product cp-->
+<!--                   INNER JOIN products p ON p.id = cp.product_id-->
+<!--                   WHERE cp.campaign_id = c.id-->
+<!--                     AND cp.is_deleted = 'false'-->
+<!--                     AND p.is_deleted = 'false'-->
+<!--               ), '') AS products-->
+<!--        FROM campaign c-->
+<!--        WHERE c.is_deleted = 'false'-->
+<!--        ORDER BY c.created_at DESC, c.id DESC-->
+<!--    </select>-->
 
-    <insert id="savecampain" parameterType="com.vt.cms.model.entity.Campain"
+    <insert id="savecampain" parameterType="com.vt.cms.campain.domain.enity.Campain"
             useGeneratedKeys="true"
             keyProperty="campainid">
         INSERT INTO campaign (
