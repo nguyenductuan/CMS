@@ -16,8 +16,6 @@ public class ProductResponse {
     private  Integer id;
     private String name;
     private String description;
-//    private List<ImageRequest> Images;
-//    private List<MediaRequest> Medias;
     @JsonIgnore
     private String jsonAttributesRaw;
     @JsonIgnore
@@ -29,7 +27,6 @@ public class ProductResponse {
     private LocalDateTime updatedAt;
     private String jsonImages;
     private String jsonMedias;
-//    private Long skuCount;
     private Long totalStock;
     private String createdBy;
     private String 	isDeleted;

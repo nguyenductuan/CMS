@@ -190,7 +190,7 @@
 
     </select>
 
-    <select id="detailProduct"  resultType="com.vt.cms.product.application.dto.response.ProductResponse">
+    <select id="detailProduct" resultType="com.vt.cms.product.application.dto.response.ProductResponse">
         SELECT id,
                name,
                created_at,
@@ -206,7 +206,7 @@
                status,
                json_attributes_name,
                type_products_name,
-               type_products AS typeProductsRaw,
+               type_products   AS typeProductsRaw,
                cancel_at,
                cancel_by,
                approve_by,
@@ -235,7 +235,6 @@
                cancel_at,
                cancel_by,
                approve_by,
-               approve_by_role,
                approved_time
         FROM products
         WHERE id = #{id}
@@ -245,14 +244,14 @@
         UPDATE products
         SET name                 = #{product.name},
             description          = #{product.description},
-            json_images          = #{product.json_images},
-            json_medias          = #{product.json_medias},
-            json_attributes      = #{product.json_attributes},
-            json_attributes_name = #{product.json_attributes_name},
-            type_products        = #{product.type_products},
-            type_products_name   = #{product.type_products_name},
-            updated_at           = #{product.updated_at},
-            updated_by           = #{product.updated_by}
+            json_images          = #{product.jsonImages},
+            json_medias          = #{product.jsonMedias},
+            json_attributes      = #{product.jsonAttributes},
+            json_attributes_name = #{product.jsonAttributesName},
+            type_products        = #{product.typeProducts},
+            type_products_name   = #{product.typeProductsName},
+            updated_at           = #{product.updatedAt},
+            updated_by           = #{id}
         WHERE id = #{id}
           AND is_deleted = 'false'
           AND status IN ('PENDING_APPROVAL', 'REJECTED')
@@ -276,9 +275,9 @@
         p.type_products_name,
         p.json_images,
         p.json_medias,
-#         JSON_UNQUOTE(
-#         JSON_EXTRACT(p.json_images, '$[0].url')
-#         ) AS first_image,
+        # JSON_UNQUOTE(
+        # JSON_EXTRACT(p.json_images, '$[0].url')
+        # ) AS first_image,
 
         (
         SELECT COUNT(*)
@@ -348,33 +347,34 @@
                 #{isDeleted})
     </insert>
 
-
-    <update id="editstatusproduct">
+    <update id="approveProduct">
         UPDATE products
-        <set>
-            status = #{status},
-            updated_at = #{updated_at},
-            updated_by = #{approve_by},
-            <if test="status == 'APPROVED'">
-                approved_time = #{approved_time},
-                approve_by = #{approve_by},
-                approve_by_role = #{approve_by_role},
-            </if>
-            <if test="status == 'REJECTED'">
-                cancel_at = #{approved_time},
-                cancel_by = #{approve_by},
-            </if>
-        </set>
+        SET status        = 'APPROVED',
+            updated_at    = NOW(),
+            approved_time = NOW(),
+            updated_by    = #{user_id}
+        WHERE id = #{product_id}
+          AND is_deleted = 'false'
+          AND status IN ('PENDING_APPROVAL', 'REJECTED')
+    </update>
+
+
+    <update id="rejectProduct">
+        UPDATE products
+        SET status        = 'REJECTED',
+            cancel_at     = NOW(),
+            updated_at    = NOW(),
+            cancel_reason = #{reason},
+            cancel_by     = #{cancel_by}
         WHERE id = #{id}
-        AND is_deleted = 'false'
-        AND status = 'PENDING_APPROVAL'
+          AND is_deleted = 'false'
+          AND status IN ('PENDING_APPROVAL')
     </update>
 
     <update id="deleteproduct">
         UPDATE products
         SET is_deleted = 'true',
-            updated_at = NOW(),
-            updated_by = 'SYSTEM'
+            updated_at = NOW()
         WHERE id = #{productId}
           AND is_deleted = 'false'
           AND status IN ('PENDING_APPROVAL', 'REJECTED')

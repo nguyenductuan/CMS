@@ -30,7 +30,7 @@ public class ProductEntityMapper {
     /**
      * Thực hiện thêm dữ liệu mới product
      */
-    public Product toNewProduct(CreateProductRequest request, Integer userId, String role) {
+    public Product toNewProduct(CreateProductRequest request, Integer userId) {
         LocalDateTime approvedTime = ProductStatus.PENDING_APPROVAL.equals(request.getStatus())
                 ? LocalDateTime.now() : null;
 
