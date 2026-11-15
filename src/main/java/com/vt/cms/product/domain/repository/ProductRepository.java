@@ -1,6 +1,6 @@
 package com.vt.cms.product.domain.repository;
 
-import com.vt.cms.model.dto.OrdersRequest;
+import com.vt.cms.base.request.Pagerequest;
 import com.vt.cms.product.application.dto.response.ProductResponse;
 import com.vt.cms.product.domain.entity.Product;
 import com.vt.cms.product.domain.entity.ProductDetail;
@@ -17,10 +17,10 @@ public interface ProductRepository {
   ProductResponse detailProduct(@Param("productId") Integer productId);
 
   /** Lấy danh sách listproduct. Các tham số và giá trị trả về được mô tả bởi chữ ký phương thức. */
-  List<ProductResponse> listproduct(OrdersRequest request);
+  List<ProductResponse> listproduct(Pagerequest request);
 
   /** Đếm số lượng countproduct. Các tham số và giá trị trả về được mô tả bởi chữ ký phương thức. */
-  long countproduct(OrdersRequest request);
+  long countproduct(Pagerequest request);
 
   /**
    * Thêm bản ghi insertproduct. Các tham số và giá trị trả về được mô tả bởi chữ ký phương thức.

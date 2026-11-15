@@ -5,8 +5,8 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.vt.cms.Exception.BusinessException;
 import com.vt.cms.base.enums.MessageCode;
+import com.vt.cms.base.request.Pagerequest;
 import com.vt.cms.base.response.BaseResponse;
-import com.vt.cms.model.dto.OrdersRequest;
 import com.vt.cms.model.dto.page.PageInfo;
 import com.vt.cms.model.dto.page.PagingResponse;
 import com.vt.cms.product.application.dto.product.AttributeRequest;
@@ -278,7 +278,7 @@ public class ProductServiceImpl implements ProductService {
 
   @Override
   // Danh sách sản phẩm
-  public BaseResponse<PagingResponse<List<ProductResponse>>> listproduct(OrdersRequest request) {
+  public BaseResponse<PagingResponse<List<ProductResponse>>> listproduct(Pagerequest request) {
     if (request == null)
       throw new BusinessException(MessageCode.THONG_TIN_PHAN_TRANG_KHONG_DUOC_DE_TRONG);
     if (request.getPageNo() == null || request.getPageNo() < 0)

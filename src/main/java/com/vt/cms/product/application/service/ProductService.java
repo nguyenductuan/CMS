@@ -1,7 +1,7 @@
 package com.vt.cms.product.application.service;
 
+import com.vt.cms.base.request.Pagerequest;
 import com.vt.cms.base.response.BaseResponse;
-import com.vt.cms.model.dto.OrdersRequest;
 import com.vt.cms.model.dto.page.PagingResponse;
 import com.vt.cms.product.application.dto.req.CreateProductRequest;
 import com.vt.cms.product.application.dto.response.ProductDetailResponse;
@@ -19,7 +19,7 @@ public interface ProductService {
   void editproduct(Integer id, CreateProductRequest createProductRequest, Integer userId);
 
   /** Lấy danh sách listproduct. Tham số và kết quả tuân theo chữ ký phương thức. */
-  BaseResponse<PagingResponse<List<ProductResponse>>> listproduct(OrdersRequest request);
+  BaseResponse<PagingResponse<List<ProductResponse>>> listproduct(Pagerequest request);
 
   /* Duyệt sản phẩm */
   void approvedProduct(Integer product_id, Integer userId);

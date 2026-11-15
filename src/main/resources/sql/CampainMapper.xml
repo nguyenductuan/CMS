@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.vt.cms.campain.domain.repository.CampainRepository">
+
+    <resultMap id="CampainResultMap" type="com.vt.cms.campain.domain.enity.Campain">
+        <id column="id" property="campainid" jdbcType="INTEGER"/>
+        <result column="created_at" property="createdAt" jdbcType="TIMESTAMP"/>
+        <result column="created_by" property="createdBy" jdbcType="VARCHAR"/>
+        <result column="is_deleted" property="isDeleted" jdbcType="VARCHAR"/>
+        <result column="updated_at" property="updatedAt" jdbcType="TIMESTAMP"/>
+        <result column="status" property="status" jdbcType="VARCHAR"/>
+        <result column="updated_by" property="updatedBy" jdbcType="VARCHAR"/>
+        <result column="discount" property="discount" jdbcType="INTEGER"/>
+        <result column="end_time" property="endTime" jdbcType="TIMESTAMP"/>
+        <result column="name" property="name" jdbcType="VARCHAR"/>
+        <result column="start_time" property="startTime" jdbcType="TIMESTAMP"/>
+        <result column="total_stock" property="totalStock" jdbcType="INTEGER"/>
+        <result column="product_id" property="productId" jdbcType="BIGINT"/>
+        <result column="description" property="description" jdbcType="VARCHAR"/>
+
+    </resultMap>
+    <select id="getCampainById" resultType="com.vt.cms.campain.domain.enity.Campain">
+        SELECT *
+        FROM campaign
+        WHERE id = #{campain_id}
+          AND is_deleted = 'false'
+    </select>
+    <update id="updatestatus">
+        UPDATE campaign
+        SET status     = #{status},
+            updated_at = NOW(),
+            updated_by = 'SYSTEM'
+        WHERE id = #{campain_id}
+          AND is_deleted = 'false'
+          AND status = 'PENDING_APPROVAL'
+    </update>
+
+    <delete id="deletecampain">
+        UPDATE campaign
+        SET is_deleted = 'true',
+            updated_at = NOW(),
+            updated_by = 'SYSTEM'
+        WHERE id = #{campain_id}
+          AND is_deleted = 'false'
+          AND status IN ('PENDING_APPROVAL', 'REJECTED')
+    </delete>
+    <select id="getlistcampain" resultType="com.vt.cms.campain.application.dto.response.CampainResponse">
+        SELECT *
+        FROM campaign c
+        WHERE c.is_deleted = 'false'
+        ORDER BY c.created_at DESC, c.id DESC
+    </select>
+
+    <insert id="savecampain" parameterType="com.vt.cms.campain.domain.enity.Campain"
+            useGeneratedKeys="true"
+            keyProperty="campainid">
+        INSERT INTO campaign (created_at,
+                              created_by,
+                              is_deleted,
+                              status,
+                              discount,
+                              end_time,
+                              name,
+                              start_time,
+                              total_stock,
+                              product_id,
+                              description)
+        VALUES (#{createdAt},
+                #{createdBy},
+                #{isDeleted},
+                #{status},
+                #{discount},
+                #{endTime},
+                #{name},
+                #{startTime},
+                #{totalStock},
+                #{productId},
+                #{description})
+    </insert>
+
+    <select id="countCampains" resultType="long">
+        SELECT COUNT(id)
+        FROM campaign c
+        WHERE c.is_deleted = 'false'
+        <if test="status != null and status != ''">
+            AND c.status = #{status}
+        </if>
+        <if test="keyword != null and keyword.trim() != ''">
+            AND LOWER(c.name) LIKE CONCAT('%', LOWER(#{keyword}), '%')
+        </if>
+    </select>
+
+</mapper>

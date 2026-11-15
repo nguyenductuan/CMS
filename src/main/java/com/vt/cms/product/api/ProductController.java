@@ -1,8 +1,8 @@
 package com.vt.cms.product.api;
 
+import com.vt.cms.base.request.Pagerequest;
 import com.vt.cms.base.response.APIRessponse;
 import com.vt.cms.base.response.BaseResponse;
-import com.vt.cms.model.dto.OrdersRequest;
 import com.vt.cms.model.dto.page.PagingResponse;
 import com.vt.cms.product.application.dto.req.CreateProductRequest;
 import com.vt.cms.product.application.dto.response.ProductResponse;
@@ -30,7 +30,7 @@ public class ProductController {
   // Danh sách sp
   @GetMapping("listproduct")
   public BaseResponse<PagingResponse<List<ProductResponse>>> listProduct(
-      @ModelAttribute OrdersRequest request) {
+      @ModelAttribute Pagerequest request) {
     return productService.listproduct(request);
   }
 
