@@ -96,7 +96,7 @@
 
     </resultMap>
 
-    <select id="getproduct1" resultMap="ProductResultMap">
+    <select id="getproduct1" resultType="com.vt.cms.product.domain.entity.ProductDetail">
 
         SELECT
             /* =========================
@@ -115,7 +115,7 @@
 
             p.json_attributes      AS json_attributes,
 
-            p.json_attributes_name AS json_attributes_name,
+            p.json_attributes_name AS attributesName,
 
             p.type_products        AS type_products,
 
@@ -125,9 +125,9 @@
 
             p.status               AS status,
 
-            p.created_at           AS create_at,
+            p.created_at           AS createAt,
 
-            p.updated_at           AS update_at,
+            p.updated_at           AS updatedAt,
             /* =========================
                CAMPAIGN
                ========================= */

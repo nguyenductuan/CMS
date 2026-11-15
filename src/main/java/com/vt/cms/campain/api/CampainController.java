@@ -71,6 +71,15 @@ public class CampainController {
   }
 
   // Chi tiết chiến dịch
+
+  /* TODO
+   * 1. Bổ sung APi chi tiết sp khi chiến dịch hết hạn gồm thông tin các sku của product /product/get-product-not-campaign
+   *  2. Bổ sung APi chi tiueets sp khi chiến dịch đang dienx ra gồm thông tin các sku trong product campaign/get-campaign-by-id
+   *  3. Đối với Chi tiết chiến dịch khi chưa hết hạn thì cho phép dừng chiến dịch. Nếu Chi tiết chiến dịch hết hạn cho phép đăng lại
+   *  4. Lấy danh sách sản phẩm đã bán trong chi tiết chiến dịch gồm các thông tin (API campaign/get-buyer-order-by-id):
+   * Danh sách nguwoif mua(số người mua)
+   * Bảng danh sách gồm các thông tin: Ngưới mua, Mã đơn, Tổng SL,Tổng tiền, thời gian, Trạng thái
+   */
   @GetMapping("/deaitlCampain/{id}")
   public ResponseEntity<APIRessponse> deaitlCampain(@PathVariable("id") Integer campainId) {
     Campain response = campainService.deaitlCampain(campainId);

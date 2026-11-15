@@ -26,11 +26,7 @@ import com.vt.cms.product.domain.repository.ProductRepository;
 import com.vt.cms.product.domain.repository.ProductSkuRepository;
 // import com.vt.cms.service.ProductReviewService;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -414,13 +410,16 @@ public class ProductServiceImpl implements ProductService {
   }
 
   @Override
-  public ProductDetailResponse product_detail(Integer campaign_id, Integer product_id) {
+  public ProductDetailResponse product_detail(Integer product_id, Integer campaign_id) {
     ProductDetail product = productRepository.getproduct1(product_id, campaign_id);
 
     if (product == null) {
       return null;
     }
+
     ProductDetailResponse response = new ProductDetailResponse();
+    System.out.println("A" + product.getAttributesName());
+
     response.setName(product.getName());
     response.setId(product.getId());
     response.setCampaignEndAt(product.getCampaignEndAt());
@@ -433,29 +432,34 @@ public class ProductServiceImpl implements ProductService {
     response.setCampaignDescription(product.getCampaignDescription());
     response.setCampaignDiscount(product.getCampaignDiscount());
     response.setPriceCampaign(product.getPriceCampaign());
-
     response.setStatus(product.getStatus());
     response.setTypeProductsName(product.getTypeProductsName());
     response.setAttributesName(product.getAttributesName());
-    response.setSkus(product.getSkus());
-
+    response.setSkus(parseJson(product.getSkus(), new TypeReference<List<SkuResponse>>() {}));
     response.setCampaignStatus(product.getCampaignStatus());
+    response.setRatingAvg(0.0);
+    response.setTotalSold(0);
     response.setCreateAt(product.getCreateAt());
-
+    /* TODO  Xem lại các trường sau
+      "priceCampaign": null,
+    "priceDiscountCampaign": null,
+    "updateAt": null,
+    "approvedTime": null,
+     */
     /* * Tìm SKU có giá sau giảm thấp nhất */
-    if (product.getSkus() != null && !product.getSkus().isEmpty()) {
-      SkuResponse minPriceSku =
-          product.getSkus().stream()
-              .filter(sku -> sku.getPriceDiscountCampaign() != null)
-              .min(Comparator.comparing(SkuResponse::getPriceDiscountCampaign))
-              .orElse(null);
-      if (minPriceSku != null) {
-        // Giá gốc của chính SKU có giá sau giảm thấp nhất
-        response.setPriceCampaign(minPriceSku.getPriceCampaign());
-        // Giá sau giảm thấp nhất
-        response.setPriceDiscountCampaign(minPriceSku.getPriceDiscountCampaign());
-      }
-    }
+    //        if (product.getSkus() != null && !product.getSkus().isEmpty()) {
+    //          SkuResponse minPriceSku =
+    //              product.getSkus().stream()
+    //                  .filter(sku -> sku.getPriceDiscountCampaign() != null)
+    //                  .min(Comparator.comparing(SkuResponse::getPriceDiscountCampaign))
+    //                  .orElse(null);
+    //          if (minPriceSku != null) {
+    //            // Giá gốc của chính SKU có giá sau giảm thấp nhất
+    //            response.setPriceCampaign(minPriceSku.getPriceCampaign());
+    //            // Giá sau giảm thấp nhất
+    //            response.setPriceDiscountCampaign(minPriceSku.getPriceDiscountCampaign());
+    //          }
+    //        }
 
     return response;
   }

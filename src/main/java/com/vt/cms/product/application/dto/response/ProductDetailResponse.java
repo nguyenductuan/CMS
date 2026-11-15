@@ -1,33 +1,32 @@
 package com.vt.cms.product.application.dto.response;
 
-import lombok.Data;
-
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
+import lombok.Data;
 
 @Data
 public class ProductDetailResponse {
-    private Integer id;
-    private Integer campaignId;
-    private String name;
-    private BigDecimal priceCampaign;
-    private BigDecimal priceDiscountCampaign;
-    private String description;
-    private String status;
-    private LocalDateTime createAt;
-    private LocalDateTime updateAt;
-    private LocalDateTime approvedTime;
-    private String campaignStatus;
-    private String campaignCode;
-    private String campaignName;
-    private String campaignDescription;
-    private BigDecimal campaignDiscount;
-    private String attributesName;
-    private String typeProductsName;
-    private List<SkuResponse> skus;
-    private Integer totalSold;
-    private BigDecimal ratingAvg;
-    private LocalDateTime campaignStartAt;
-    private LocalDateTime campaignEndAt;
+  private Integer id;
+  private Integer campaignId;
+  private String name;
+  private BigDecimal priceCampaign;
+  private BigDecimal priceDiscountCampaign;
+  private String description;
+  private String status;
+  private LocalDateTime createAt;
+  private LocalDateTime updateAt;
+  private LocalDateTime approvedTime;
+  private String campaignStatus;
+  private String campaignCode;
+  private String campaignName;
+  private String campaignDescription;
+  private BigDecimal campaignDiscount;
+  private String attributesName;
+  private String typeProductsName;
+  private List<SkuResponse> skus;
+  private Integer totalSold;
+  private Double ratingAvg;
+  private LocalDateTime campaignStartAt;
+  private LocalDateTime campaignEndAt;
 }

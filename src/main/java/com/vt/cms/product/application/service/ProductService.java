@@ -31,5 +31,5 @@ public interface ProductService {
   void deleteProduct(Integer product_id);
 
   /** Thực hiện product_detail. Tham số và kết quả tuân theo chữ ký phương thức. */
-  ProductDetailResponse product_detail(Integer campaign_id, Integer product_id);
+  ProductDetailResponse product_detail(Integer product_id, Integer campaign_id);
 }

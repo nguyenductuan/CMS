@@ -1,78 +1,70 @@
 package com.vt.cms.product.domain.entity;
 
-import com.vt.cms.product.application.dto.response.SkuResponse;
-import lombok.Data;
-
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
-import java.util.List;
+import lombok.Data;
 
 @Data
 public class ProductDetail {
 
-    // =========================
-    // Product
-    // =========================
+  // =========================
+  // Product
+  // =========================
 
-    private Integer id;
+  private Integer id;
 
-    private Integer campaignId;
+  private Integer campaignId;
 
-    private String name;
+  private String name;
 
-    private BigDecimal priceCampaign;
+  private BigDecimal priceCampaign;
 
-    private BigDecimal priceDiscountCampaign;
+  private BigDecimal priceDiscountCampaign;
 
-    private String description;
+  private String description;
 
-    private String status;
+  private String status;
 
-    private LocalDateTime createAt;
+  private LocalDateTime createAt;
 
-    private LocalDateTime updateAt;
+  private LocalDateTime updateAt;
 
-    private LocalDateTime approvedTime;
+  private LocalDateTime approvedTime;
 
+  // =========================
+  // Campaign
+  // =========================
 
-    // =========================
-    // Campaign
-    // =========================
+  private String campaignStatus;
 
-    private String campaignStatus;
+  private String campaignName;
+  private String campaignDescription;
+  private BigDecimal campaignDiscount;
 
-    private String campaignName;
-    private String campaignDescription;
-    private BigDecimal campaignDiscount;
+  private LocalDateTime campaignStartAt;
 
+  private LocalDateTime campaignEndAt;
 
+  // =========================
+  // Product attributes
+  // =========================
 
-    private LocalDateTime campaignStartAt;
+  private String attributesName;
 
-    private LocalDateTime campaignEndAt;
+  private String typeProductsName;
 
+  // =========================
+  // SKU
+  // =========================
 
-    // =========================
-    // Product attributes
-    // =========================
+  //    private List<SkuResponse> skus;
+  private String skus;
 
-    private String attributesName;
+  // =========================
+  // Statistics
+  // =========================
 
-    private String typeProductsName;
+  private Integer totalSold;
 
-
-    // =========================
-    // SKU
-    // =========================
-
-    private List<SkuResponse> skus;
-
-
-    // =========================
-    // Statistics
-    // =========================
-
-    private Integer totalSold;
-
-    private BigDecimal ratingAvg;
-    }
+  private BigDecimal ratingAvg;
+}
