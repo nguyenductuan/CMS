@@ -4,7 +4,7 @@
 <mapper namespace="com.vt.cms.campain.domain.repository.CampainRepository">
 
     <resultMap id="CampainResultMap" type="com.vt.cms.campain.domain.enity.Campain">
-        <id column="id" property="campainid" jdbcType="INTEGER"/>
+        <id property="campainId" column="id"/>
         <result column="created_at" property="createdAt" jdbcType="TIMESTAMP"/>
         <result column="created_by" property="createdBy" jdbcType="VARCHAR"/>
         <result column="is_deleted" property="isDeleted" jdbcType="VARCHAR"/>
@@ -20,7 +20,7 @@
         <result column="description" property="description" jdbcType="VARCHAR"/>
 
     </resultMap>
-    <select id="getCampainById" resultType="com.vt.cms.campain.domain.enity.Campain">
+    <select id="getCampainById" resultMap="CampainResultMap">
         SELECT *
         FROM campaign
         WHERE id = #{campain_id}

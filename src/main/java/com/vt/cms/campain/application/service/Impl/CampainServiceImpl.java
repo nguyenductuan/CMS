@@ -242,6 +242,13 @@ public class CampainServiceImpl implements CampainService {
   }
 
   @Override
+  public Campain deaitlCampain(Integer campainId) {
+    Campain campain = campainRepository.getCampainById(campainId);
+    campain.setCampainId(campain.getCampainId());
+    return campain;
+  }
+
+  @Override
   /** Lấy dữ liệu getlist */
   public BaseResponse<PagingResponse<List<CampainResponse>>> getlist(Pagerequest request) {
     if (request == null) throw new BusinessException(MessageCode.PAGE_NOT_FOUND);

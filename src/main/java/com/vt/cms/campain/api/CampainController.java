@@ -6,6 +6,7 @@ import com.vt.cms.base.response.BaseResponse;
 import com.vt.cms.campain.application.dto.request.CreatedCampainRequest;
 import com.vt.cms.campain.application.dto.response.CampainResponse;
 import com.vt.cms.campain.application.service.CampainService;
+import com.vt.cms.campain.domain.enity.Campain;
 import com.vt.cms.campain.domain.enums.CampainStatus;
 import com.vt.cms.model.dto.page.PagingResponse;
 import com.vt.cms.security.JwtAuthenticationFilter;
@@ -70,6 +71,11 @@ public class CampainController {
   }
 
   // Chi tiết chiến dịch
+  @GetMapping("/deaitlCampain/{id}")
+  public ResponseEntity<APIRessponse> deaitlCampain(@PathVariable("id") Integer campainId) {
+    Campain response = campainService.deaitlCampain(campainId);
+    return ResponseEntity.ok(new APIRessponse(200, "Thành công", response));
+  }
 
   // Xóa chiến dịch
   @DeleteMapping("/deletecampain/{id}")
