@@ -31,7 +31,6 @@ import org.springframework.stereotype.Service;
 @Service
 public class CampainServiceImpl implements CampainService {
 
-  private static final String SYSTEM_USER = "SYSTEM";
   private static final String ACTIVE_STATUS = "ACTIVE";
   private static final String NOT_DELETED = "false";
 
@@ -66,14 +65,14 @@ public class CampainServiceImpl implements CampainService {
   @Override
   @Transactional
   /** Tạo mới dữ liệu created campain. Các tham số và kết quả tuân theo chữ ký phương thức. */
-  public void createdCampain(CreatedCampainRequest request) {
+  public void createdCampain(CreatedCampainRequest request, Integer userId) {
     log.info("Start creating campaign");
 
     // 1. Kiểm tra dữ liệu đầu vào trước khi ghi DB.
     campaignRequestValidator.validate(request);
 
     // 2. Tạo entity campaign từ request.
-    Campain campaign = campaignEntityMapper.toNewCampaign(request);
+    Campain campaign = campaignEntityMapper.toNewCampaign(request, userId);
 
     // 3. Lưu campaign trước để lấy ID cho bảng chi tiết.
     campainRepository.savecampain(campaign);
@@ -212,7 +211,7 @@ public class CampainServiceImpl implements CampainService {
     campaignProduct.setStockCampaign(skuRequest.getStock_campaign());
     campaignProduct.setStatus(skuRequest.getStatus());
     campaignProduct.setCreatedAt(LocalDateTime.now());
-    campaignProduct.setCreatedBy(SYSTEM_USER);
+    //    campaignProduct.setCreatedBy(SYSTEM_USER);
     campaignProduct.setIsDeleted(NOT_DELETED);
 
     return campaignProduct;
@@ -220,7 +219,7 @@ public class CampainServiceImpl implements CampainService {
 
   @Override
   /** Cập nhật dữ liệu updatestatus. Các tham số và kết quả tuân theo chữ ký phương thức. */
-  public void updatestatus(Integer campain_id, CampainStatus status) {
+  public void updatestatus(Integer campain_id, CampainStatus status, Integer userId) {
     if (campain_id == null || campain_id <= 0 || status == null) {
       throw new BusinessException(MessageCode.CAMPAIGN_ID_VA_TRANG_THAI_LA_BAT_BUOC);
     }
@@ -228,17 +227,31 @@ public class CampainServiceImpl implements CampainService {
     if (campaign == null || "true".equalsIgnoreCase(campaign.getIsDeleted())) {
       throw new BusinessException(MessageCode.CAMPAIGN_NOT_FOUND);
     }
-    if (campaign.getStatus() != CampainStatus.PENDING_APPROVAL
-        || (status != CampainStatus.APPROVED && status != CampainStatus.REJECTED)) {
+    // duyệt campain đối với trạng thái chờ duyệt và từ chối, chỉ được từ chối chiến dịch đối với đã
+    // TODO: Cần xem xét lại logic này
+    CampainStatus currentStatus = campaign.getStatus();
+
+    boolean isValid =
+        (currentStatus == CampainStatus.PENDING_APPROVAL
+                && (status == CampainStatus.APPROVED || status == CampainStatus.REJECTED))
+            || (currentStatus == CampainStatus.APPROVED && status == CampainStatus.REJECTED);
+
+    if (!isValid) {
       throw new BusinessException(MessageCode.CAMPAIN_STATUS_INVALID);
     }
-    int rows = campainRepository.updatestatus(campain_id, status);
+
+    int rows = campainRepository.updatestatus(campain_id, status, userId);
     if (rows != 1) throw new BusinessException(MessageCode.CAMPAIN_STATUS_INVALID);
   }
 
   @Override
-  /** Lấy dữ liệu getlist. Các tham số và kết quả tuân theo chữ ký phương thức. */
+  /** Lấy dữ liệu getlist */
   public BaseResponse<PagingResponse<List<CampainResponse>>> getlist(Pagerequest request) {
+    if (request == null) throw new BusinessException(MessageCode.PAGE_NOT_FOUND);
+    if (request.getPageNo() == null || request.getPageNo() < 0)
+      throw new BusinessException(MessageCode.PAGE_NO_MUST_BE_GREATER_THAN_OR_EQUAL_TO_0);
+    if (request.getPageSize() == null || request.getPageSize() < 1 || request.getPageSize() > 100)
+      throw new BusinessException(MessageCode.PAGE_SIZE_MUST_BE_BETWEEN_1_AND_100);
     // Lấy danh sách chiên dịch
     List<CampainResponse> campainResponses = campainRepository.getlistcampain(request);
     // Tinhs số lượng bản ghi
@@ -263,13 +276,18 @@ public class CampainServiceImpl implements CampainService {
   }
 
   @Override
-  /** Xóa dữ liệu deletecampain. Các tham số và kết quả tuân theo chữ ký phương thức. */
-  public void deletecampain(Integer campainID) {
+  /** Xóa dữ liệu deletecampain */
+  public void deletecampain(Integer campainID, Integer userId) {
     if (campainID == null || campainID <= 0)
       throw new BusinessException(MessageCode.CAMPAIGN_ID_KHONG_HOP_LE);
-    int rows = campainRepository.deletecampain(campainID);
-    if (rows != 1)
-      throw new IllegalStateException(
-          "Không thể xóa chiến dịch: chiến dịch không tồn tại hoặc trạng thái không cho phép");
+    // Chỉ cho phép xóa chiến dịch đang chờ duyệt
+    // TODO: Cần xem xét lại logic này
+    Campain campaign = campainRepository.getCampainById(campainID);
+    CampainStatus currentStatus = campaign.getStatus();
+    if (currentStatus != CampainStatus.PENDING_APPROVAL) {
+      throw new BusinessException(MessageCode.CAMPAIN_STATUS_INVALID);
+    }
+    int rows = campainRepository.deletecampain(campainID, userId);
+    if (rows != 1) throw new BusinessException(MessageCode.CAMPAIN_DELETE_FAILED);
   }
 }

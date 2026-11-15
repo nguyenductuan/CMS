@@ -7,6 +7,13 @@ public enum MessageCode {
   PRODUCT_APPROVE_FAILED("E004", "Duyệt sản phẩm thất bại"),
   PRODUCT_REJECT_FAILED("E005", "Từ chối sản phẩm thất bại"),
   PRODUCT_NOT_IN_REJECT("E006", "Trạng thái sản phẩm không được từ chối"),
+  // Phân trang
+  PAGE_NO_MUST_BE_GREATER_THAN_OR_EQUAL_TO_0("E007", "pageNo phải >= 0"),
+  PAGE_SIZE_MUST_BE_BETWEEN_1_AND_100("E008", "pageSize phải nằm trong khoảng 1..100"),
+  PAGE_NOT_FOUND("E009", "Thông tin phân trang không đợc để trống"),
+
+  // Chiến dịch
+  CAMPAIN_DELETE_FAILED("E010", "Xo chiến dịch không thành công"),
   SHIPPING_NOT_FOUND("SHIPPING_NOT_FOUND", "Phương thức vận chuyển không tồn tại"),
   INVALID_SHIPPING_FEE("INVALID_SHIPPING_FEE", "Phí vận chuyển không hợp lệ"),
   INVALID_ORDER("INVALID_ORDER", "Thông tin đơn hàng không hợp lệ"),

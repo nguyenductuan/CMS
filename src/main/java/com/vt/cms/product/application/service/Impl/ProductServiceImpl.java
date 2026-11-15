@@ -279,12 +279,11 @@ public class ProductServiceImpl implements ProductService {
   @Override
   // Danh sách sản phẩm
   public BaseResponse<PagingResponse<List<ProductResponse>>> listproduct(Pagerequest request) {
-    if (request == null)
-      throw new BusinessException(MessageCode.THONG_TIN_PHAN_TRANG_KHONG_DUOC_DE_TRONG);
+    if (request == null) throw new BusinessException(MessageCode.PAGE_NOT_FOUND);
     if (request.getPageNo() == null || request.getPageNo() < 0)
-      throw new BusinessException(MessageCode.PAGENO_PHAI_0);
+      throw new BusinessException(MessageCode.PAGE_NO_MUST_BE_GREATER_THAN_OR_EQUAL_TO_0);
     if (request.getPageSize() == null || request.getPageSize() < 1 || request.getPageSize() > 100)
-      throw new BusinessException(MessageCode.PAGESIZE_PHAI_NAM_TRONG_KHOANG_1_100);
+      throw new BusinessException(MessageCode.PAGE_SIZE_MUST_BE_BETWEEN_1_AND_100);
     List<ProductResponse> product = productRepository.listproduct(request);
 
     for (ProductResponse item : product) {

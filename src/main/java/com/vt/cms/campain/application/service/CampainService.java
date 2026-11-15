@@ -10,14 +10,14 @@ import java.util.List;
 
 public interface CampainService {
   /** Tạo mới created campain. Tham số và kết quả tuân theo chữ ký phương thức. */
-  void createdCampain(CreatedCampainRequest request);
+  void createdCampain(CreatedCampainRequest request, Integer userId);
 
   /** Cập nhật updatestatus. Tham số và kết quả tuân theo chữ ký phương thức. */
-  void updatestatus(Integer campain_id, CampainStatus status);
+  void updatestatus(Integer campain_id, CampainStatus status, Integer userId);
 
   /** Lấy dữ liệu getlist. Tham số và kết quả tuân theo chữ ký phương thức. */
   BaseResponse<PagingResponse<List<CampainResponse>>> getlist(Pagerequest request);
 
   /** Xóa deletecampain. Tham số và kết quả tuân theo chữ ký phương thức. */
-  void deletecampain(Integer campainID);
+  void deletecampain(Integer campainID, Integer userId);
 }

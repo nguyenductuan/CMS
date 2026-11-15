@@ -31,34 +31,62 @@
             parameterType="com.vt.cms.product.domain.entity.Product_Sku"
             useGeneratedKeys="true"
             keyProperty="id">
-        INSERT INTO product_sku (
-            product_id, height_cm, length_cm, width_cm, weight_gram,
-            type_product, stock, status, sku_code, price, image_url,
-            attribute, created_by, is_deleted, created_at
-        )
-        VALUES (
-            #{product_id}, #{height_cm}, #{length_cm}, #{width_cm}, #{weight_gram},
-            #{type_product}, #{stock}, #{status}, #{sku_code}, #{price}, #{image_url},
-            #{attribute}, #{created_by}, #{is_deleted}, #{created_at}
-        )
+        INSERT INTO product_sku (product_id, height_cm, length_cm, width_cm, weight_gram,
+                                 type_product, stock, status, sku_code, price, image_url,
+                                 attribute, created_by, is_deleted, created_at)
+        VALUES (#{product_id}, #{height_cm}, #{length_cm}, #{width_cm}, #{weight_gram},
+                #{type_product}, #{stock}, #{status}, #{sku_code}, #{price}, #{image_url},
+                #{attribute}, #{created_by}, #{is_deleted}, #{created_at})
     </insert>
 
     <select id="findByProductId"
             parameterType="java.lang.Integer"
             resultMap="Product_SkuResultMap">
-        SELECT id, created_at, created_by, is_deleted, updated_at, updated_by,
-               attribute, height_cm, length_cm, width_cm, weight_gram,
-               product_id, stock, type_product, price, image_url, sku_code, status
+        SELECT id,
+               created_at,
+               created_by,
+               is_deleted,
+               updated_at,
+               updated_by,
+               attribute,
+               height_cm,
+               length_cm,
+               width_cm,
+               weight_gram,
+               product_id,
+               stock,
+               type_product,
+               price,
+               image_url,
+               sku_code,
+               status
         FROM product_sku
         WHERE product_id = #{product_id}
           AND is_deleted = 'false'
+          AND status = 'ACTIVE'
+
         ORDER BY id DESC
     </select>
 
     <select id="findNotDeletedById" resultMap="Product_SkuResultMap">
-        SELECT id, created_at, created_by, is_deleted, updated_at, updated_by,
-               attribute, height_cm, length_cm, width_cm, weight_gram,
-               product_id, stock, type_product, price, image_url, sku_code, status
+        SELECT id,
+               created_at,
+               created_by,
+               is_deleted,
+               updated_at,
+               updated_by,
+               attribute,
+               height_cm,
+               length_cm,
+               width_cm,
+               weight_gram,
+               product_id,
+               stock,
+               type_product,
+               price,
+               image_url,
+               sku_code,
+               status
         FROM product_sku
         WHERE id = #{skuId}
           AND is_deleted = 'false'
@@ -67,24 +95,27 @@
 
     <update id="softDeleteByProductId">
         UPDATE product_sku
-        SET is_deleted = 'true', updated_at = NOW(), updated_by = 'SYSTEM'
-        WHERE product_id = #{productId} AND is_deleted = 'false'
+        SET is_deleted = 'true',
+            updated_at = NOW(),
+            updated_by = 'SYSTEM'
+        WHERE product_id = #{productId}
+          AND is_deleted = 'false'
     </update>
 
     <update id="updateByProductIdAndSkuCode">
         UPDATE product_sku
-        SET height_cm = #{sku.height_cm},
-            width_cm = #{sku.width_cm},
-            length_cm = #{sku.length_cm},
-            weight_gram = #{sku.weight_gram},
+        SET height_cm    = #{sku.height_cm},
+            width_cm     = #{sku.width_cm},
+            length_cm    = #{sku.length_cm},
+            weight_gram  = #{sku.weight_gram},
             type_product = #{sku.type_product},
-            stock = #{sku.stock},
-            status = #{sku.status},
-            price = #{sku.price},
-            image_url = #{sku.image_url},
-            attribute = #{sku.attribute},
-            updated_at = #{sku.updated_at},
-            updated_by = #{sku.updated_by}
+            stock        = #{sku.stock},
+            status       = #{sku.status},
+            price        = #{sku.price},
+            image_url    = #{sku.image_url},
+            attribute    = #{sku.attribute},
+            updated_at   = #{sku.updated_at},
+            updated_by   = #{sku.updated_by}
         WHERE product_id = #{sku.product_id}
           AND sku_code = #{sku.sku_code}
           AND is_deleted = 'false'

@@ -30,7 +30,7 @@
         UPDATE campaign
         SET status     = #{status},
             updated_at = NOW(),
-            updated_by = 'SYSTEM'
+            updated_by = #{userId}
         WHERE id = #{campain_id}
           AND is_deleted = 'false'
           AND status = 'PENDING_APPROVAL'
@@ -40,7 +40,7 @@
         UPDATE campaign
         SET is_deleted = 'true',
             updated_at = NOW(),
-            updated_by = 'SYSTEM'
+            updated_by = #{userId}
         WHERE id = #{campain_id}
           AND is_deleted = 'false'
           AND status IN ('PENDING_APPROVAL', 'REJECTED')
@@ -50,6 +50,7 @@
         FROM campaign c
         WHERE c.is_deleted = 'false'
         ORDER BY c.created_at DESC, c.id DESC
+        LIMIT #{pageSize} OFFSET #{offset}
     </select>
 
     <insert id="savecampain" parameterType="com.vt.cms.campain.domain.enity.Campain"
