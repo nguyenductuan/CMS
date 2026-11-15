@@ -24,7 +24,6 @@ import jakarta.transaction.Transactional;
 import java.time.LocalDateTime;
 import java.util.List;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.scheduling.config.ScheduledTaskHolder;
 import org.springframework.stereotype.Service;
 
 @Slf4j
@@ -37,7 +36,6 @@ public class CampainServiceImpl implements CampainService {
   private final CampainRepository campainRepository;
   private final CampainProductRepository campainProductRepository;
   private final ProductSkuRepository productSkuRepository;
-  private final ScheduledTaskHolder scheduledTaskHolder;
   private final CampaignRequestValidator campaignRequestValidator;
   private final CampaignEntityMapper campaignEntityMapper;
 
@@ -45,14 +43,12 @@ public class CampainServiceImpl implements CampainService {
       CampainRepository campainRepository,
       CampainProductRepository campainProductRepository,
       ProductSkuRepository productSkuRepository,
-      ScheduledTaskHolder scheduledTaskHolder,
       CampaignRequestValidator campaignRequestValidator,
       CampaignEntityMapper campaignEntityMapper) {
 
     this.campainRepository = campainRepository;
     this.campainProductRepository = campainProductRepository;
     this.productSkuRepository = productSkuRepository;
-    this.scheduledTaskHolder = scheduledTaskHolder;
     this.campaignRequestValidator = campaignRequestValidator;
     this.campaignEntityMapper = campaignEntityMapper;
   }
@@ -77,7 +73,7 @@ public class CampainServiceImpl implements CampainService {
     // 3. Lưu campaign trước để lấy ID cho bảng chi tiết.
     campainRepository.savecampain(campaign);
 
-    Integer campaignId = campaign.getCampainid();
+    Integer campaignId = campaign.getCampainId();
     if (campaignId == null) {
       log.error("Failed to create campaign: generated campaign ID is null");
       throw new IllegalStateException("Campaign ID was not generated after saving");
@@ -94,7 +90,7 @@ public class CampainServiceImpl implements CampainService {
     for (CampainProductRequest productRequest : request.getProducts()) {
       savedSkuCount += saveProductSkus(campaignId, productRequest);
     }
-
+    // TODO: Check số lượng bán trong chiến diịch <= sl của từng sku trong kho
     log.info(
         "Campaign creation completed. campaignId={}, savedSkuCount={}", campaignId, savedSkuCount);
   }
@@ -218,28 +214,29 @@ public class CampainServiceImpl implements CampainService {
   }
 
   @Override
-  /** Cập nhật dữ liệu updatestatus. Các tham số và kết quả tuân theo chữ ký phương thức. */
+  /** Cập nhật dữ liệu updatestatus */
   public void updatestatus(Integer campain_id, CampainStatus status, Integer userId) {
+    // Kiểm tra dữ liệu đầu vào
     if (campain_id == null || campain_id <= 0 || status == null) {
       throw new BusinessException(MessageCode.CAMPAIGN_ID_VA_TRANG_THAI_LA_BAT_BUOC);
     }
     Campain campaign = campainRepository.getCampainById(campain_id);
+    // Kiểm tra chiến dịch tồn tại và chưa bị xóa
     if (campaign == null || "true".equalsIgnoreCase(campaign.getIsDeleted())) {
       throw new BusinessException(MessageCode.CAMPAIGN_NOT_FOUND);
     }
-    // duyệt campain đối với trạng thái chờ duyệt và từ chối, chỉ được từ chối chiến dịch đối với đã
+    // Chỉ được duyệt hoặc từ chối đối với chiến dịch trạng tha Chờ duyệt
     // TODO: Cần xem xét lại logic này
     CampainStatus currentStatus = campaign.getStatus();
-
     boolean isValid =
-        (currentStatus == CampainStatus.PENDING_APPROVAL
-                && (status == CampainStatus.APPROVED || status == CampainStatus.REJECTED))
-            || (currentStatus == CampainStatus.APPROVED && status == CampainStatus.REJECTED);
+        (currentStatus == CampainStatus.PENDING
+            && (status == CampainStatus.APPROVED || status == CampainStatus.REJECTED));
 
     if (!isValid) {
       throw new BusinessException(MessageCode.CAMPAIN_STATUS_INVALID);
     }
-
+    //    int rows = campainRepository.savecampain(campain_id, status, userId);
+    // ToDO: Có thể dùng 1 hàm save campain để có thể chung sửa campain
     int rows = campainRepository.updatestatus(campain_id, status, userId);
     if (rows != 1) throw new BusinessException(MessageCode.CAMPAIN_STATUS_INVALID);
   }
@@ -277,17 +274,44 @@ public class CampainServiceImpl implements CampainService {
 
   @Override
   /** Xóa dữ liệu deletecampain */
-  public void deletecampain(Integer campainID, Integer userId) {
-    if (campainID == null || campainID <= 0)
+  public void deletecampain(Integer campainId, Integer userId) {
+    if (campainId == null || campainId <= 0)
       throw new BusinessException(MessageCode.CAMPAIGN_ID_KHONG_HOP_LE);
     // Chỉ cho phép xóa chiến dịch đang chờ duyệt
     // TODO: Cần xem xét lại logic này
-    Campain campaign = campainRepository.getCampainById(campainID);
+    Campain campaign = campainRepository.getCampainById(campainId);
     CampainStatus currentStatus = campaign.getStatus();
-    if (currentStatus != CampainStatus.PENDING_APPROVAL) {
+    if (currentStatus != CampainStatus.PENDING) {
       throw new BusinessException(MessageCode.CAMPAIN_STATUS_INVALID);
     }
-    int rows = campainRepository.deletecampain(campainID, userId);
+    int rows = campainRepository.deletecampain(campainId, userId);
     if (rows != 1) throw new BusinessException(MessageCode.CAMPAIN_DELETE_FAILED);
+  }
+
+  public void finishCampain(Integer campainId, Integer userId) {
+    /**
+     * Cập nhật trnajg thái campain thành FINISH Lấy danh sách đơn hàng c trạng thái Chờ thanh toán
+     * Lấy danh sách đơn hàng Chờ giao, Đang giao, Đã giao, Dã hoàn thành Hủy đơn haàng đối với đơn
+     * chờ thaành toán (tác nhân là Seller hoặc role người kết thuc chiến dịch)
+     */
+    // Kiểm tra dữ liệu đầu vào
+    if (campainId == null || campainId <= 0) {
+      throw new BusinessException(MessageCode.CAMPAIGN_ID_VA_TRANG_THAI_LA_BAT_BUOC);
+    }
+    Campain campaign = campainRepository.getCampainById(campainId);
+    // Kiểm tra chiến dịch tồn tại và chưa bị xóa
+    if (campaign == null || "true".equalsIgnoreCase(campaign.getIsDeleted())) {
+      throw new BusinessException(MessageCode.CAMPAIGN_NOT_FOUND);
+    }
+    CampainStatus currentStatus = campaign.getStatus();
+    boolean isValid = (currentStatus == CampainStatus.APPROVED);
+    if (!isValid) {
+      throw new BusinessException(MessageCode.CAMPAIN_STATUS_INVALID);
+    }
+    campaign.setCampainId(campainId);
+    campaign.setStatus(CampainStatus.FINISHED);
+    campaign.setUpdatedBy(userId.toString());
+    campainRepository.finishCampain(campaign);
+    // TODO: Xử lý đơn hàng khi hủy chiến dịch
   }
 }

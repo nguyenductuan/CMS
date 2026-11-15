@@ -16,6 +16,8 @@ public interface CampainRepository {
 
   void savecampain(Campain campain);
 
+  void finishCampain(Campain campain);
+
   int updatestatus(
       @Param("campain_id") Integer campainId,
       @Param("status") CampainStatus status,

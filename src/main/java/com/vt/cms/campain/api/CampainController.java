@@ -47,7 +47,7 @@ public class CampainController {
     return campainService.getlist(request);
   }
 
-  // Thay đổi trạng thái chiến dịch(Duyệt, kết thúc chiến dịch)
+  // Thay đổi trạng thái chiến dịch
   @PutMapping("/status/{id}/{status}")
   public ResponseEntity<APIRessponse> updateCampain(
       @PathVariable("id") Integer campain_id,
@@ -58,6 +58,18 @@ public class CampainController {
     campainService.updatestatus(campain_id, status, userId);
     return ResponseEntity.ok(new APIRessponse(200, "Cập nhật trạng thái thành công"));
   }
+
+  // Kết thúc chiến dịch
+  @PutMapping("/finish_campain/{id}")
+  public ResponseEntity<APIRessponse> finishCampain(
+      @PathVariable("id") Integer campainId, HttpServletRequest request) {
+    log.info("Start finish Campain");
+    Integer userID = (Integer) request.getAttribute(JwtAuthenticationFilter.USER_ID_ATTRIBUTE);
+    campainService.finishCampain(campainId, userID);
+    return ResponseEntity.ok(new APIRessponse(200, "Kết thúc chiến dịch thành công"));
+  }
+
+  // Chi tiết chiến dịch
 
   // Xóa chiến dịch
   @DeleteMapping("/deletecampain/{id}")

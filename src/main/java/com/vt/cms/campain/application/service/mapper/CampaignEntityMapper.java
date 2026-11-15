@@ -16,7 +16,7 @@ public class CampaignEntityMapper {
     campaign.setStartTime(request.getStartTime());
     campaign.setEndTime(request.getEndTime());
     campaign.setDiscount(request.getDiscount());
-    campaign.setStatus(CampainStatus.PENDING_APPROVAL);
+    campaign.setStatus(CampainStatus.PENDING);
     campaign.setCreatedAt(LocalDateTime.now());
     campaign.setCreatedBy(userId.toString());
     campaign.setIsDeleted("false");

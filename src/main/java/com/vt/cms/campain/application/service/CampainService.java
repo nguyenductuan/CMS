@@ -19,5 +19,7 @@ public interface CampainService {
   BaseResponse<PagingResponse<List<CampainResponse>>> getlist(Pagerequest request);
 
   /** Xóa deletecampain. Tham số và kết quả tuân theo chữ ký phương thức. */
-  void deletecampain(Integer campainID, Integer userId);
+  void deletecampain(Integer campainId, Integer userId);
+
+  void finishCampain(Integer campainId, Integer userId);
 }

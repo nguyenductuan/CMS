@@ -14,6 +14,7 @@ public enum MessageCode {
 
   // Chiến dịch
   CAMPAIN_DELETE_FAILED("E010", "Xo chiến dịch không thành công"),
+
   SHIPPING_NOT_FOUND("SHIPPING_NOT_FOUND", "Phương thức vận chuyển không tồn tại"),
   INVALID_SHIPPING_FEE("INVALID_SHIPPING_FEE", "Phí vận chuyển không hợp lệ"),
   INVALID_ORDER("INVALID_ORDER", "Thông tin đơn hàng không hợp lệ"),
