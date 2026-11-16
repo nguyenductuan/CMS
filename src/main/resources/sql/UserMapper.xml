@@ -1,19 +1,45 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="com.vt.cms.model.repository.UserRepository">
-        <resultMap id="UserResultMap" type="com.vt.cms.model.entity.User">
-            <id column="id" property="id" jdbcType="OTHER"/>
-            <result column="name" property="name" jdbcType="VARCHAR"/>
-            <result column="age" property="age" jdbcType="INTEGER"/>
-        </resultMap>
+<mapper namespace="com.vt.cms.account.domain.repository.UserRepository">
+    <resultMap id="UserResultMap" type="com.vt.cms.account.domain.enity.User">
+        <id column="id" property="id"/>
+        <result column="name" property="name"/>
+        <result column="age" property="age"/>
+        <result column="username" property="username"/>
+        <result column="password" property="password"/>
+        <result column="role" property="role"/>
+        <result column="phone" property="phone"/>
+        <result column="email" property="email"/>
+        <result column="address" property="address"/>
+        <result column="bank_name" property="bankName"/>
+        <result column="bank_account_number" property="bankAccountNumber"/>
+        <result column="bank_account_holder" property="bankAccountHolder"/>
+    </resultMap>
 
     <select id="getUser" resultMap="UserResultMap">
-        SELECT * FROM user
+        SELECT id, name, age, username, role FROM users
     </select>
 
     <select id="detailUser" resultMap="UserResultMap">
-        SELECT * FROM user where id = #{id}
+        SELECT id, name, age, username, role, phone, email, address, bank_name, bank_account_number, bank_account_holder FROM users WHERE id = #{id}
     </select>
 
-    </mapper>
+    <select id="findByUsername" resultMap="UserResultMap">
+        SELECT id, name, age, username, password, role, phone, email, address, bank_name, bank_account_number, bank_account_holder
+        FROM users
+        WHERE username = #{username}
+        LIMIT 1
+    </select>
+
+    <insert id="createUser" parameterType="com.vt.cms.account.domain.enity.User"
+            useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO users (name, age, username, password, role)
+        VALUES (#{name}, #{age}, #{username}, #{password}, #{role})
+    </insert>
+    <update id="updateBuyerProfile" parameterType="com.vt.cms.account.domain.enity.User">
+        UPDATE users SET name=COALESCE(#{name},name), age=COALESCE(#{age},age), phone=COALESCE(#{phone},phone), email=COALESCE(#{email},email), address=COALESCE(#{address},address),
+            bank_name=COALESCE(#{bankName},bank_name), bank_account_number=COALESCE(#{bankAccountNumber},bank_account_number), bank_account_holder=COALESCE(#{bankAccountHolder},bank_account_holder)
+        WHERE id=#{id} AND role='BUYER'
+    </update>
+</mapper>

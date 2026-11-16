@@ -1,147 +1,204 @@
-package com.vt.cms.service.Impl;
-import com.vt.cms.model.dto.PaymentRequest;
-import com.vt.cms.model.dto.Paymentcallback;
-import com.vt.cms.model.dto.order.Itemorderdetail;
-import com.vt.cms.model.entity.Order;
-import com.vt.cms.model.entity.Payment;
-import com.vt.cms.model.enums.OrderStatus;
-import com.vt.cms.model.enums.PaymentStatus;
-import com.vt.cms.model.repository.*;
-import com.vt.cms.model.resp.PaymentResponse;
-import com.vt.cms.service.PaymentService;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-import lombok.extern.slf4j.Slf4j;
-import java.math.BigDecimal;
-import java.time.LocalDateTime;
-import java.util.List;
-import java.util.Random;
-import java.util.UUID;
-
-@Service
-@Slf4j
-public class PaymentServiceImpl implements PaymentService{
-
-    private final PaymentRepostitory paymentRepostitory;
-    private final OrderRepository orderRepository;
-    private final CampainRepository campainRepository;
-    private final CampainProductRepository campainProductRepository;
-
-    public PaymentServiceImpl(PaymentRepostitory paymentRepostitory,
-                              OrderRepository orderRepository, CampainRepository campainRepository, CampainProductRepository campainProductRepository)
-    {
-        this.paymentRepostitory = paymentRepostitory;
-        this.orderRepository = orderRepository;
-        this.campainRepository = campainRepository;
-        this.campainProductRepository = campainProductRepository;
-    }
-    @Override
-    @Transactional(rollbackFor = Exception.class)
-    public void paymentcallback(Paymentcallback paymentcallback) {
-        //1. Validate request
-        if (paymentcallback == null ) {
-            throw new IllegalArgumentException("Invalid payment request");
-        }
-        if( paymentcallback.getTransactionCode() == null || paymentcallback.getTransactionCode().isEmpty()) {
-            throw new IllegalArgumentException("Transaction code is required");
-        }
-        if(paymentcallback.getAmount() == null || paymentcallback.getAmount().compareTo(BigDecimal.ZERO) <= 0) {
-            throw new IllegalArgumentException("Amount must be greater than zero");
-        }
-        //2. Find payment by transaction code
-        Payment payment = paymentRepostitory.paymentbytransaction(paymentcallback.getTransactionCode());
-        if (payment == null) {
-            throw new IllegalArgumentException("Payment not found");
-        }
-        //3. Validate amount
-        if (paymentcallback.getAmount().compareTo(payment.getAmount()) != 0) {
-            throw new IllegalArgumentException("Invalid payment amount");
-        }
-
-        //5. Find order
-        Order order = orderRepository.getorderbyId(payment.getOrderId());
-        if(order == null) {
-            throw new IllegalArgumentException("Order not found");
-        }
-
-        // 5. Prevent duplicate callback from deducting stock twice
-        if (PaymentStatus.PAYMENT_SUCCESS.getCode().equals(payment.getStatus()) || "SUCCESS".equalsIgnoreCase(payment.getStatus())) {
-            log.info("Duplicate payment callback ignored. orderId={}, transactionCode={}", payment.getOrderId(), paymentcallback.getTransactionCode());
-            return;
-        }
-        if (order.getOrder_status() != OrderStatus.WAIT_PAYMENT) {
-            log.warn("Payment callback rejected because order is not awaiting payment. orderId={}, status={}",
-                    order.getId(), order.getOrder_status());
-            throw new IllegalStateException("Đơn hàng không ở trạng thái chờ thanh toán");
-        }
-        //4. Update payment
-        paymentRepostitory.updatepayment(paymentcallback.getTransactionCode());
-
-        List<Itemorderdetail> orderItems = orderRepository.getOrderItemsByOrderId1(payment.getOrderId());
-
-        // 7. Deduct stock for the purchased SKU in Campaign
-        for (Itemorderdetail item : orderItems) {
-
-            // Process each item
-            int updatedRows =  campainProductRepository.deductStock(item.getCampaignId(),
-                    item.getSkuId(), item.getQuantity());
-
-            if (updatedRows == 0) {
-                throw new IllegalStateException(
-                        "SKU not found or insufficient campaign stock"
-                );
-            }
-        }
-
-        //6. update orrder
-        order.setOrder_status(OrderStatus.PAID);
-        order.setUpdatedAt(LocalDateTime.now());
-        order.setUpdated_by("SYSTEM");
-        orderRepository.save(order);
-        log.info("Payment confirmed. orderId={}, transactionCode={}, amount={}", payment.getOrderId(), paymentcallback.getTransactionCode(), paymentcallback.getAmount());
-    }
-
-    @Override
-    public PaymentResponse payment(PaymentRequest paymentRequest) {
-
-        // Sinh payment ID dạng số
-        String paymentId = String.valueOf(
-                System.currentTimeMillis()
-                        + new Random().nextInt(100000)
-        );
-
-        Payment payment = new Payment();
-        // Tạo mã giao dịch mock
-        String transactionCode = "VPO"
-                + UUID.randomUUID().toString()
-                .replace("-", "")
-                .substring(0, 13)
-                .toUpperCase();
-
-        LocalDateTime createdTime = LocalDateTime.now();
-        LocalDateTime expiredTime = createdTime.plusMinutes(15);
-        log.info("Creating mock payment. orderId={}, amount={}", paymentRequest.getOrderIds(), paymentRequest.getTotalPayment());
-
-        payment.setOrderId(paymentRequest.getOrderIds());
-        payment.setStatus("PENDING");
-        payment.setTransactionCode(transactionCode);
-        payment.setAmount(paymentRequest.getTotalPayment());
-        paymentRepostitory.save(payment);
-        PaymentResponse payment1= new PaymentResponse();
-
-        payment1.setPayment_id(paymentId);
-        payment1.setAmount(paymentRequest.getTotalPayment());
-        payment1.setTransaction_code(transactionCode);
-        payment1.setCreated_qr_time(createdTime);
-        payment1.setExpired_qr_time(expiredTime);
-        payment1.setQr_code(generateQRCode());
-
-        return payment1;
-    }
-    // Hàm sinh QR code
-    public String generateQRCode() {
-
-        return "00020101021238630010A000000727013300069704480119VPO1791609490961CMI0208QRIBFTTA530370454062267945802VN62230819VPO1791609490961CMI63049751";
-
-    }
-}
+//package com.vt.cms.service.Impl;
+//
+//
+//import com.vt.cms.Exception.BusinessException;
+//import com.vt.cms.model.enums.MessageCode;
+//import com.vt.cms.model.dto.PaymentRequest;
+//import com.vt.cms.model.dto.PaymentCallback;
+//import com.vt.cms.model.dto.order.Itemorderdetail;
+//import com.vt.cms.model.entity.Order;
+//import com.vt.cms.model.entity.Payment;
+//import com.vt.cms.model.enums.OrderStatus;
+//import com.vt.cms.model.enums.PaymentStatus;
+//import com.vt.cms.model.repository.CampainProductRepository;
+//import com.vt.cms.model.repository.OrderRepository;
+//import com.vt.cms.model.repository.PaymentRepository;
+//import com.vt.cms.model.resp.PaymentResponse;
+//import com.vt.cms.service.PaymentService;
+//import com.vt.cms.service.OrderHistoryService;
+//import lombok.extern.slf4j.Slf4j;
+//import org.springframework.stereotype.Service;
+//import org.springframework.transaction.annotation.Transactional;
+//
+//import java.math.BigDecimal;
+//import java.time.LocalDateTime;
+//import java.util.List;
+//import java.util.UUID;
+//
+//@Service
+//@Slf4j
+//public class PaymentServiceImpl implements PaymentService {
+//    private final PaymentRepository paymentRepository;
+//    private final OrderRepository orderRepository;
+//    private final CampainProductRepository campainProductRepository;
+//    private final OrderHistoryService orderHistoryService;
+//
+//    /**
+//     * Xử lý thanh toán payment service impl. Các tham số và kết quả tuân theo chữ ký phương thức.
+//     */
+//    public PaymentServiceImpl(
+//            PaymentRepository paymentRepository,
+//            OrderRepository orderRepository,
+//            CampainProductRepository campainProductRepository,
+//            OrderHistoryService orderHistoryService) {
+//        this.paymentRepository = paymentRepository;
+//        this.orderRepository = orderRepository;
+//        this.campainProductRepository = campainProductRepository;
+//        this.orderHistoryService = orderHistoryService;
+//    }
+//
+//    @Override
+//    @Transactional(rollbackFor = Exception.class)
+//    /**
+//     * Xử lý thanh toán paymentCallback. Các tham số và kết quả tuân theo chữ ký phương thức.
+//     */
+//    public void paymentCallback(PaymentCallback paymentCallback) {
+//        if (paymentCallback == null
+//                || paymentCallback.getTransactionCode() == null
+//                || paymentCallback.getTransactionCode().isBlank()
+//                || paymentCallback.getAmount() == null
+//                || paymentCallback.getAmount().compareTo(BigDecimal.ZERO) <= 0) {
+//            /**
+//             * Thực hiện xử lý nghiệp vụ illegal argument exception. Các tham số và kết quả tuân theo chữ ký phương thức.
+//             */
+//            throw new BusinessException(MessageCode.YEU_CAU_THANH_TOAN_KHONG_HOP_LE);
+//        }
+//
+//        Payment paymentLookup = paymentRepository.findByTransactionCode(
+//                paymentCallback.getTransactionCode());
+//        if (paymentLookup == null) {
+//            throw new BusinessException(MessageCode.KHONG_TIM_THAY_GIAO_DICH_THANH_TOAN);
+//        }
+//
+//        // Lock order first to serialize different payment sessions for the same order.
+//        Order order = orderRepository.getorderbyIdForUpdate(paymentLookup.getOrderId());
+//        if (order == null) {
+//            throw new BusinessException(MessageCode.KHONG_TIM_THAY_DON_HANG);
+//        }
+//        Payment payment = paymentRepository.findByTransactionCodeForUpdate(
+//                paymentCallback.getTransactionCode());
+//        if (payment == null) {
+//            throw new BusinessException(MessageCode.KHONG_TIM_THAY_GIAO_DICH_THANH_TOAN);
+//        }
+//        if (payment.getAmount() == null
+//                || paymentCallback.getAmount().compareTo(payment.getAmount()) != 0) {
+//            throw new BusinessException(MessageCode.SO_TIEN_THANH_TOAN_KHONG_HOP_LE);
+//        }
+//        if (order.getTotal() == null
+//                || paymentCallback.getAmount().compareTo(order.getTotal()) != 0) {
+//            /**
+//             * Thực hiện xử lý nghiệp vụ illegal argument exception. Các tham số và kết quả tuân theo chữ ký phương thức.
+//             */
+//            throw new BusinessException(MessageCode.SO_TIEN_CALLBACK_KHONG_KHOP_TONG_TIEN_DON_HANG);
+//        }
+//
+//        String paymentStatus = payment.getStatus();
+//        if ("SUCCESS".equalsIgnoreCase(paymentStatus)
+//                || PaymentStatus.PAYMENT_SUCCESS.getCode().equalsIgnoreCase(paymentStatus)) {
+//            log.info("Duplicate payment callback ignored. orderId={}, transactionCode={}",
+//                    payment.getOrderId(), paymentCallback.getTransactionCode());
+//            return;
+//        }
+//        if (!"PENDING".equalsIgnoreCase(paymentStatus)) {
+//            throw new IllegalStateException("Giao dịch không ở trạng thái chờ thanh toán");
+//        }
+//        if (order.getOrder_status() != OrderStatus.WAIT_PAYMENT) {
+//            throw new IllegalStateException("Đơn hàng không ở trạng thái chờ thanh toán");
+//        }
+//
+//        List<Itemorderdetail> orderItems =
+//                orderRepository.getOrderItemsByOrderId1(payment.getOrderId());
+//        if (orderItems == null || orderItems.isEmpty()) {
+//            throw new IllegalStateException("Đơn hàng không có sản phẩm để thanh toán");
+//        }
+//
+//        // All writes should participate in the same Spring transaction.
+//        // Atomic/idempotent stock updates should be enforced by the repository/database.
+//        for (Itemorderdetail item : orderItems) {
+//            if (item == null || item.getCampaignId() == null || item.getSkuId() == null
+//                    || item.getQuantity() <= 0) {
+//                throw new IllegalStateException("Chi tiết đơn hàng không hợp lệ");
+//            }
+//            int updatedRows = campainProductRepository.deductStock(
+//                    item.getCampaignId(), item.getSkuId(), item.getQuantity());
+//            if (updatedRows != 1) {
+//                throw new IllegalStateException("SKU không tồn tại hoặc không đủ tồn kho");
+//            }
+//        }
+//
+//        if (paymentRepository.markSuccessIfPending(paymentCallback.getTransactionCode()) != 1) {
+//            throw new IllegalStateException("Giao dịch không còn ở trạng thái chờ thanh toán");
+//        }
+//        order.setOrder_status(OrderStatus.PAID);
+//        order.setUpdatedAt(LocalDateTime.now());
+//        order.setUpdated_by("SYSTEM");
+//        orderRepository.save(order);
+//        orderHistoryService.record(order.getId(), "005", "PAID", "SYSTEM", "SYSTEM", "Đơn hàng đã thanh toán thành công, Nhà bán đang chuẩn bị hàng", "Cổng thanh toán xác nhận giao dịch thành công");
+//
+//        log.info("Payment confirmed. orderId={}, transactionCode={}, amount={}",
+//                payment.getOrderId(), paymentCallback.getTransactionCode(),
+//                paymentCallback.getAmount());
+//    }
+//
+//    @Override
+//    @Transactional(rollbackFor = Exception.class)
+//    /**
+//     * Xử lý thanh toán payment. Các tham số và kết quả tuân theo chữ ký phương thức.
+//     */
+//    public PaymentResponse payment(PaymentRequest paymentRequest) {
+//        if (paymentRequest == null
+//                || paymentRequest.getOrderIds() == null
+//                || paymentRequest.getOrderIds() <= 0
+//                || paymentRequest.getTotalPayment() == null
+//                || paymentRequest.getTotalPayment().compareTo(BigDecimal.ZERO) <= 0) {
+//            throw new BusinessException(MessageCode.THONG_TIN_TAO_THANH_TOAN_KHONG_HOP_LE);
+//        }
+//
+//        Order order = orderRepository.getorderbyIdForUpdate(paymentRequest.getOrderIds());
+//        if (order == null) {
+//            throw new BusinessException(MessageCode.KHONG_TIM_THAY_DON_HANG);
+//        }
+//        if (order.getOrder_status() != OrderStatus.WAIT_PAYMENT) {
+//            throw new IllegalStateException("Đơn hàng không ở trạng thái chờ thanh toán");
+//        }
+//        if (order.getTotal() == null
+//                || order.getTotal().compareTo(paymentRequest.getTotalPayment()) != 0) {
+//            throw new BusinessException(MessageCode.SO_TIEN_THANH_TOAN_KHONG_KHOP_TONG_TIEN_DON_HANG);
+//        }
+//        if (paymentRepository.countPendingByOrderId(order.getId()) > 0) {
+//            throw new IllegalStateException("Đơn hàng đã có giao dịch đang chờ thanh toán");
+//        }
+//
+//        String transactionCode = "VPO" + UUID.randomUUID().toString()
+//                .replace("-", "").substring(0, 13).toUpperCase();
+//
+//        LocalDateTime createdTime = LocalDateTime.now();
+//        LocalDateTime expiredTime = createdTime.plusMinutes(15);
+//
+//        Payment payment = new Payment();
+//        payment.setOrderId(paymentRequest.getOrderIds());
+//        payment.setStatus("PENDING");
+//        payment.setTransactionCode(transactionCode);
+//        payment.setAmount(paymentRequest.getTotalPayment());
+//        int insertedRows = paymentRepository.save(payment);
+//        if (insertedRows != 1 || payment.getId() == null) {
+//            throw new IllegalStateException("Không thể tạo bản ghi thanh toán");
+//        }
+//
+//        PaymentResponse response = new PaymentResponse();
+//        response.setPayment_id(String.valueOf(payment.getId()));
+//        response.setAmount(paymentRequest.getTotalPayment());
+//        response.setTransaction_code(transactionCode);
+//        response.setCreated_qr_time(createdTime);
+//        response.setExpired_qr_time(expiredTime);
+//        response.setQr_code(generateQRCode());
+//        return response;
+//    }
+//
+//    /**
+//     * Thực hiện xử lý nghiệp vụ generate qrcode. Các tham số và kết quả tuân theo chữ ký phương thức.
+//     */
+//    public String generateQRCode() {
+//        return "00020101021238630010A000000727013300069704480119VPO1791609490961CMI0208QRIBFTTA530370454062267945802VN62230819VPO1791609490961CMI63049751";
+//    }
+//}

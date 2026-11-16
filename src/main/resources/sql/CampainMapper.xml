@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="com.vt.cms.model.repository.CampainRepository">
+<mapper namespace="com.vt.cms.campain.domain.repository.CampainRepository">
 
-    <resultMap id="CampainResultMap" type="com.vt.cms.model.entity.Campain">
-        <id column="id" property="campainid" jdbcType="INTEGER"/>
+    <resultMap id="CampainResultMap" type="com.vt.cms.campain.domain.enity.Campain">
+        <id property="campainId" column="id"/>
         <result column="created_at" property="createdAt" jdbcType="TIMESTAMP"/>
         <result column="created_by" property="createdBy" jdbcType="VARCHAR"/>
         <result column="is_deleted" property="isDeleted" jdbcType="VARCHAR"/>
@@ -20,51 +20,87 @@
         <result column="description" property="description" jdbcType="VARCHAR"/>
 
     </resultMap>
-    <select id="getCampainById" resultType="com.vt.cms.model.entity.Campain">
+    <select id="getCampainById" resultMap="CampainResultMap">
         SELECT *
         FROM campaign
         WHERE id = #{campain_id}
+          AND is_deleted = 'false'
     </select>
     <update id="updatestatus">
         UPDATE campaign
-        SET status = #{status}
+        SET status     = #{status},
+            updated_at = NOW(),
+            updated_by = #{userId}
         WHERE id = #{campain_id}
+          AND is_deleted = 'false'
+          AND status = 'PENDING_APPROVAL'
     </update>
+
+    <update id="finishCampain">
+        UPDATE campaign
+        SET status     = #{status},
+            updated_at = NOW(),
+            updated_by = #{updatedBy}
+        WHERE id = #{campainId}
+          AND is_deleted = 'false'
+          AND status = 'APPROVED'
+    </update>
+
 
     <delete id="deletecampain">
         UPDATE campaign
-        SET is_deleted = "false"
+        SET is_deleted = 'true',
+            updated_at = NOW(),
+            updated_by = #{userId}
         WHERE id = #{campain_id}
+          AND is_deleted = 'false'
+          AND status IN ('PENDING_APPROVAL', 'REJECTED')
     </delete>
-    <insert id="savecampain" parameterType="com.vt.cms.model.entity.Campain"
+    <select id="getlistcampain" resultType="com.vt.cms.campain.application.dto.response.CampainResponse">
+        SELECT *
+        FROM campaign c
+        WHERE c.is_deleted = 'false'
+        ORDER BY c.created_at DESC, c.id DESC
+        LIMIT #{pageSize} OFFSET #{offset}
+    </select>
+
+    <insert id="savecampain" parameterType="com.vt.cms.campain.domain.enity.Campain"
             useGeneratedKeys="true"
             keyProperty="campainid">
-        INSERT INTO campaign (
-            created_at,
-            created_by,
-            is_deleted,
-            status,
-            discount,
-            end_time,
-            name,
-            start_time,
-            total_stock,
-            product_id,
-            description
-        )
-        VALUES (
-                   #{createdAt},
-                   #{createdBy},
-                   #{isDeleted},
-                   #{status},
-                   #{discount},
-                   #{endTime},
-                   #{name},
-                   #{startTime},
-                   #{totalStock},
-                   #{productId},
-                   #{description}
-               )
+        INSERT INTO campaign (created_at,
+                              created_by,
+                              is_deleted,
+                              status,
+                              discount,
+                              end_time,
+                              name,
+                              start_time,
+                              total_stock,
+                              product_id,
+                              description)
+        VALUES (#{createdAt},
+                #{createdBy},
+                #{isDeleted},
+                #{status},
+                #{discount},
+                #{endTime},
+                #{name},
+                #{startTime},
+                #{totalStock},
+                #{productId},
+                #{description})
     </insert>
+
+    <select id="countCampains" resultType="long">
+        SELECT COUNT(id)
+        FROM campaign c
+        WHERE c.is_deleted = 'false'
+        <if test="status != null and status != ''">
+            AND c.status = #{status}
+        </if>
+        <if test="keyword != null and keyword.trim() != ''">
+            AND LOWER(c.name) LIKE CONCAT('%', LOWER(#{keyword}), '%')
+        </if>
+    </select>
 
 </mapper>

@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="com.vt.cms.model.repository.CampainProductRepository">
+<mapper namespace="com.vt.cms.campain.domain.repository.CampainProductRepository">
 
     <!-- Ánh xạ kết quả từ DB sang entity -->
-    <resultMap id="CampainProductResultMap" type="com.vt.cms.model.entity.CampainProduct">
+    <resultMap id="CampainProductResultMap" type="com.vt.cms.campain.domain.enity.CampainProduct">
         <id property="id" column="id"/>
 
         <result property="createdAt" column="created_at"/>
@@ -23,51 +23,44 @@
     </resultMap>
 
     <!-- Lệnh insert -->
-    <insert id="savecampainproduct" parameterType="com.vt.cms.model.entity.CampainProduct"
+    <insert id="savecampainproduct" parameterType="com.vt.cms.campain.domain.enity.CampainProduct"
             useGeneratedKeys="true"
             keyProperty="id">
-        INSERT INTO campain_product (
-
-            created_at,
-            created_by,
-            is_deleted,
-            updated_at,
-            updated_by,
-            campaign_id,
-            product_id,
-            sku_id,
-            stock_campaign,
-            price,
-            price_discount,
-            discount_amount,
-            status
-        )
-        VALUES (
-
-                   #{createdAt},
-                   #{createdBy},
-                   #{isDeleted},
-                   #{updatedAt},
-                   #{updatedBy},
-                   #{campaignId},
-                   #{productId},
-                   #{skuId},
-                   #{stockCampaign},
-                   #{price},
-                   #{price_discount},
-                   #{discountAmount},
-                   #{status}
-               )
+        INSERT INTO campain_product (created_at,
+                                     created_by,
+                                     is_deleted,
+                                     updated_at,
+                                     updated_by,
+                                     campaign_id,
+                                     product_id,
+                                     sku_id,
+                                     stock_campaign,
+                                     price,
+                                     price_discount,
+                                     discount_amount,
+                                     status)
+        VALUES (#{createdAt},
+                #{createdBy},
+                #{isDeleted},
+                #{updatedAt},
+                #{updatedBy},
+                #{campaignId},
+                #{productId},
+                #{skuId},
+                #{stockCampaign},
+                #{price},
+                #{price_discount},
+                #{discountAmount},
+                #{status})
     </insert>
 
     <select id="existsAssociationByProductId" resultType="boolean">
-        SELECT EXISTS (
-            SELECT 1 FROM campain_product
-            WHERE product_id = #{productId}
-        )
+        SELECT EXISTS (SELECT 1
+                       FROM campain_product
+                       WHERE product_id = #{productId})
     </select>
 
-    <update id="deductStock" >
+    <update id="deductStock">
         UPDATE campain_product
         SET stock_campaign = stock_campaign - #{quantity}
         WHERE campaign_id = #{campainId}

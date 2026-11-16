@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="com.vt.cms.model.repository.ProductRepository">
-    <resultMap id="ProductResultMap" type="com.vt.cms.model.entity.ProductDetail">
+<mapper namespace="com.vt.cms.product.domain.repository.ProductRepository">
+    <resultMap id="ProductResultMap" type="com.vt.cms.product.domain.entity.Product">
 
         <!-- Product -->
         <id column="id"
@@ -33,8 +33,8 @@
                 property="status"
                 jdbcType="VARCHAR"/>
 
-        <result column="create_at"
-                property="createAt"
+        <result column="created_at"
+                property="created_at"
                 jdbcType="TIMESTAMP"/>
 
         <result column="update_at"
@@ -51,9 +51,10 @@
                 property="campaignStatus"
                 jdbcType="VARCHAR"/>
 
-        <result column="sales_commission"
-                property="salesCommission"
-                jdbcType="DECIMAL"/>
+        <result column="campaign_name" property="campaignName" jdbcType="VARCHAR"/>
+        <result column="campaign_description" property="campaignDescription" jdbcType="VARCHAR"/>
+        <result column="campaign_discount" property="campaignDiscount" jdbcType="DECIMAL"/>
+
 
         <result column="product_commission"
                 property="productCommission"
@@ -95,7 +96,7 @@
 
     </resultMap>
 
-    <select id="getproduct1" resultMap="ProductResultMap">
+    <select id="getproduct1" resultType="com.vt.cms.product.domain.entity.ProductDetail">
 
         SELECT
             /* =========================
@@ -114,7 +115,7 @@
 
             p.json_attributes      AS json_attributes,
 
-            p.json_attributes_name AS json_attributes_name,
+            p.json_attributes_name AS attributesName,
 
             p.type_products        AS type_products,
 
@@ -124,14 +125,17 @@
 
             p.status               AS status,
 
-            p.created_at           AS create_at,
+            p.created_at           AS createAt,
 
-            p.updated_at           AS update_at,
+            p.updated_at           AS updatedAt,
             /* =========================
                CAMPAIGN
                ========================= */
 
             c.status               AS campaign_status,
+            c.name                 AS campaign_name,
+            c.description          AS campaign_description,
+            c.discount             AS campaign_discount,
 
             c.start_time           AS campaign_start_at,
 
@@ -140,97 +144,166 @@
                SKU
                ========================= */
             COALESCE(
-                    (
-                        SELECT CONCAT(
-                                       '[',
-                                       GROUP_CONCAT(
-                                               JSON_OBJECT(
-                                                       'id', ps.id,
-                                                       'sku_code', ps.sku_code,
-                                                       'attribute', ps.attribute,
-                                                       'type_product', ps.type_product,
-                                                       'price', ps.price,
-                                                       'stock', ps.stock,
-                                                       'weight_gram', ps.weight_gram,
-                                                       'length_cm', ps.length_cm,
-                                                       'width_cm', ps.width_cm,
-                                                       'height_cm', ps.height_cm,
-                                                       'image_url', ps.image_url,
-                                                       'status', ps.status,
-                                                       'campaign_product_status', cp2.status,
-                                                       'price_campaign', cp2.price,
-                                                       'price_discount_campaign', cp2.price_discount,
-                                                       'stock_campaign', cp2.stock_campaign
-                                               )
-                                               ORDER BY ps.id
-                                               SEPARATOR ','
-                                       ),
-                                       ']'
-                               )
-                        FROM campain_product cp2
-                                 INNER JOIN product_sku ps
-                                            ON ps.id = cp2.sku_id
-                                                AND ps.product_id = cp2.product_id
-                        WHERE cp2.campaign_id = c.id
-                          AND cp2.product_id = p.id
-                          AND cp2.is_deleted = 'false'
-                          AND ps.is_deleted = 'false'
-                    ),
+                    (SELECT CONCAT(
+                                    '[',
+                                    GROUP_CONCAT(
+                                            JSON_OBJECT(
+                                                    'id', ps.id,
+                                                    'sku_code', ps.sku_code,
+                                                    'attribute', ps.attribute,
+                                                    'type_product', ps.type_product,
+                                                    'price', ps.price,
+                                                    'stock', ps.stock,
+                                                    'weight_gram', ps.weight_gram,
+                                                    'length_cm', ps.length_cm,
+                                                    'width_cm', ps.width_cm,
+                                                    'height_cm', ps.height_cm,
+                                                    'image_url', ps.image_url,
+                                                    'status', ps.status,
+                                                    'campaign_product_status', cp2.status,
+                                                    'price_campaign', cp2.price,
+                                                    'price_discount_campaign', cp2.price_discount,
+                                                    'stock_campaign', cp2.stock_campaign
+                                            )
+                                            ORDER BY ps.id
+                                            SEPARATOR ','
+                                    ),
+                                    ']'
+                            )
+                     FROM campain_product cp2
+                              INNER JOIN product_sku ps
+                                         ON ps.id = cp2.sku_id
+                                             AND ps.product_id = cp2.product_id
+                     WHERE cp2.campaign_id = c.id
+                       AND cp2.product_id = p.id
+                       AND cp2.is_deleted = 'false'
+                       AND ps.is_deleted = 'false'),
                     '[]'
-            ) AS skus
+            )                      AS skus
         FROM campaign c
 
                  INNER JOIN products p
-                            ON p.id = #{product_id}
-#                                 AND p.is_deleted = 'false'
+                            ON p.id = #{product_id} AND p.is_deleted = 'false'
 
-        WHERE c.id = #{campaign_id} ;
-#           and c.status='APPROVAL';
+        WHERE c.id = #{campaign_id}
+          AND c.is_deleted = 'false';
 
     </select>
 
+    <select id="detailProduct" resultType="com.vt.cms.product.application.dto.response.ProductResponse">
+        SELECT id,
+               name,
+               created_at,
+               created_by,
+               is_deleted,
+               updated_at,
+               updated_by,
 
-    <select id="detailProduct" resultType="com.vt.cms.model.entity.Product">
-        SELECT id, name, created_at, created_by, is_deleted, updated_at, updated_by,
-               description, json_images, json_attributes, json_medias, price_display,
-               status, json_attributes_name, type_products_name, type_products,
-               cancel_at, cancel_by, approve_by, approved_time
+               description,
+               json_images,
+               json_attributes AS jsonAttributesRaw,
+               json_medias,
+               status,
+               json_attributes_name,
+               type_products_name,
+               type_products   AS typeProductsRaw,
+               cancel_at,
+               cancel_by,
+               approve_by,
+               approved_time
         FROM products
-        WHERE id = #{productId} AND is_deleted = 'false'
+        WHERE id = #{productId}
+          AND is_deleted = 'false'
     </select>
 
-    <select id="getProductById" resultType="com.vt.cms.model.entity.Product">
-        SELECT id, name, created_at, created_by, is_deleted, updated_at, updated_by,
-               description, json_images, json_attributes, json_medias, price_display,
-               status, json_attributes_name, type_products_name, type_products,
-               cancel_at, cancel_by, approve_by, approved_time
-        FROM products WHERE id = #{id}
+    <select id="getProductById" resultType="com.vt.cms.product.domain.entity.Product">
+        SELECT id,
+               name,
+               created_at,
+               created_by,
+               is_deleted,
+               updated_at,
+               updated_by,
+               description,
+               json_images,
+               json_attributes,
+               json_medias,
+               status,
+               json_attributes_name,
+               type_products_name,
+               type_products,
+               cancel_at,
+               cancel_by,
+               approve_by,
+               approved_time
+        FROM products
+        WHERE id = #{id}
     </select>
 
     <update id="updateProduct">
         UPDATE products
-        SET name = #{product.name}, description = #{product.description},
-            json_images = #{product.json_images}, json_medias = #{product.json_medias},
-            json_attributes = #{product.json_attributes}, json_attributes_name = #{product.json_attributes_name},
-            type_products = #{product.type_products}, type_products_name = #{product.type_products_name},
-            updated_at = #{product.updated_at}, updated_by = #{product.updated_by}
-        WHERE id = #{id} AND is_deleted = 'false'
-          AND status = 'PENDING_APPROVAL'
+        SET name                 = #{product.name},
+            description          = #{product.description},
+            json_images          = #{product.jsonImages},
+            json_medias          = #{product.jsonMedias},
+            json_attributes      = #{product.jsonAttributes},
+            json_attributes_name = #{product.jsonAttributesName},
+            type_products        = #{product.typeProducts},
+            type_products_name   = #{product.typeProductsName},
+            updated_at           = #{product.updatedAt},
+            updated_by           = #{id}
+        WHERE id = #{id}
+          AND is_deleted = 'false'
+          AND status IN ('PENDING_APPROVAL', 'REJECTED')
     </update>
+    <select id="listproduct"
+            resultType="com.vt.cms.product.application.dto.response.ProductResponse">
+        SELECT
+        p.id,
+        p.name,
+        p.description,
+        p.created_at,
+        p.updated_at,
+        p.created_by,
+        p.is_deleted,
+        p.status,
+        p.json_images,
+        p.json_medias,
+        p.json_attributes AS jsonAttributesRaw,
+        p.json_attributes_name,
+        p.type_products AS typeProductsRaw,
+        p.type_products_name,
+        p.json_images,
+        p.json_medias,
+        # JSON_UNQUOTE(
+        # JSON_EXTRACT(p.json_images, '$[0].url')
+        # ) AS first_image,
 
-    <select id="listproduct" resultType="com.vt.cms.model.resp.ProductResponse">
-        SELECT p.id, p.name, p.description, p.created_at, p.updated_at, p.created_by, p.is_deleted, p.status,
-               JSON_UNQUOTE(JSON_EXTRACT(p.json_images, '$[0].url')) AS first_image,
-               (SELECT COUNT(*) FROM product_sku ps WHERE ps.product_id = p.id AND ps.is_deleted = 'false') AS sku_count,
-               (SELECT COALESCE(SUM(ps.stock), 0) FROM product_sku ps WHERE ps.product_id = p.id AND ps.is_deleted = 'false') AS total_stock
+        (
+        SELECT COUNT(*)
+        FROM product_sku ps
+        WHERE ps.product_id = p.id
+        AND ps.is_deleted = 'false'
+        ) AS sku_count,
+
+        (
+        SELECT COALESCE(SUM(ps.stock), 0)
+        FROM product_sku ps
+        WHERE ps.product_id = p.id
+        AND ps.is_deleted = 'false'
+        ) AS total_stock
+
         FROM products p
         WHERE p.is_deleted = 'false'
+
         <if test="status != null and status != ''">
             AND p.status = #{status}
         </if>
+
         <if test="keyword != null and keyword.trim() != ''">
             AND LOWER(p.name) LIKE CONCAT('%', LOWER(#{keyword}), '%')
         </if>
+
         ORDER BY p.created_at DESC, p.id DESC
         LIMIT #{pageSize} OFFSET #{offset}
     </select>
@@ -245,7 +318,7 @@
             AND LOWER(p.name) LIKE CONCAT('%', LOWER(#{keyword}), '%')
         </if>
     </select>
-    <insert id="insertproduct" parameterType="com.vt.cms.model.entity.Product"
+    <insert id="insertproduct" parameterType="com.vt.cms.product.domain.entity.Product"
             useGeneratedKeys="true"
             keyProperty="id">
         INSERT INTO products (name,
@@ -263,35 +336,52 @@
         VALUES (#{name},
                 #{description},
                 #{status},
-                #{created_at},
-                #{created_by},
-                #{json_images},
-                #{json_medias},
-                #{json_attributes},
-                #{json_attributes_name},
-                #{type_products},
-                #{type_products_name},
-                #{is_deleted})
+                #{createdAt},
+                #{createdBy},
+                #{jsonImages},
+                #{jsonMedias},
+                #{jsonAttributes},
+                #{jsonAttributesName},
+                #{typeProducts},
+                #{typeProductsName},
+                #{isDeleted})
     </insert>
 
-
-    <update id="editstatusproduct">
+    <update id="approveProduct">
         UPDATE products
-        SET status = #{status}, updated_at = #{updated_at},
-            approved_time = #{approved_time}, approve_by = #{approve_by}
-        WHERE id = #{id} AND is_deleted = 'false'
-          AND COALESCE(status, '') <> 'APPROVAL'
+        SET status        = 'APPROVED',
+            updated_at    = NOW(),
+            approved_time = NOW(),
+            updated_by    = #{user_id}
+        WHERE id = #{product_id}
+          AND is_deleted = 'false'
+          AND status IN ('PENDING_APPROVAL', 'REJECTED')
+    </update>
+
+
+    <update id="rejectProduct">
+        UPDATE products
+        SET status        = 'REJECTED',
+            cancel_at     = NOW(),
+            updated_at    = NOW(),
+            cancel_reason = #{reason},
+            cancel_by     = #{cancel_by}
+        WHERE id = #{id}
+          AND is_deleted = 'false'
+          AND status IN ('PENDING_APPROVAL')
     </update>
 
     <update id="deleteproduct">
-        UPDATE products SET is_deleted = 'true', updated_at = NOW(), updated_by = 'SYSTEM'
+        UPDATE products
+        SET is_deleted = 'true',
+            updated_at = NOW()
         WHERE id = #{productId}
           AND is_deleted = 'false'
           AND status IN ('PENDING_APPROVAL', 'REJECTED')
-          AND NOT EXISTS (
-              SELECT 1 FROM campain_product cp
-              WHERE cp.product_id = products.id AND cp.is_deleted = 'false'
-          )
+          AND NOT EXISTS (SELECT 1
+                          FROM campain_product cp
+                          WHERE cp.product_id = products.id
+                            AND cp.is_deleted = 'false')
     </update>
 
 

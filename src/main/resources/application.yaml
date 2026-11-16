@@ -19,9 +19,21 @@ spring:
       max-file-size: 10MB
       max-request-size: 10MB
 
+security:
+  jwt:
+    # Set JWT_SECRET in environment; use a random secret with at least 32 bytes.
+    secret:  "MySuperSecretKeyForJwtAuthentication2026"
+    expiration-seconds: 3600
+
 mybatis:
   configuration:
     map-underscore-to-camel-case: true
     log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
   mapper-locations: classpath:sql/**/*.xml
 
+
+# Enable only in local/dev environments; mock shipments are stored in memory.
+viettel:
+  mock:
+    enabled: ${VIETTEL_MOCK_ENABLED:true}
+    base-url: ${VIETTEL_MOCK_BASE_URL:http://localhost:8080}
