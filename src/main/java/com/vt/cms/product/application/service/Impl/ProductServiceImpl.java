@@ -197,7 +197,7 @@ public class ProductServiceImpl implements ProductService {
     response.setSkus(skus);
     // response.setReviews(productReviewService.getByProduct(product_id));
     // response.setAverageRating(productReviewService.getAverage(product_id));
-    response.setReviewCount((long) response.getReviews().size());
+    //    response.setReviewCount((long) response.getReviews().size());
     return response;
   }
 
@@ -412,11 +412,9 @@ public class ProductServiceImpl implements ProductService {
   @Override
   public ProductDetailResponse product_detail(Integer product_id, Integer campaign_id) {
     ProductDetail product = productRepository.getproduct1(product_id, campaign_id);
-
     if (product == null) {
       return null;
     }
-
     ProductDetailResponse response = new ProductDetailResponse();
     System.out.println("A" + product.getAttributesName());
 
@@ -431,36 +429,39 @@ public class ProductServiceImpl implements ProductService {
     response.setCampaignName(product.getCampaignName());
     response.setCampaignDescription(product.getCampaignDescription());
     response.setCampaignDiscount(product.getCampaignDiscount());
-    response.setPriceCampaign(product.getPriceCampaign());
     response.setStatus(product.getStatus());
     response.setTypeProductsName(product.getTypeProductsName());
     response.setAttributesName(product.getAttributesName());
     response.setSkus(parseJson(product.getSkus(), new TypeReference<List<SkuResponse>>() {}));
     response.setCampaignStatus(product.getCampaignStatus());
-    response.setRatingAvg(0.0);
-    response.setTotalSold(0);
+    response.setRatingAvg(getProductRating(product_id));
+    response.setTotalSold(getTotalSold(product_id));
     response.setCreateAt(product.getCreateAt());
-    /* TODO  Xem lại các trường sau
-      "priceCampaign": null,
-    "priceDiscountCampaign": null,
-    "updateAt": null,
-    "approvedTime": null,
-     */
-    /* * Tìm SKU có giá sau giảm thấp nhất */
-    //        if (product.getSkus() != null && !product.getSkus().isEmpty()) {
-    //          SkuResponse minPriceSku =
-    //              product.getSkus().stream()
-    //                  .filter(sku -> sku.getPriceDiscountCampaign() != null)
-    //                  .min(Comparator.comparing(SkuResponse::getPriceDiscountCampaign))
-    //                  .orElse(null);
-    //          if (minPriceSku != null) {
-    //            // Giá gốc của chính SKU có giá sau giảm thấp nhất
-    //            response.setPriceCampaign(minPriceSku.getPriceCampaign());
-    //            // Giá sau giảm thấp nhất
-    //            response.setPriceDiscountCampaign(minPriceSku.getPriceDiscountCampaign());
-    //          }
-    //        }
+
+    if (product.getSkus() != null && !product.getSkus().isBlank()) {
+
+      List<SkuResponse> skus =
+          parseJson(product.getSkus(), new TypeReference<List<SkuResponse>>() {});
+
+      skus.stream()
+          .filter(sku -> sku.getPriceDiscountCampaign() != null)
+          .min(Comparator.comparing(SkuResponse::getPriceDiscountCampaign))
+          .ifPresent(minPriceSku -> {
+            response.setPriceCampaign(minPriceSku.getPriceCampaign());
+            response.setPriceDiscountCampaign(minPriceSku.getPriceDiscountCampaign());
+          });
+    }
 
     return response;
+  }
+
+  // TODO Lấy thông tin đánh giá của sản phẩm
+  public Double getProductRating(Integer productId) {
+    return productRepository.getRating(productId);
+  }
+
+  // TODO Lấy thông tin đã bán của sản phẩm
+  public int getTotalSold(Integer productId) {
+    return productRepository.getotalSold(productId);
   }
 }

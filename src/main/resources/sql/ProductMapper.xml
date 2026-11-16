@@ -384,5 +384,15 @@
                             AND cp.is_deleted = 'false')
     </update>
 
+    <select id="getRating">
+        SELECT average_rating
+        FROM product_stats
+        WHERE product_id = #{productId}
+    </select>
 
+    <select id="getotalSold">
+        SELECT total_sold
+        FROM product_stats
+        WHERE product_id = #{productId}
+    </select>
 </mapper>

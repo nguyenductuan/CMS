@@ -10,29 +10,19 @@ import org.apache.ibatis.annotations.Param;
 
 @Mapper
 public interface ProductRepository {
-  /**
-   * Thực hiện truy cập dữ liệu detail product. Các tham số và giá trị trả về được mô tả bởi chữ ký
-   * phương thức.
-   */
+
+  int getotalSold(Integer productId);
+
   ProductResponse detailProduct(@Param("productId") Integer productId);
 
-  /** Lấy danh sách listproduct. Các tham số và giá trị trả về được mô tả bởi chữ ký phương thức. */
   List<ProductResponse> listproduct(Pagerequest request);
 
-  /** Đếm số lượng countproduct. Các tham số và giá trị trả về được mô tả bởi chữ ký phương thức. */
   long countproduct(Pagerequest request);
 
-  /**
-   * Thêm bản ghi insertproduct. Các tham số và giá trị trả về được mô tả bởi chữ ký phương thức.
-   */
   int insertproduct(Product product);
 
-  /** Cập nhật update product. Các tham số và giá trị trả về được mô tả bởi chữ ký phương thức. */
   int updateProduct(@Param("product") Product product, @Param("id") Integer id);
 
-  /**
-   * Lấy dữ liệu get product by id. Các tham số và giá trị trả về được mô tả bởi chữ ký phương thức.
-   */
   Product getProductById(@Param("id") Integer id);
 
   int approveProduct(@Param("product_id") Integer product_id, @Param("user_id") String user_id);
@@ -53,4 +43,6 @@ public interface ProductRepository {
 
   /** Lấy dữ liệu getproduct1. Các tham số và giá trị trả về được mô tả bởi chữ ký phương thức. */
   ProductDetail getproduct1(Integer product_id, Integer campaign_id);
+
+  Double getRating(Integer productId);
 }
