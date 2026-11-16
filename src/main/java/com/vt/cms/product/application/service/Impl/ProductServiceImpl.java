@@ -416,8 +416,6 @@ public class ProductServiceImpl implements ProductService {
       return null;
     }
     ProductDetailResponse response = new ProductDetailResponse();
-    System.out.println("A" + product.getAttributesName());
-
     response.setName(product.getName());
     response.setId(product.getId());
     response.setCampaignEndAt(product.getCampaignEndAt());
