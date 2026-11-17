@@ -263,6 +263,7 @@
         p.name,
         p.description,
         p.created_at,
+        p.stock,
         p.updated_at,
         p.created_by,
         p.is_deleted,
@@ -274,18 +275,14 @@
         p.type_products AS typeProductsRaw,
         p.type_products_name,
         p.json_images,
-        p.json_medias,
-        # JSON_UNQUOTE(
-        # JSON_EXTRACT(p.json_images, '$[0].url')
-        # ) AS first_image,
 
+        p.json_medias,
         (
         SELECT COUNT(*)
         FROM product_sku ps
         WHERE ps.product_id = p.id
         AND ps.is_deleted = 'false'
         ) AS sku_count,
-
         (
         SELECT COALESCE(SUM(ps.stock), 0)
         FROM product_sku ps
@@ -322,6 +319,7 @@
             useGeneratedKeys="true"
             keyProperty="id">
         INSERT INTO products (name,
+                              stock,
                               description,
                               status,
                               created_at,
@@ -334,6 +332,7 @@
                               type_products_name,
                               is_deleted)
         VALUES (#{name},
+                #{stock},
                 #{description},
                 #{status},
                 #{createdAt},

@@ -16,6 +16,7 @@ public class Product {
   private String jsonImages;
   private String jsonAttributes; // VD: [{"name":"Xanh than"},{"name":"Retro bụi"}]
   private String jsonMedias;
+  private Integer stock;
   private String status;
   private String jsonAttributesName; // thuộc tính thứ nhất của sp VD: Màu
   private String typeProductsName; // thuộc tính thứ 2 của sản phẩm. VD: Kích thươc
