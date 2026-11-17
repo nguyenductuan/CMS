@@ -1,25 +1,23 @@
 package com.vt.cms.product.application.dto.req;
 
-
 import com.vt.cms.product.application.dto.product.*;
 import jakarta.validation.constraints.NotBlank;
+import java.util.List;
 import lombok.Data;
 
-import java.util.List;
-
 @Data
-
 public class CreateProductRequest {
-    @NotBlank(message = "Tên sản phẩm không được để trống")
-    private String name;
-    private String description;
-//    private Integer stock;
-    private List<ImageRequest> images;
-    private List<MediaRequest> medias;
-    private List<AttributeRequest> attributes;
-    private String attributes_name;
-    private List<TypeProductRequest> type_products;
-    private String type_products_name;
-    private List<SkuRequest> skus;
-    private String status;
+  @NotBlank(message = "Tên sản phẩm không được để trống")
+  private String name;
+
+  private String description;
+  private Integer stock;
+  private List<ImageRequest> images;
+  private List<MediaRequest> medias;
+  private List<AttributeRequest> attributes;
+  private String attributes_name;
+  private List<TypeProductRequest> type_products;
+  private String type_products_name;
+  private List<SkuRequest> skus;
+  private String status;
 }

@@ -288,6 +288,7 @@ public class ProductServiceImpl implements ProductService {
 
       item.setTypeProducts(
           parseJson(item.getTypeProductsRaw(), new TypeReference<List<TypeProductRequest>>() {}));
+      item.setTotalSolid(0); // TODO  SL Đã bán của sp
     }
 
     // Lấy danh sách SKU cho từng sản phẩm
