@@ -27,7 +27,6 @@ public class Campain {
   private String name;
   private LocalDateTime startTime;
   private Integer totalStock;
-  private Long productId;
+  private Integer productId;
   private String description;
-  //    private Integer salesCommission;
 }

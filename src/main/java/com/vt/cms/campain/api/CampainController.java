@@ -6,7 +6,6 @@ import com.vt.cms.base.response.BaseResponse;
 import com.vt.cms.campain.application.dto.request.CreatedCampainRequest;
 import com.vt.cms.campain.application.dto.response.CampainResponse;
 import com.vt.cms.campain.application.service.CampainService;
-import com.vt.cms.campain.domain.enity.Campain;
 import com.vt.cms.campain.domain.enums.CampainStatus;
 import com.vt.cms.model.dto.page.PagingResponse;
 import com.vt.cms.security.JwtAuthenticationFilter;
@@ -81,8 +80,8 @@ public class CampainController {
    * Bảng danh sách gồm các thông tin: Ngưới mua, Mã đơn, Tổng SL,Tổng tiền, thời gian, Trạng thái
    */
   @GetMapping("/deaitlCampain/{id}")
-  public ResponseEntity<APIRessponse> deaitlCampain(@PathVariable("id") Integer campainId) {
-    Campain response = campainService.deaitlCampain(campainId);
+  public ResponseEntity<APIRessponse> deaitlCampain(@PathVariable("id") Integer campain_id) {
+    CampainResponse response = campainService.deaitlCampain(campain_id);
     return ResponseEntity.ok(new APIRessponse(200, "Thành công", response));
   }
 

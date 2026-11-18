@@ -7,12 +7,15 @@ import com.vt.cms.base.response.BaseResponse;
 import com.vt.cms.campain.application.dto.request.CampainProductRequest;
 import com.vt.cms.campain.application.dto.request.CampainProductSku;
 import com.vt.cms.campain.application.dto.request.CreatedCampainRequest;
+import com.vt.cms.campain.application.dto.response.CampaignProductGroupResponse;
+import com.vt.cms.campain.application.dto.response.CampaignProductResponse;
 import com.vt.cms.campain.application.dto.response.CampainResponse;
 import com.vt.cms.campain.application.service.CampainService;
 import com.vt.cms.campain.application.service.mapper.CampaignEntityMapper;
 import com.vt.cms.campain.application.service.validation.CampaignRequestValidator;
 import com.vt.cms.campain.domain.enity.Campain;
 import com.vt.cms.campain.domain.enity.CampainProduct;
+import com.vt.cms.campain.domain.enums.CampaignAction;
 import com.vt.cms.campain.domain.enums.CampainStatus;
 import com.vt.cms.campain.domain.repository.CampainProductRepository;
 import com.vt.cms.campain.domain.repository.CampainRepository;
@@ -22,7 +25,10 @@ import com.vt.cms.product.domain.entity.Product_Sku;
 import com.vt.cms.product.domain.repository.ProductSkuRepository;
 import jakarta.transaction.Transactional;
 import java.time.LocalDateTime;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
@@ -230,7 +236,7 @@ public class CampainServiceImpl implements CampainService {
     CampainStatus currentStatus = campaign.getStatus();
     boolean isValid =
         (currentStatus == CampainStatus.PENDING
-            && (status == CampainStatus.APPROVED || status == CampainStatus.REJECTED));
+            && (status == CampainStatus.ACTIVE || status == CampainStatus.REJECTED));
 
     if (!isValid) {
       throw new BusinessException(MessageCode.CAMPAIN_STATUS_INVALID);
@@ -242,10 +248,59 @@ public class CampainServiceImpl implements CampainService {
   }
 
   @Override
-  public Campain deaitlCampain(Integer campainId) {
-    Campain campain = campainRepository.getCampainById(campainId);
-    campain.setCampainId(campain.getCampainId());
-    return campain;
+  public CampainResponse deaitlCampain(Integer campain_id) {
+    Campain campain = campainRepository.getCampainById(campain_id);
+
+    List<CampaignProductResponse> campainProduct =
+        campainProductRepository.findCampainProductById(campain_id);
+    // Nhóm SKU theo productId
+    Map<Integer, List<CampaignProductResponse>> groupedProducts =
+        campainProduct.stream()
+            .collect(
+                Collectors.groupingBy(
+                    CampaignProductResponse::getProductId,
+                    LinkedHashMap::new,
+                    Collectors.toList()));
+
+    // Chuyển thành danh sách products
+    List<CampaignProductGroupResponse> products =
+        groupedProducts.entrySet().stream()
+            .map(entry -> {
+              CampaignProductGroupResponse product = new CampaignProductGroupResponse();
+              CampaignProductResponse first = entry.getValue().get(0);
+
+              product.setProductId(entry.getKey());
+              product.setProductName(first.getProductName());
+              product.setCampaignProduct(entry.getValue());
+              return product;
+            })
+            .toList();
+
+    System.out.println("A" + campain.getProductId());
+    CampainResponse campainResponse = new CampainResponse();
+    campainResponse.setDescription(campain.getDescription());
+
+    campainResponse.setName(campain.getName());
+    campainResponse.setId(campain_id);
+    campainResponse.setProduct(products);
+    campainResponse.setStatus(campain.getStatus());
+    campainResponse.setDiscount(campain.getDiscount());
+    campainResponse.setStartTime(campain.getStartTime());
+    campainResponse.setEndTime(campain.getEndTime());
+    campainResponse.setAvailableActions(getAvailableActions(campain.getStatus()));
+
+    return campainResponse;
+  }
+
+  public List<CampaignAction> getAvailableActions(CampainStatus status) {
+    return switch (status) {
+      case PENDING ->
+          List.of(CampaignAction.CANCEL_APPROVAL, CampaignAction.EDIT, CampaignAction.VIEW_DETAIL);
+      case ACTIVE -> List.of(CampaignAction.VIEW_DETAIL, CampaignAction.STOP);
+      case REJECTED -> List.of(CampaignAction.VIEW_DETAIL);
+      case FINISHED -> List.of(CampaignAction.REPOST, CampaignAction.VIEW_DETAIL);
+      case CANCELLED -> List.of(CampaignAction.VIEW_DETAIL);
+    };
   }
 
   @Override
@@ -256,8 +311,11 @@ public class CampainServiceImpl implements CampainService {
       throw new BusinessException(MessageCode.PAGE_NO_MUST_BE_GREATER_THAN_OR_EQUAL_TO_0);
     if (request.getPageSize() == null || request.getPageSize() < 1 || request.getPageSize() > 100)
       throw new BusinessException(MessageCode.PAGE_SIZE_MUST_BE_BETWEEN_1_AND_100);
-    // Lấy danh sách chiên dịch
     List<CampainResponse> campainResponses = campainRepository.getlistcampain(request);
+    // Lấy thông tin action theo trạng thaái chiến dịch
+    for (CampainResponse item : campainResponses) {
+      item.setAvailableActions(getAvailableActions(item.getStatus()));
+    }
     // Tinhs số lượng bản ghi
     long totalRecords = campainRepository.countCampains(request);
     long totalpage = (int) Math.ceil((double) totalRecords / request.getPageSize());
@@ -311,7 +369,7 @@ public class CampainServiceImpl implements CampainService {
       throw new BusinessException(MessageCode.CAMPAIGN_NOT_FOUND);
     }
     CampainStatus currentStatus = campaign.getStatus();
-    boolean isValid = (currentStatus == CampainStatus.APPROVED);
+    boolean isValid = (currentStatus == CampainStatus.ACTIVE);
     if (!isValid) {
       throw new BusinessException(MessageCode.CAMPAIN_STATUS_INVALID);
     }
