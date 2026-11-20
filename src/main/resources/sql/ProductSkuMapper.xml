@@ -120,4 +120,34 @@
           AND sku_code = #{sku.sku_code}
           AND is_deleted = 'false'
     </update>
+    <select id="findSkuByIds" resultMap="Product_SkuResultMap">
+        SELECT *
+        FROM product_sku s
+        WHERE s.id IN
+        <foreach collection="skuIds"
+                 item="id"
+                 open="("
+                 separator=","
+                 close=")">
+            #{id}
+        </foreach>
+    </select>
+
+
+    <update id="saveSkus">
+        UPDATE product_sku
+        SET stock = CASE id
+        <foreach collection="skus" item="sku">
+            WHEN #{sku.id} THEN #{sku.stock}
+        </foreach>
+        ELSE stock
+        END
+        WHERE id IN
+        <foreach collection="skus" item="sku"
+                 open="("
+                 separator=","
+                 close=")">
+            #{sku.id}
+        </foreach>
+    </update>
 </mapper>

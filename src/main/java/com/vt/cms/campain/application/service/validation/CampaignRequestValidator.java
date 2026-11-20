@@ -6,6 +6,7 @@ import com.vt.cms.campain.application.dto.request.CampainProductRequest;
 import com.vt.cms.campain.application.dto.request.CampainProductSku;
 import com.vt.cms.campain.application.dto.request.CreatedCampainRequest;
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.Set;
 import org.springframework.stereotype.Component;
@@ -17,8 +18,6 @@ public class CampaignRequestValidator {
     if (request == null) throw new BusinessException(MessageCode.REQUEST_IS_REQUIRED);
     if (request.getName() == null || request.getName().isBlank())
       throw new BusinessException(MessageCode.TEN_CHIEN_DICH_KHONG_DUOC_DE_TRONG);
-    // if (request.getTotal_stock() == null || request.getTotal_stock() < 0) throw new
-    // IllegalArgumentException("Tổng tồn kho chiến dịch phải >= 0");
     if (request.getStartTime() == null || request.getEndTime() == null)
       throw new BusinessException(MessageCode.START_TIME_AND_END_TIME_ARE_REQUIRED);
     if (request.getStartTime().isAfter(request.getEndTime()))
@@ -26,7 +25,6 @@ public class CampaignRequestValidator {
     validateDiscount(request.getDiscount());
     if (request.getProducts() == null || request.getProducts().isEmpty())
       throw new BusinessException(MessageCode.CAMPAIGN_MUST_CONTAIN_AT_LEAST_ONE_PRODUCT);
-
     Set<Integer> requestedSkuIds = new HashSet<>();
     for (CampainProductRequest product : request.getProducts()) {
       if (product == null || product.getProductid() <= 0)
@@ -39,6 +37,13 @@ public class CampaignRequestValidator {
         if (!requestedSkuIds.add(sku.getSkuId()))
           throw new BusinessException(MessageCode.DUPLICATE_SKU_ID);
       }
+    }
+    // Check thời gian
+    if (!request.getStartTime().isBefore(request.getEndTime())
+        || request.getStartTime() == null
+        || request.getEndTime() == null
+        || request.getStartTime().isBefore(LocalDateTime.now())) {
+      throw new BusinessException(MessageCode.TIME_INVALID);
     }
   }
 

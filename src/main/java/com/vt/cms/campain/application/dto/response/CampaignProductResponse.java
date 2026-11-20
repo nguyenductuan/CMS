@@ -14,7 +14,7 @@ public class CampaignProductResponse {
   //  private String campaignId;
   private Integer productId;
   private String productName;
-  private String skuId;
+  private Integer skuId;
 
   // Lấy từ product_sku
   private String attribute;

@@ -14,5 +14,6 @@ public class CreatedCampainRequest {
   private BigDecimal discount;
   //    private Integer total_stock;
   //    private Integer salesCommission;
+  /*TODO: Mục đích lưu stock trong bảng campain làm gì */
   private List<CampainProductRequest> products;
 }

@@ -11,7 +11,7 @@ public class Campain {
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   @Column(name = "id")
-  private Integer campainId;
+  private Integer campaignId;
 
   private LocalDateTime createdAt;
   private String createdBy;

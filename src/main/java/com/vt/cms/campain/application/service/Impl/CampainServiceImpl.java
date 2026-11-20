@@ -12,6 +12,7 @@ import com.vt.cms.campain.application.dto.response.CampaignProductResponse;
 import com.vt.cms.campain.application.dto.response.CampainResponse;
 import com.vt.cms.campain.application.service.CampainService;
 import com.vt.cms.campain.application.service.mapper.CampaignEntityMapper;
+import com.vt.cms.campain.application.service.port.CampaignProductPort;
 import com.vt.cms.campain.application.service.validation.CampaignRequestValidator;
 import com.vt.cms.campain.domain.enity.Campain;
 import com.vt.cms.campain.domain.enity.CampainProduct;
@@ -25,6 +26,7 @@ import com.vt.cms.product.domain.entity.Product_Sku;
 import com.vt.cms.product.domain.repository.ProductSkuRepository;
 import jakarta.transaction.Transactional;
 import java.time.LocalDateTime;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -44,19 +46,22 @@ public class CampainServiceImpl implements CampainService {
   private final ProductSkuRepository productSkuRepository;
   private final CampaignRequestValidator campaignRequestValidator;
   private final CampaignEntityMapper campaignEntityMapper;
+  private final CampaignProductPort campaignProductPort;
 
   public CampainServiceImpl(
       CampainRepository campainRepository,
       CampainProductRepository campainProductRepository,
       ProductSkuRepository productSkuRepository,
       CampaignRequestValidator campaignRequestValidator,
-      CampaignEntityMapper campaignEntityMapper) {
+      CampaignEntityMapper campaignEntityMapper,
+      CampaignProductPort campaignProductPort) {
 
     this.campainRepository = campainRepository;
     this.campainProductRepository = campainProductRepository;
     this.productSkuRepository = productSkuRepository;
     this.campaignRequestValidator = campaignRequestValidator;
     this.campaignEntityMapper = campaignEntityMapper;
+    this.campaignProductPort = campaignProductPort;
   }
 
   /**
@@ -79,7 +84,7 @@ public class CampainServiceImpl implements CampainService {
     // 3. Lưu campaign trước để lấy ID cho bảng chi tiết.
     campainRepository.savecampain(campaign);
 
-    Integer campaignId = campaign.getCampainId();
+    Integer campaignId = campaign.getCampaignId();
     if (campaignId == null) {
       log.error("Failed to create campaign: generated campaign ID is null");
       throw new IllegalStateException("Campaign ID was not generated after saving");
@@ -96,15 +101,48 @@ public class CampainServiceImpl implements CampainService {
     for (CampainProductRequest productRequest : request.getProducts()) {
       savedSkuCount += saveProductSkus(campaignId, productRequest);
     }
+
+    // 5. Lấy danh sách SKU vừa tạo
+    //    List<CampainProduct> campaignProducts =
+    // campainProductRepository.findByCampaignId(campaignId);
+    List<CampaignProductResponse> campaignProducts =
+        campainProductRepository.findCampainProductById(campaignId);
+
+    // 6. Kiểm tra tồn kho và trừ kho
+    updateStockSku(campaignProducts, true);
+
     // TODO: Check số lượng bán trong chiến diịch <= sl của từng sku trong kho
     log.info(
         "Campaign creation completed. campaignId={}, savedSkuCount={}", campaignId, savedSkuCount);
   }
 
-  /**
-   * Kiểm tra SKU thuộc đúng product, đang ACTIVE và có đủ tồn kho. Mỗi SKU được lưu thành một
-   * entity CampainProduct riêng biệt.
-   */
+  private void updateStockSku(List<CampaignProductResponse> campaignProducts, boolean isDecrease) {
+
+    Map<Integer, Integer> skuDeltaMap = new HashMap<>();
+
+    for (CampaignProductResponse cp : campaignProducts) {
+
+      if (cp.getStatus() != null && cp.getStatus() == CampainStatus.ACTIVE) {
+
+        Integer skuId = cp.getSkuId();
+        int stock = cp.getStockCampaign() != null ? cp.getStockCampaign() : 0;
+
+        if (skuId != null && stock > 0) {
+
+          int delta = isDecrease ? -stock : stock;
+
+          skuDeltaMap.merge(skuId, delta, Integer::sum);
+        }
+      }
+    }
+    System.out.println("A" + skuDeltaMap.keySet());
+    System.out.println("B" + skuDeltaMap);
+
+    if (!skuDeltaMap.isEmpty()) {
+      campaignProductPort.updateStockSkus(skuDeltaMap.keySet(), skuDeltaMap);
+    }
+  }
+
   private int saveProductSkus(Integer campaignId, CampainProductRequest productRequest) {
 
     Integer productId = productRequest.getProductid();
@@ -276,7 +314,6 @@ public class CampainServiceImpl implements CampainService {
             })
             .toList();
 
-    System.out.println("A" + campain.getProductId());
     CampainResponse campainResponse = new CampainResponse();
     campainResponse.setDescription(campain.getDescription());
 
@@ -373,7 +410,7 @@ public class CampainServiceImpl implements CampainService {
     if (!isValid) {
       throw new BusinessException(MessageCode.CAMPAIN_STATUS_INVALID);
     }
-    campaign.setCampainId(campainId);
+    campaign.setCampaignId(campainId);
     campaign.setStatus(CampainStatus.FINISHED);
     campaign.setUpdatedBy(userId.toString());
     campainRepository.finishCampain(campaign);

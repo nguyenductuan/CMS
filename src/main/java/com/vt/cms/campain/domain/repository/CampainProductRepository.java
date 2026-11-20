@@ -8,7 +8,7 @@ import org.apache.ibatis.annotations.Param;
 
 @Mapper
 public interface CampainProductRepository {
-  List<CampaignProductResponse> findCampainProductById(@Param("campain_id") Integer campain_id);
+  List<CampaignProductResponse> findCampainProductById(@Param("campaign_id") Integer campaignId);
 
   void savecampainproduct(CampainProduct campainProduct);
 

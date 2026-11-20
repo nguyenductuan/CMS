@@ -1,5 +1,6 @@
 package com.vt.cms.campain.domain.enity;
 
+import com.vt.cms.campain.domain.enums.CampainStatus;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import lombok.Data;
@@ -20,5 +21,5 @@ public class CampainProduct {
   private BigDecimal price;
   private BigDecimal price_discount;
   private String discountAmount;
-  private String status;
+  private CampainStatus status;
 }

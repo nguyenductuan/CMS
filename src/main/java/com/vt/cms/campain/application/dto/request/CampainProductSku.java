@@ -1,5 +1,6 @@
 package com.vt.cms.campain.application.dto.request;
 
+import com.vt.cms.campain.domain.enums.CampainStatus;
 import java.math.BigDecimal;
 import lombok.Data;
 
@@ -10,5 +11,5 @@ public class CampainProductSku {
   private BigDecimal price;
   private String image;
   private Integer stock_campaign;
-  private String status;
+  private CampainStatus status;
 }
