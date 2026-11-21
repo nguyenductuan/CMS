@@ -23,5 +23,5 @@ public interface CampainService {
   /** Xóa deletecampain. Tham số và kết quả tuân theo chữ ký phương thức. */
   void deletecampain(Integer campainId, Integer userId);
 
-  void finishCampain(Integer campainId, Integer userId);
+  void finishCampain(Integer campaignId, Integer userId);
 }

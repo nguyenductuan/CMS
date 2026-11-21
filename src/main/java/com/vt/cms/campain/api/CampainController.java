@@ -62,10 +62,10 @@ public class CampainController {
   // Kết thúc chiến dịch
   @PutMapping("/finish_campain/{id}")
   public ResponseEntity<APIRessponse> finishCampain(
-      @PathVariable("id") Integer campainId, HttpServletRequest request) {
+      @PathVariable("id") Integer campaignId, HttpServletRequest request) {
     log.info("Start finish Campain");
     Integer userID = (Integer) request.getAttribute(JwtAuthenticationFilter.USER_ID_ATTRIBUTE);
-    campainService.finishCampain(campainId, userID);
+    campainService.finishCampain(campaignId, userID);
     return ResponseEntity.ok(new APIRessponse(200, "Kết thúc chiến dịch thành công"));
   }
 

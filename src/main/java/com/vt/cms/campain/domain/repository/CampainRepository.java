@@ -23,7 +23,7 @@ public interface CampainRepository {
       @Param("status") CampainStatus status,
       @Param("userId") Integer userId);
 
-  Campain getCampainById(@Param("campain_id") Integer campain_id);
+  Campain getCampainById(@Param("campaign_id") Integer campaignId);
 
-  int deletecampain(@Param("campain_id") Integer campainID, @Param("userId") Integer userId);
+  int deletecampain(@Param("campaign_id") Integer campaignId, @Param("userId") Integer userId);
 }

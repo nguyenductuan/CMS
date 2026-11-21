@@ -64,53 +64,36 @@ public class CampainServiceImpl implements CampainService {
     this.campaignProductPort = campaignProductPort;
   }
 
-  /**
-   * Tạo campaign và lưu thông tin SKU tương ứng.
-   *
-   * <p>Toàn bộ thao tác ghi dữ liệu phải rollback nếu một SKU không hợp lệ.
-   */
   @Override
   @Transactional
-  /** Tạo mới dữ liệu created campain. Các tham số và kết quả tuân theo chữ ký phương thức. */
+  /* Tạo mới chiến dịch  */
   public void createdCampain(CreatedCampainRequest request, Integer userId) {
     log.info("Start creating campaign");
-
     // 1. Kiểm tra dữ liệu đầu vào trước khi ghi DB.
     campaignRequestValidator.validate(request);
-
     // 2. Tạo entity campaign từ request.
     Campain campaign = campaignEntityMapper.toNewCampaign(request, userId);
-
     // 3. Lưu campaign trước để lấy ID cho bảng chi tiết.
     campainRepository.savecampain(campaign);
-
     Integer campaignId = campaign.getCampaignId();
     if (campaignId == null) {
       log.error("Failed to create campaign: generated campaign ID is null");
       throw new IllegalStateException("Campaign ID was not generated after saving");
     }
-
     log.info(
         "Campaign created. campaignId={}, productCount={}",
         campaignId,
         request.getProducts().size());
-
     // 4. Validate và lưu chi tiết từng SKU.
     int savedSkuCount = 0;
-
     for (CampainProductRequest productRequest : request.getProducts()) {
       savedSkuCount += saveProductSkus(campaignId, productRequest);
     }
-
     // 5. Lấy danh sách SKU vừa tạo
-    //    List<CampainProduct> campaignProducts =
-    // campainProductRepository.findByCampaignId(campaignId);
     List<CampaignProductResponse> campaignProducts =
         campainProductRepository.findCampainProductById(campaignId);
-
     // 6. Kiểm tra tồn kho và trừ kho
     updateStockSku(campaignProducts, true);
-
     // TODO: Check số lượng bán trong chiến diịch <= sl của từng sku trong kho
     log.info(
         "Campaign creation completed. campaignId={}, savedSkuCount={}", campaignId, savedSkuCount);
@@ -178,10 +161,7 @@ public class CampainServiceImpl implements CampainService {
     return savedCount;
   }
 
-  /**
-   * Tìm SKU trong danh sách của product hiện tại. Không chỉ kiểm tra SKU tồn tại, mà còn đảm bảo
-   * SKU thuộc đúng product.
-   */
+  /* Tìm SKU trong danh sách của product hiện tại */
   private Product_Sku findSku(List<Product_Sku> productSkus, Integer skuId) {
 
     return productSkus.stream()
@@ -190,9 +170,6 @@ public class CampainServiceImpl implements CampainService {
         .orElseThrow(() -> new BusinessException(MessageCode.PRODUCT_SKU_NOT_FOUND));
   }
 
-  /**
-   * Kiểm tra tính hợp lệ validate sku status. Các tham số và kết quả tuân theo chữ ký phương thức.
-   */
   private void validateSkuStatus(Product_Sku sku, Integer campaignId) {
 
     if (!ACTIVE_STATUS.equalsIgnoreCase(sku.getStatus())) {
@@ -206,10 +183,6 @@ public class CampainServiceImpl implements CampainService {
     }
   }
 
-  /**
-   * Kiểm tra tính hợp lệ validate campaign stock. Các tham số và kết quả tuân theo chữ ký phương
-   * thức.
-   */
   private void validateCampaignStock(
       Product_Sku sku, CampainProductSku skuRequest, Integer campaignId) {
 
@@ -375,32 +348,35 @@ public class CampainServiceImpl implements CampainService {
   }
 
   @Override
-  /** Xóa dữ liệu deletecampain */
-  public void deletecampain(Integer campainId, Integer userId) {
-    if (campainId == null || campainId <= 0)
+  /* Xóa dữ liệu deletecampain */
+  public void deletecampain(Integer campaignId, Integer userId) {
+    if (campaignId == null || campaignId <= 0)
       throw new BusinessException(MessageCode.CAMPAIGN_ID_KHONG_HOP_LE);
     // Chỉ cho phép xóa chiến dịch đang chờ duyệt
-    // TODO: Cần xem xét lại logic này
-    Campain campaign = campainRepository.getCampainById(campainId);
+    Campain campaign = campainRepository.getCampainById(campaignId);
     CampainStatus currentStatus = campaign.getStatus();
     if (currentStatus != CampainStatus.PENDING) {
       throw new BusinessException(MessageCode.CAMPAIN_STATUS_INVALID);
     }
-    int rows = campainRepository.deletecampain(campainId, userId);
+    int rows = campainRepository.deletecampain(campaignId, userId);
     if (rows != 1) throw new BusinessException(MessageCode.CAMPAIN_DELETE_FAILED);
+    // Cộng lại kho khi xóa chiến dịch
+    List<CampaignProductResponse> campaignProducts =
+        campainProductRepository.findCampainProductById(campaignId);
+    updateStockSku(campaignProducts, false);
   }
 
-  public void finishCampain(Integer campainId, Integer userId) {
+  public void finishCampain(Integer campaignId, Integer userId) {
     /**
      * Cập nhật trnajg thái campain thành FINISH Lấy danh sách đơn hàng c trạng thái Chờ thanh toán
      * Lấy danh sách đơn hàng Chờ giao, Đang giao, Đã giao, Dã hoàn thành Hủy đơn haàng đối với đơn
      * chờ thaành toán (tác nhân là Seller hoặc role người kết thuc chiến dịch)
      */
     // Kiểm tra dữ liệu đầu vào
-    if (campainId == null || campainId <= 0) {
+    if (campaignId == null || campaignId <= 0) {
       throw new BusinessException(MessageCode.CAMPAIGN_ID_VA_TRANG_THAI_LA_BAT_BUOC);
     }
-    Campain campaign = campainRepository.getCampainById(campainId);
+    Campain campaign = campainRepository.getCampainById(campaignId);
     // Kiểm tra chiến dịch tồn tại và chưa bị xóa
     if (campaign == null || "true".equalsIgnoreCase(campaign.getIsDeleted())) {
       throw new BusinessException(MessageCode.CAMPAIGN_NOT_FOUND);
@@ -410,10 +386,14 @@ public class CampainServiceImpl implements CampainService {
     if (!isValid) {
       throw new BusinessException(MessageCode.CAMPAIN_STATUS_INVALID);
     }
-    campaign.setCampaignId(campainId);
+    campaign.setCampaignId(campaignId);
     campaign.setStatus(CampainStatus.FINISHED);
     campaign.setUpdatedBy(userId.toString());
     campainRepository.finishCampain(campaign);
+    // Cộng lại kho khi kết thúc chiến dịch
+    List<CampaignProductResponse> campaignProducts =
+        campainProductRepository.findCampainProductById(campaignId);
+    updateStockSku(campaignProducts, false);
     // TODO: Xử lý đơn hàng khi hủy chiến dịch
   }
 }

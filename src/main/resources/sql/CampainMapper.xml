@@ -4,7 +4,7 @@
 <mapper namespace="com.vt.cms.campain.domain.repository.CampainRepository">
 
     <resultMap id="CampainResultMap" type="com.vt.cms.campain.domain.enity.Campain">
-        <id property="campainId" column="id"/>
+        <id property="campaignId" column="id"/>
         <result column="created_at" property="createdAt" jdbcType="TIMESTAMP"/>
         <result column="created_by" property="createdBy" jdbcType="VARCHAR"/>
         <result column="is_deleted" property="isDeleted" jdbcType="VARCHAR"/>
@@ -23,7 +23,7 @@
     <select id="getCampainById" resultMap="CampainResultMap">
         SELECT *
         FROM campaign c
-        WHERE c.id = #{campain_id}
+        WHERE c.id = #{campaign_id}
           AND c.is_deleted = 'false';
 
     </select>
@@ -52,7 +52,7 @@
         SET is_deleted = 'true',
             updated_at = NOW(),
             updated_by = #{userId}
-        WHERE id = #{campain_id}
+        WHERE id = #{campaign_id}
           AND is_deleted = 'false'
           AND status IN ('PENDING_APPROVAL', 'REJECTED')
     </delete>
