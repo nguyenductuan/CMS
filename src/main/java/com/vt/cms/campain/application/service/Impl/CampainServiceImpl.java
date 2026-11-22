@@ -26,10 +26,7 @@ import com.vt.cms.product.domain.entity.Product_Sku;
 import com.vt.cms.product.domain.repository.ProductSkuRepository;
 import jakarta.transaction.Transactional;
 import java.time.LocalDateTime;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -172,7 +169,7 @@ public class CampainServiceImpl implements CampainService {
 
   private void validateSkuStatus(Product_Sku sku, Integer campaignId) {
 
-    if (!ACTIVE_STATUS.equalsIgnoreCase(sku.getStatus())) {
+    if (CampainStatus.ACTIVE != (sku.getStatus())) {
       log.warn(
           "Inactive SKU rejected. campaignId={}, skuId={}, status={}",
           campaignId,
@@ -395,5 +392,24 @@ public class CampainServiceImpl implements CampainService {
         campainProductRepository.findCampainProductById(campaignId);
     updateStockSku(campaignProducts, false);
     // TODO: Xử lý đơn hàng khi hủy chiến dịch
+  }
+
+  @Override
+  public List<CampainResponse> getCampaignInfoById(Set<Integer> campainids) {
+    return campainRepository.findAllCampainByIds(campainids).stream()
+        .map(CampaignEntityMapper::toCampainInfo)
+        .toList();
+  }
+
+  @Override
+  public List<CampaignProductResponse> findCampaignProductByCampaignIdIn(Set<Integer> campainids) {
+    return campainProductRepository.findCampaignProductByCampaignIdIn(campainids).stream()
+        .map(CampaignEntityMapper::toCampainProductInfo)
+        .toList();
+  }
+
+  @Override
+  public boolean isCampaignExpried(LocalDateTime endtime) {
+    return endtime.isBefore(LocalDateTime.now());
   }
 }

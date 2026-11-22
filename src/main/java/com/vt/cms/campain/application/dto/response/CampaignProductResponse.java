@@ -11,6 +11,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class CampaignProductResponse {
   private String id;
+  private Integer campaignId;
   //  private String campaignId;
   private Integer productId;
   private String productName;

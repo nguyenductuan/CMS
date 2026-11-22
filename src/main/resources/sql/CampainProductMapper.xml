@@ -99,4 +99,26 @@
           AND cp.is_deleted = false
     </select>
 
+    <select id="findCampaignProductByCampaignIdIn"
+            parameterType="java.util.Set"
+            resultType="com.vt.cms.campain.domain.enity.CampainProduct">
+        SELECT *
+        FROM campain_product
+        WHERE campaign_id IN
+        <foreach collection="ids" item="id" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </select>
+
+    <select id="findAllByCampaignIds"
+            parameterType="java.util.Set"
+            resultType="com.vt.cms.campain.domain.enity.CampainProduct">
+        SELECT *
+        FROM campain_product
+        WHERE campaign_id IN
+        <foreach collection="campaignIds" item="id" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </select>
+
 </mapper>

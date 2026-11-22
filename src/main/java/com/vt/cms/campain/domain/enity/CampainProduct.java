@@ -3,12 +3,15 @@ package com.vt.cms.campain.domain.enity;
 import com.vt.cms.campain.domain.enums.CampainStatus;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @Data
+@AllArgsConstructor
+@NoArgsConstructor
 public class CampainProduct {
   private Long id;
-
   private LocalDateTime createdAt;
   private String createdBy;
   private String isDeleted;

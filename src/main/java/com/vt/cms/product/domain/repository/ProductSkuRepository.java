@@ -1,5 +1,6 @@
 package com.vt.cms.product.domain.repository;
 
+import com.vt.cms.product.application.dto.response.SkuResponse;
 import com.vt.cms.product.domain.entity.Product_Sku;
 import java.util.List;
 import java.util.Set;
@@ -14,6 +15,8 @@ public interface ProductSkuRepository {
    * Thực hiện truy cập dữ liệu inserproductsku. Các tham số và giá trị trả về được mô tả bởi chữ ký
    * phương thức.
    */
+  List<Product_Sku> findSkuByIds(@Param("skuIds") List<Integer> ids);
+
   int inserproductsku(Product_Sku productSku);
 
   /**
@@ -40,4 +43,6 @@ public interface ProductSkuRepository {
   int updateByProductIdAndSkuCode(@Param("sku") Product_Sku sku);
 
   void saveSkus(@Param("skus") List<Product_Sku> productSkus);
+
+  List<SkuResponse> findSkuWithCampaignStock(Set<Integer> ids, Set<Integer> campaignIds);
 }

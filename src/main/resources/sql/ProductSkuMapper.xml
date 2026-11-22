@@ -150,4 +150,57 @@
             #{sku.id}
         </foreach>
     </update>
+
+    <select id="findSkuWithCampaignStock">
+
+        SELECT
+        s.id AS id,
+        cp.campaign_id AS campaignId,
+        s.sku_code AS skuCode,
+        s.attribute AS attribute,
+        s.type_product AS typeProduct,
+        s.price AS price,
+        COALESCE(cp.stock_campaign, 0) AS stockCampaign,
+        COALESCE(s.stock, 0) AS stock,
+        COALESCE(c.total_stock, 0) AS totalStock,
+        s.image_url AS imageUrl,
+        p.id AS productId,
+        p.name AS productName,
+
+        p.json_images AS jsonImages,
+        COALESCE(s.weight_gram, 0) AS weightGram,
+        cp.price_discount AS priceDiscount,
+        p.created_by AS createdBy
+
+        FROM product_sku s
+
+        INNER JOIN products p
+        ON p.id = s.product_id
+
+        INNER JOIN campain_product cp
+        ON cp.sku_id = s.id
+
+        INNER JOIN campaign c
+        ON c.id = cp.campaign_id
+
+        WHERE s.id IN
+        <foreach collection="ids"
+                 item="skuId"
+                 open="("
+                 separator=","
+                 close=")">
+            #{skuId}
+        </foreach>
+
+        AND cp.campaign_id IN
+        <foreach collection="campaignIds"
+                 item="campaignId"
+                 open="("
+                 separator=","
+                 close=")">
+            #{campaignId}
+        </foreach>
+
+    </select>
+
 </mapper>
