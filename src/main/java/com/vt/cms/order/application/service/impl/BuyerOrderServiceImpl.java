@@ -85,6 +85,9 @@ public class BuyerOrderServiceImpl implements BuyerOrderService {
 
     // 9. Build SKU Preview
     List<SkuPreviewDto> skus = buildSkuResponses(selections, skuInfos, campaignProductMap);
+    System.out.println("-----------------------------------------------");
+    System.out.println("Z" + skus);
+    System.out.println("-----------------------------------------------");
     // 10. Build response
     CheckoutPreviewResponse response = new CheckoutPreviewResponse();
     response.setPaymentMethod(PaymentMethod.QR);
@@ -121,12 +124,17 @@ public class BuyerOrderServiceImpl implements BuyerOrderService {
           SkuPreviewDto response = new SkuPreviewDto();
 
           response.setSkuId(sku.getId());
+          response.setCampaign_id(sku.getCampaignId());
           response.setProduct_id(sku.getProductId());
           response.setProduct_name(sku.getProductName());
+          response.setQuantity(selection.quantity());
 
           // Giá bán
           if (campaignProduct != null) {
             response.setPrice(campaignProduct.getPrice());
+            response.setStockCampaign(campaignProduct.getStockCampaign());
+            response.setPriceDiscount(campaignProduct.getPrice_discount());
+
           } else {
             response.setPrice(sku.getPrice());
           }

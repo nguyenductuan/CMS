@@ -16,7 +16,7 @@ public class SkuResponse {
   private Integer stock;
   private Integer weightGram;
   private Integer productId;
-
+  private Integer campaignId;
   private String productName;
   private BigDecimal lengthCm;
   private BigDecimal widthCm;
