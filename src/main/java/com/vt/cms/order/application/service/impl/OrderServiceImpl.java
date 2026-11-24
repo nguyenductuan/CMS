@@ -47,7 +47,7 @@
 //
 //    /**
 //     * Thực hiện xử lý nghiệp vụ order service impl. Các tham số và kết quả tuân theo chữ ký
-// phương thức.
+//     phương thức.
 //     */
 //    public OrderServiceImpl(
 //            OrderRepository orderRepository,
@@ -73,7 +73,7 @@
 //     * Lấy dữ liệu getdetailorder. Các tham số và kết quả tuân theo chữ ký phương thức.
 //     */
 //    public OrderResponse getdetailorder(long orderId) {
-//         OrderResponse order = orderRepository.getorderbyid(orderId);
+//        OrderResponse order = orderRepository.getorderbyid(orderId);
 //        if (order == null) {
 //            throw new RuntimeException("Order not found");
 //        }
@@ -90,7 +90,7 @@
 //     */
 //    @Transactional
 //    public void cancelOrder(int orderId, String notecancel, String actorUsername, String
-// actorRole) {
+//            actorRole) {
 //        if (!"ADMIN".equals(actorRole) && !"SELLER".equals(actorRole)) {
 //            throw new SecurityException("Chỉ ADMIN hoặc SELLER được hủy đơn hàng");
 //        }
@@ -115,11 +115,12 @@
 //        }
 //        if (paid && paymentRepository.markRefundPendingByOrderId(orderId) < 1) {
 //            throw new IllegalStateException("Không tìm thấy giao dịch đã thanh toán để chuyển
-// trạng thái hoàn tiền");
+//                    trạng thái hoàn tiền");
 //        }
 //        orderHistoryService.record(orderId, paid ? "006" : "006", order.getOrder_status().name(),
-// actorUsername, actorRole, paid ? "Đơn hàng đã hủy, chờ hoàn tiền" : "Đơn hàng đã bị hủy", "Lý do:
-// " + (notecancel == null ? "Không có lý do" : notecancel));
+//                actorUsername, actorRole, paid ? "Đơn hàng đã hủy, chờ hoàn tiền" : "Đơn hàng đã
+// bị hủy", "Lý do:
+//                " + (notecancel == null ? "Không có lý do" : notecancel));
 //    }
 //
 //    @Override
@@ -238,8 +239,8 @@
 //        order.setCreatedAt(LocalDateTime.now());
 //        order.setExpectedDelivery(getEstimatedDeliveryTime());
 //        if (buyerUsername == null || buyerUsername.isBlank()) throw new SecurityException("Tài
-// khoản mua hàng không hợp lệ");
-//        order.setCreated_by(buyerUsername);
+//                khoản mua hàng không hợp lệ");
+//                order.setCreated_by(buyerUsername);
 //
 //
 //        int insertedOrders = orderRepository.insertorder(order);
@@ -252,7 +253,8 @@
 //        }
 //
 //        orderHistoryService.record(order.getId(), "001", "WAIT_PAYMENT", buyerUsername, "BUYER",
-// "Đơn hàng đã được đặt", "Buyer đặt đơn hàng thành công. Mã đơn hàng: " + order.getId());
+//                "Đơn hàng đã được đặt", "Buyer đặt đơn hàng thành công. Mã đơn hàng: " +
+// order.getId());
 //
 //        int insertedItems = orderItemRepository.insertorderitems(orderItems);
 //        if (insertedItems <= 0) {
@@ -269,7 +271,7 @@
 //    //Hàm tính thời gian giao hàng
 //    /**
 //     * Lấy dữ liệu get estimated delivery time. Các tham số và kết quả tuân theo chữ ký phương
-// thức.
+//     thức.
 //     */
 //    public LocalDateTime getEstimatedDeliveryTime() {
 //

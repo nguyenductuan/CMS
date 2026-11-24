@@ -28,11 +28,10 @@ public class CampaignEntityMapper {
     campaignProductResponse.setProductId(campainProduct.getProductId());
     campaignProductResponse.setSkuId(campainProduct.getSkuId());
     campaignProductResponse.setStockCampaign(campainProduct.getStockCampaign());
-    campaignProductResponse.setDisCountPrice(campainProduct.getPrice_discount());
+    campaignProductResponse.setPrice(campainProduct.getPrice());
+    campaignProductResponse.setDisCountPrice(campainProduct.getPriceDiscount());
     return campaignProductResponse;
   }
-
-
 
   /** Thực hiện to new campaign. Tham số và kết quả tuân theo chữ ký phương thức. */
   public Campain toNewCampaign(CreatedCampainRequest request, Integer userId) {

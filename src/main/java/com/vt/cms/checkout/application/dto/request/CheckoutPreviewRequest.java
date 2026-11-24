@@ -1,6 +1,6 @@
 package com.vt.cms.checkout.application.dto.request;
 
-import com.vt.cms.model.dto.ItemRequest;
+import com.vt.cms.order.application.dto.request.ItemRequest;
 import java.util.List;
 import lombok.Data;
 

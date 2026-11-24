@@ -217,7 +217,7 @@ public class CampainServiceImpl implements CampainService {
     campaignProduct.setProductId(productId);
     campaignProduct.setSkuId(sku.getId());
     campaignProduct.setPrice(skuRequest.getPrice());
-    campaignProduct.setPrice_discount(skuRequest.getDiscountPrice());
+    campaignProduct.setPriceDiscount(skuRequest.getDiscountPrice());
     campaignProduct.setStockCampaign(skuRequest.getStock_campaign());
     campaignProduct.setStatus(skuRequest.getStatus());
     campaignProduct.setCreatedAt(LocalDateTime.now());

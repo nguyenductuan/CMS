@@ -49,6 +49,7 @@ public class ProductController {
   public ResponseEntity<APIRessponse> rejectProduct(
       @PathVariable Integer product_id, HttpServletRequest request, String reason) {
     Integer userId = (Integer) request.getAttribute(JwtAuthenticationFilter.USER_ID_ATTRIBUTE);
+
     productService.rejectProduct(product_id, userId, reason);
     return ResponseEntity.ok(new APIRessponse(200, "Từ chối sản phẩm thành công"));
   }

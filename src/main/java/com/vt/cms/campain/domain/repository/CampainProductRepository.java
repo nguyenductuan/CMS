@@ -22,5 +22,5 @@ public interface CampainProductRepository {
       @Param("SkuId") Integer skuId,
       @Param("quantity") Integer quantity);
 
-  Collection<CampainProduct> findAllByCampaignIds(List<Integer> campaignIds);
+  Collection<CampainProduct> findAllByCampaignIds(@Param("campaignIds") List<Integer> campaignIds);
 }

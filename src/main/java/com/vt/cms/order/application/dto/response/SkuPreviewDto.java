@@ -14,5 +14,6 @@ public class SkuPreviewDto {
   private Integer quantity;
   private String skuImageUrl;
   private String typeProduct;
+  private String attribute;
   private Integer stockCampaign;
 }

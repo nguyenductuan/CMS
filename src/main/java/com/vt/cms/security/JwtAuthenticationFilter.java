@@ -20,7 +20,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
   public static final String USERNAME_ATTRIBUTE = "authenticatedUsername";
   public static final String ROLE_ATTRIBUTE = "authenticatedRole";
 
-  private static final Set<String> PROTECTED_PATHS = Set.of("/v1/product/", "/v1/campain/");
+  private static final Set<String> PROTECTED_PATHS =
+      Set.of("/v1/product/", "/v1/campain/", "/v1/b/order/");
 
   private final JwtService jwtService;
 
@@ -56,7 +57,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
       request.setAttribute(USER_ID_ATTRIBUTE, userId);
       request.setAttribute(USERNAME_ATTRIBUTE, username);
       request.setAttribute(ROLE_ATTRIBUTE, role);
-
       String method = request.getMethod();
 
       if (!hasPermission(path, method, role)) {

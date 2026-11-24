@@ -7,20 +7,22 @@ import com.vt.cms.campain.application.dto.response.CampainResponse;
 import com.vt.cms.campain.application.service.port.CampaignProductPort;
 import com.vt.cms.campain.domain.enity.CampainProduct;
 import com.vt.cms.campain.domain.repository.CampainProductRepository;
-import com.vt.cms.model.dto.ItemRequest;
-import com.vt.cms.order.application.dto.request.CheckoutPreviewItem;
-import com.vt.cms.order.application.dto.request.CheckoutPreviewRequest;
-import com.vt.cms.order.application.dto.response.CheckoutPreviewResponse;
-import com.vt.cms.order.application.dto.response.ExceedStockSkuDTO;
-import com.vt.cms.order.application.dto.response.ProductSkuDTO;
-import com.vt.cms.order.application.dto.response.SkuPreviewDto;
+import com.vt.cms.order.application.dto.request.*;
+import com.vt.cms.order.application.dto.response.*;
 import com.vt.cms.order.application.service.BuyerOrderService;
 import com.vt.cms.order.application.service.port.CampaignPort;
+import com.vt.cms.order.domain.OrderStatus;
+import com.vt.cms.order.domain.entity.Order;
+import com.vt.cms.order.domain.entity.OrderItem;
+import com.vt.cms.order.domain.repository.OrderItemRepository;
+import com.vt.cms.order.domain.repository.OrderRepository;
 import com.vt.cms.payment.domain.enums.PaymentMethod;
 import com.vt.cms.product.application.dto.response.SkuResponse;
 import com.vt.cms.product.domain.entity.Product_Sku;
+import com.vt.cms.product.domain.repository.ProductRepository;
 import com.vt.cms.product.domain.repository.ProductSkuRepository;
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -33,16 +35,25 @@ public class BuyerOrderServiceImpl implements BuyerOrderService {
   private final CampaignPort campaignPort;
   private final ProductSkuRepository productSkuRepository;
   private final CampainProductRepository campainProductRepository;
+  private final ProductRepository productRepository;
+  private final OrderRepository orderRepository;
+  private final OrderItemRepository orderItemRepository;
 
   public BuyerOrderServiceImpl(
       CampaignProductPort campaignProductPort,
       CampaignPort campaignPort,
       ProductSkuRepository productSkuRepository,
-      CampainProductRepository campainProductRepository) {
+      CampainProductRepository campainProductRepository,
+      ProductRepository productRepository,
+      OrderRepository orderRepository,
+      OrderItemRepository orderItemRepository) {
     this.campaignProductPort = campaignProductPort;
     this.campaignPort = campaignPort;
     this.productSkuRepository = productSkuRepository;
     this.campainProductRepository = campainProductRepository;
+    this.productRepository = productRepository;
+    this.orderRepository = orderRepository;
+    this.orderItemRepository = orderItemRepository;
   }
 
   @Override
@@ -58,7 +69,7 @@ public class BuyerOrderServiceImpl implements BuyerOrderService {
     // 3. Lấy thông tin campain product
     List<CampaignProductResponse> campaignProductInfos =
         campaignPort.findCampaignProductByCampaignIdIn(uniqueCampaignIds);
-    System.out.println("C" + campaignProductInfos);
+    System.out.println("campaignProductInfos" + campaignProductInfos);
     // 4. Kiểm tra campain và stock: Sản phẩm trong campain có hợp lệ về thời gian không
     checkCampaignExpired(campainInfo, campaignProductInfos, request);
     // 5. Kiểm tra số lượng hàng tồn kho có đủ đáp ứng số lượng người dùng muốn mua không
@@ -89,10 +100,259 @@ public class BuyerOrderServiceImpl implements BuyerOrderService {
     System.out.println("Z" + skus);
     System.out.println("-----------------------------------------------");
     // 10. Build response
+
+    return buildCheckoutReponse(skus);
+  }
+
+  public Set<Integer> getUniqueCampaignIds(List<OrderRequest> orderRequests) {
+    return orderRequests.stream().map(OrderRequest::getCampaignId).collect(Collectors.toSet());
+  }
+
+  private Set<Integer> getUniqueSkuIds(List<OrderRequest> orders) {
+
+    return orders.stream()
+        .flatMap(order -> order.getItem().stream())
+        .map(item -> item.getSkuId())
+        .collect(Collectors.toSet());
+  }
+
+  private Map<Integer, SkuResponse> buildSkuResMap(
+      Set<Integer> uniqueSkuIds, Set<Integer> uniqueCampaignIds) {
+    List<SkuResponse> skuResList =
+        productSkuRepository.findSkuWithCampaignStock(uniqueSkuIds, uniqueCampaignIds);
+    return skuResList.stream().collect(Collectors.toMap(SkuResponse::getId, Function.identity()));
+  }
+
+  // TODO: Xử lý validate tạo đơn hàng
+  //
+  //  private void validateCreateOrder(
+  //          Set<Integer> uniqueCampaignIds,
+  //          Set<Integer> uniqueSkuIds,
+  //          List<CampainResponse> campaignInfos,
+  //          List<CampaignProductResponse> campaignProductInfos,
+  //          CreateOrderRequest request) {
+  //    Set<Integer> uniqueProductIds = getUniqueProductIds(request.getOrders());
+  //
+  //    checkExistsCampaign(uniqueCampaignIds, campaignInfos);
+  //    checkExistsProduct(uniqueProductIds, campaignProductInfos);
+  //    checkExistsSku(uniqueSkuIds, campaignProductInfos);
+  //    checkCampaignExpired(campaignInfos, campaignProductInfos, null);
+  //    checkInsufficientStock(request.getOrders(), null, campaignProductInfos);
+  //    checkTotalAmount(request, campaignProductInfos);
+  //  }
+
+  private Map<Integer, CampaignProductResponse> buildSkuInCampaignMap(
+      List<CampaignProductResponse> campaignProductInfos) {
+    return campaignProductInfos.stream()
+        .collect(Collectors.toMap(CampaignProductResponse::getSkuId, Function.identity()));
+  }
+
+  private Map<Integer, CampainResponse> buildCampaignMap(List<CampainResponse> campaignInfos) {
+    return campaignInfos.stream()
+        .collect(Collectors.toMap(CampainResponse::getId, Function.identity()));
+  }
+
+  private List<OrderItem> buildOrderItems(
+      OrderRequest orderReq,
+      Map<Integer, CampaignProductResponse> skuInfoMap,
+      Map<Integer, SkuResponse> skuResMap) {
+
+    List<OrderItem> items = new ArrayList<>();
+
+    for (OrderItemRequest itemReq : orderReq.getItem()) {
+
+      CampaignProductResponse skuInfo = skuInfoMap.get(itemReq.getSkuId());
+      SkuResponse skuRes = skuResMap.get(itemReq.getSkuId());
+
+      BigDecimal originalPrice = skuInfo.getPrice(); // gia goc
+      BigDecimal unitPrice = skuInfo.getDisCountPrice(); // gia ban
+      BigDecimal totalPrice = unitPrice.multiply(BigDecimal.valueOf(itemReq.getQuantity()));
+      Integer totalWeight = itemReq.getQuantity() * skuRes.getWeightGram();
+
+      OrderItem orderItem = new OrderItem();
+      orderItem.setSku_id(itemReq.getSkuId());
+      orderItem.setQuantity(itemReq.getQuantity());
+      orderItem.setOriginalPrice(originalPrice);
+      orderItem.setUnitPrice(unitPrice);
+      orderItem.setTotal_price(totalPrice);
+      orderItem.setTotalWeight(totalWeight);
+
+      items.add(orderItem);
+    }
+
+    return items;
+  }
+
+  private void buildOrders(
+      List<OrderRequest> orderRequests,
+      Map<Integer, CampaignProductResponse> skuCampaignInfoMap,
+      List<Order> orders,
+      Map<Integer, List<OrderItem>> orderItemMap,
+      Map<Integer, CampainResponse> campaignInfoMap,
+      BigDecimal shippingFeeMap,
+      Map<Integer, SkuResponse> skuResMap,
+      Integer userId) {
+    for (int i = 0; i < orderRequests.size(); i++) {
+      // ToDO  BigDecimal shippingFee = shippingFeeMap.getOrDefault(i, BigDecimal.ZERO);
+      OrderRequest orderReq = orderRequests.get(i);
+      Order order = new Order();
+      order.setOrderStatus(OrderStatus.WAIT_PAYMENT);
+      order.setProductId(orderReq.getProductId());
+      order.setCampaignId(orderReq.getCampaignId());
+      order.setCreatedBy(userId.toString());
+      order.setShipperCode(orderReq.getShipping_service_code());
+      order.setShipperName(orderReq.getShipping_service_name());
+      order.setCreatedAt(LocalDateTime.now());
+      List<OrderItem> items = buildOrderItems(orderReq, skuCampaignInfoMap, skuResMap);
+      System.out.println("items:" + items);
+      Integer itemQuantity = items.stream().map(OrderItem::getQuantity).reduce(0, Integer::sum);
+      BigDecimal itemTotal =
+          items.stream().map(OrderItem::getTotal_price).reduce(BigDecimal.ZERO, BigDecimal::add);
+      Integer totalWeight = items.stream().map(OrderItem::getTotalWeight).reduce(0, Integer::sum);
+      order.setTotalPrice(itemTotal);
+      order.setTotalWeight(totalWeight);
+      order.setTotalQuantity(itemQuantity);
+      order.setTotalPayment(itemTotal);
+      order.setShippingFee(BigDecimal.valueOf(0)); // phi van chuyen: shippingFee
+      orders.add(order);
+      orderItemMap.put(i, items);
+    }
+  }
+
+  // TODO  Tính phí vân chuyển đơn hàng
+
+  //  private Map<Integer, BigDecimal> calculateShippingFees(
+  //          Map<Integer, SkuResponse> skuResMap, CreateOrderRequest request) {
+  //    Map<Integer, BigDecimal> shippingFeeMap = new HashMap<>();
+  //    String requestId = RequestUtils.extractRequestId();
+  //
+  //    for (int i = 0; i < request.getOrders().size(); i++) {
+  //      CreateOrderRequest.OrderRequest orderReq = request.getOrders().get(i);
+  //
+  //      BigDecimal totalItemPrice = BigDecimal.ZERO;
+  //      int totalWeight = 0;
+  //
+  //      for (CreateOrderRequest.OrderItemRequest item : orderReq.getItems()) {
+  //        BigDecimal price = skuResMap.get(item.getSkuId()).getPriceDiscount();
+  //        totalItemPrice =
+  // totalItemPrice.add(price.multiply(BigDecimal.valueOf(item.getQuantity())));
+  //
+  //        ProductSkuRes skuRes = skuResMap.get(item.getSkuId());
+  //        if (skuRes != null) {
+  //          totalWeight += (skuRes.getWeightGram() * item.getQuantity());
+  //        }
+  //      }
+  //
+  //      ShippingPerServiceRequest vtpReq =
+  //              buildVtpRequest(orderReq, request.getShipping(), totalWeight, totalItemPrice);
+  //      log.info("ShppingPersServiceRequest: {}", JsonUtils.toJson(vtpReq));
+  //
+  //      BigDecimal fee =
+  //              shippingPartnerGateway.getShippingPerService(requestId, vtpReq).getMoneyTotal();
+  //      shippingFeeMap.put(i, fee != null ? fee : BigDecimal.ZERO);
+  //    }
+  //    return shippingFeeMap;
+  //  }
+  @Override
+  public OrderCreateResponse createOrder(CreateOrderRequest createorderRequest, Integer userId) {
+    System.out.println("Du lieu" + userId);
+    // Check valadate request
+    if (createorderRequest == null
+        || createorderRequest.getOrders() == null
+        || createorderRequest.getOrders().isEmpty()) {
+      throw new BusinessException(MessageCode.INVALID_ORDER);
+    }
+    List<OrderRequest> orderRequests = createorderRequest.getOrders();
+    // ---------------------------------------------------------//
+    // Lấy thông tin campain từ request
+    Set<Integer> uniqueCampaignIds = getUniqueCampaignIds(orderRequests);
+    // Lấy thông tin SKU từ request
+    Set<Integer> uniqueSkuIds = getUniqueSkuIds(orderRequests);
+    // Lấy thông tin Campaign
+    List<CampainResponse> campaignInfos = campaignPort.getCampaignInfoById(uniqueCampaignIds);
+    // Lấy sản phẩm thuộc Campaign
+    List<CampaignProductResponse> campaignProductInfos =
+        campaignPort.findCampaignProductByCampaignIdIn(uniqueCampaignIds);
+    System.out.println(" campaignProductInfos" + campaignProductInfos);
+    // Build map SKU
+    Map<Integer, SkuResponse> skuResMap = buildSkuResMap(uniqueSkuIds, uniqueCampaignIds);
+    System.out.println("skuResMap" + skuResMap);
+
+    // TODO Tính phí vận chuyển
+    // Map<Integer, BigDecimal> shippingFeeMap = calculateShippingFees(skuResMap, orderRequests);
+
+    // TODO  Check validate
+    // validateCreateOrder(uniqueCampaignIds, uniqueSkuIds, campaignInfos, campaignProductInfos,
+    // orderRequests);
+
+    // chuyển List thành Map để tra cứu nhanh hơn.
+    Map<Integer, CampaignProductResponse> skuCampaignInfoMap =
+        buildSkuInCampaignMap(campaignProductInfos);
+    Map<Integer, CampainResponse> campaignInfoMap = buildCampaignMap(campaignInfos);
+
+    System.out.println("Check skucampain:" + skuCampaignInfoMap);
+    System.out.println("Check campaignInfoMap " + campaignInfoMap);
+    BigDecimal shippingFeeMap = BigDecimal.valueOf(0); // TODO: Giả lập phí =0
+    List<Order> orders = new ArrayList<>();
+    Map<Integer, List<OrderItem>> orderItemMap = new HashMap<>();
+    buildOrders(
+        orderRequests,
+        skuCampaignInfoMap,
+        orders,
+        orderItemMap,
+        campaignInfoMap,
+        shippingFeeMap,
+        skuResMap,
+        userId);
+    int savedOrders = orderRepository.saveAll(orders);
+    List<Integer> orderIds = orders.stream().map(Order::getId).toList();
+
+    List<OrderItem> orderItems = buildOrderItem(orders, orderItemMap);
+    // TODO: Cập nhật kho campain
+    // decreaseStock(orderRequests, orderItems, campaignProductInfos);
+    orderItemRepository.saveAll(orderItems);
+    OrderCreateResponse response = new OrderCreateResponse();
+    response.setOrderId(orderIds);
+    response.setTotal_payment(createorderRequest.getTotalAmount());
+    response.setPayment_method(PaymentMethod.QR);
+    return response;
+  }
+
+  private List<OrderItem> buildOrderItem(
+      List<Order> orders, Map<Integer, List<OrderItem>> orderItemMap) {
+
+    List<OrderItem> orderItems = new ArrayList<>();
+
+    for (int i = 0; i < orders.size(); i++) {
+
+      Integer orderId = orders.get(i).getId();
+      List<OrderItem> items = orderItemMap.get(i);
+
+      for (OrderItem item : items) {
+        item.setOrder_id(orderId);
+        orderItems.add(item);
+      }
+    }
+
+    return orderItems;
+  }
+
+  // Tính tiền tổng đơn hàng
+  private BigDecimal calculateTotalPrice(List<SkuPreviewDto> skus) {
+    return skus.stream()
+        .map(item ->
+            item.getPrice() != null
+                ? item.getPriceDiscount().multiply(BigDecimal.valueOf(item.getQuantity()))
+                : BigDecimal.ZERO)
+        .reduce(BigDecimal.ZERO, BigDecimal::add);
+  }
+
+  private CheckoutPreviewResponse buildCheckoutReponse(List<SkuPreviewDto> skus) {
+
     CheckoutPreviewResponse response = new CheckoutPreviewResponse();
     response.setPaymentMethod(PaymentMethod.QR);
     response.setSkus(skus);
-    response.setTotalPrice(BigDecimal.valueOf(100));
+    response.setTotalPrice(calculateTotalPrice(skus));
     return response;
   }
 
@@ -128,17 +388,19 @@ public class BuyerOrderServiceImpl implements BuyerOrderService {
           response.setProduct_id(sku.getProductId());
           response.setProduct_name(sku.getProductName());
           response.setQuantity(selection.quantity());
+          response.setSkuImageUrl(sku.getImageUrl());
+          response.setTypeProduct(sku.getTypeProduct());
+          response.setAttribute(sku.getAttribute());
 
           // Giá bán
           if (campaignProduct != null) {
             response.setPrice(campaignProduct.getPrice());
             response.setStockCampaign(campaignProduct.getStockCampaign());
-            response.setPriceDiscount(campaignProduct.getPrice_discount());
+            response.setPriceDiscount(campaignProduct.getPriceDiscount());
 
           } else {
             response.setPrice(sku.getPrice());
           }
-
           return response;
         })
         .collect(Collectors.toList());
@@ -297,8 +559,6 @@ public class BuyerOrderServiceImpl implements BuyerOrderService {
   public void validateRequest(CheckoutPreviewRequest request) {
     // 1. request null hoặc rỗng -> tạo 1 hàm trả về gi trị rỗng
   }
-
-  public void processItem(ItemRequest item) {}
 
   private record SkuCampaignKey(Integer skuId, Integer campaignId) {}
 

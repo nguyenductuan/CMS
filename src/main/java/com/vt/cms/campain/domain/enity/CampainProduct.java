@@ -22,7 +22,7 @@ public class CampainProduct {
   private Integer skuId;
   private Integer stockCampaign;
   private BigDecimal price;
-  private BigDecimal price_discount;
+  private BigDecimal priceDiscount;
   private String discountAmount;
   private CampainStatus status;
 }
