@@ -37,7 +37,6 @@ public class BuyerOrderController {
   public ResponseEntity<APIRessponse> order(
       @Valid @RequestBody CreateOrderRequest orderRequest, HttpServletRequest request) {
     Integer userId = (Integer) request.getAttribute(JwtAuthenticationFilter.USER_ID_ATTRIBUTE);
-    System.out.println("DL" + userId);
     OrderCreateResponse orderCreateResponse = buyerOrderService.createOrder(orderRequest, userId);
     return ResponseEntity.ok(new APIRessponse(200, "Thành công", orderCreateResponse));
   }

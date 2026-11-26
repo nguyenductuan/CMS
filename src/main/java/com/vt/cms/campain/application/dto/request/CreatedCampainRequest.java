@@ -12,8 +12,7 @@ public class CreatedCampainRequest {
   private LocalDateTime endTime;
   private String description;
   private BigDecimal discount;
-  //    private Integer total_stock;
-  //    private Integer salesCommission;
+  private Integer total_stock;
   /*TODO: Mục đích lưu stock trong bảng campain làm gì */
   private List<CampainProductRequest> products;
 }

@@ -10,7 +10,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class CampaignProductResponse {
-  private String id;
+  private Integer id;
   private Integer campaignId;
   //  private String campaignId;
   private Integer productId;

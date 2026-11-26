@@ -33,4 +33,8 @@ public interface CampainService {
   List<CampaignProductResponse> findCampaignProductByCampaignIdIn(Set<Integer> campainids);
 
   boolean isCampaignExpried(LocalDateTime endtime);
+
+  int decreaseStock(Integer campaignProductId, Integer quantity);
+
+  int decreaseTotalStock(Integer campaignId, Integer quantity);
 }

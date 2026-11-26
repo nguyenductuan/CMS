@@ -412,4 +412,12 @@ public class CampainServiceImpl implements CampainService {
   public boolean isCampaignExpried(LocalDateTime endtime) {
     return endtime.isBefore(LocalDateTime.now());
   }
+
+  public int decreaseStock(Integer campaignProductId, Integer quantity) {
+    return campainProductRepository.decreaseStock(campaignProductId, quantity);
+  }
+
+  public int decreaseTotalStock(Integer campaignId, Integer quantity) {
+    return campainRepository.decreaseTotalStock(campaignId, quantity);
+  }
 }

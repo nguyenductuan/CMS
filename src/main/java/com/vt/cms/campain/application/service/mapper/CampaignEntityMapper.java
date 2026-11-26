@@ -24,6 +24,7 @@ public class CampaignEntityMapper {
 
   public static CampaignProductResponse toCampainProductInfo(CampainProduct campainProduct) {
     CampaignProductResponse campaignProductResponse = new CampaignProductResponse();
+    campaignProductResponse.setId(campainProduct.getId());
     campaignProductResponse.setCampaignId(campainProduct.getCampaignId());
     campaignProductResponse.setProductId(campainProduct.getProductId());
     campaignProductResponse.setSkuId(campainProduct.getSkuId());
@@ -43,6 +44,8 @@ public class CampaignEntityMapper {
     campaign.setDiscount(request.getDiscount());
     campaign.setStatus(CampainStatus.PENDING);
     campaign.setCreatedAt(LocalDateTime.now());
+    // TODO: Check total_stock ở request với tổng stock của các SKU
+    campaign.setTotalStock(request.getTotal_stock());
     campaign.setCreatedBy(userId.toString());
     campaign.setIsDeleted("false");
     return campaign;

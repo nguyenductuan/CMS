@@ -11,7 +11,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class CampainProduct {
-  private Long id;
+  private Integer id;
   private LocalDateTime createdAt;
   private String createdBy;
   private String isDeleted;

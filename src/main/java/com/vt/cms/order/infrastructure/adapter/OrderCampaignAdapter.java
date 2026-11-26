@@ -32,4 +32,14 @@ public class OrderCampaignAdapter implements CampaignPort {
   public boolean isCampaignExpried(LocalDateTime endtime) {
     return campainService.isCampaignExpried(endtime);
   }
+
+  @Override
+  public int decreaseStock(Integer campaignProductId, Integer quantity) {
+    return campainService.decreaseStock(campaignProductId, quantity);
+  }
+
+  @Override
+  public int decreaseTotalStock(Integer campaignId, Integer quantity) {
+    return campainService.decreaseTotalStock(campaignId, quantity);
+  }
 }

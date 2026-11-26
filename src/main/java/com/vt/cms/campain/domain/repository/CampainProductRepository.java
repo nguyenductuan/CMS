@@ -17,10 +17,7 @@ public interface CampainProductRepository {
 
   boolean existsAssociationByProductId(@Param("productId") Integer productId);
 
-  int deductStock(
-      @Param("campainId") Integer campainId,
-      @Param("SkuId") Integer skuId,
-      @Param("quantity") Integer quantity);
+  int decreaseStock(Integer campaignProductId, Integer quantity);
 
   Collection<CampainProduct> findAllByCampaignIds(@Param("campaignIds") List<Integer> campaignIds);
 }

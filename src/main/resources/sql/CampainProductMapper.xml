@@ -49,7 +49,7 @@
                 #{skuId},
                 #{stockCampaign},
                 #{price},
-                #{price_discount},
+                #{priceDiscount},
                 #{discountAmount},
                 #{status})
     </insert>
@@ -60,11 +60,10 @@
                        WHERE product_id = #{productId})
     </select>
 
-    <update id="deductStock">
+    <update id="decreaseStock">
         UPDATE campain_product
         SET stock_campaign = stock_campaign - #{quantity}
-        WHERE campaign_id = #{campainId}
-          AND sku_id = #{SkuId}
+        WHERE id = #{campaignProductId}
           AND stock_campaign >= #{quantity};
     </update>
 
@@ -120,5 +119,6 @@
             #{id}
         </foreach>
     </select>
+
 
 </mapper>

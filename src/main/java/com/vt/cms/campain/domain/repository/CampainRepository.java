@@ -29,4 +29,7 @@ public interface CampainRepository {
   int deletecampain(@Param("campaign_id") Integer campaignId, @Param("userId") Integer userId);
 
   List<Campain> findAllCampainByIds(Collection<Integer> ids);
+
+  int decreaseTotalStock(
+      @Param("campaignId") Integer campaignId, @Param("quantity") Integer quantity);
 }

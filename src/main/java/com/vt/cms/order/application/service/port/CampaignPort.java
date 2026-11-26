@@ -12,4 +12,8 @@ public interface CampaignPort {
   List<CampaignProductResponse> findCampaignProductByCampaignIdIn(Set<Integer> campainID);
 
   boolean isCampaignExpried(LocalDateTime endtime);
+
+  int decreaseStock(Integer campaignProductId, Integer quantity);
+
+  int decreaseTotalStock(Integer campaignId, Integer quantity);
 }

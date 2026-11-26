@@ -84,21 +84,12 @@ public class BuyerOrderServiceImpl implements BuyerOrderService {
                     item.getQuantity()))
             .collect(Collectors.toList());
     // 7. Lấy thông tin SKU
-    System.out.println("-----------------------------------------------");
     List<SkuResponse> skuInfos = loadSkuInfosForSelections(selections);
-    System.out.println("P" + skuInfos);
-    System.out.println("-----------------------------------------------");
-    System.out.println(skuInfos.stream().map(SkuResponse::getId).toList());
-    System.out.println("-----------------------------------------------");
     // 8. Map Campaign Product
     Map<SkuCampaignKey, CampainProduct> campaignProductMap = loadCampaignProductMap(selections);
-    // 9. Xử lý thông tin SKU để build response
-
     // 9. Build SKU Preview
     List<SkuPreviewDto> skus = buildSkuResponses(selections, skuInfos, campaignProductMap);
-    System.out.println("-----------------------------------------------");
-    System.out.println("Z" + skus);
-    System.out.println("-----------------------------------------------");
+
     // 10. Build response
 
     return buildCheckoutReponse(skus);
@@ -156,14 +147,10 @@ public class BuyerOrderServiceImpl implements BuyerOrderService {
       OrderRequest orderReq,
       Map<Integer, CampaignProductResponse> skuInfoMap,
       Map<Integer, SkuResponse> skuResMap) {
-
     List<OrderItem> items = new ArrayList<>();
-
     for (OrderItemRequest itemReq : orderReq.getItem()) {
-
       CampaignProductResponse skuInfo = skuInfoMap.get(itemReq.getSkuId());
       SkuResponse skuRes = skuResMap.get(itemReq.getSkuId());
-
       BigDecimal originalPrice = skuInfo.getPrice(); // gia goc
       BigDecimal unitPrice = skuInfo.getDisCountPrice(); // gia ban
       BigDecimal totalPrice = unitPrice.multiply(BigDecimal.valueOf(itemReq.getQuantity()));
@@ -255,7 +242,6 @@ public class BuyerOrderServiceImpl implements BuyerOrderService {
   //  }
   @Override
   public OrderCreateResponse createOrder(CreateOrderRequest createorderRequest, Integer userId) {
-    System.out.println("Du lieu" + userId);
     // Check valadate request
     if (createorderRequest == null
         || createorderRequest.getOrders() == null
@@ -273,11 +259,9 @@ public class BuyerOrderServiceImpl implements BuyerOrderService {
     // Lấy sản phẩm thuộc Campaign
     List<CampaignProductResponse> campaignProductInfos =
         campaignPort.findCampaignProductByCampaignIdIn(uniqueCampaignIds);
-    System.out.println(" campaignProductInfos" + campaignProductInfos);
+    System.out.println("Check 123" + campaignProductInfos);
     // Build map SKU
     Map<Integer, SkuResponse> skuResMap = buildSkuResMap(uniqueSkuIds, uniqueCampaignIds);
-    System.out.println("skuResMap" + skuResMap);
-
     // TODO Tính phí vận chuyển
     // Map<Integer, BigDecimal> shippingFeeMap = calculateShippingFees(skuResMap, orderRequests);
 
@@ -289,9 +273,6 @@ public class BuyerOrderServiceImpl implements BuyerOrderService {
     Map<Integer, CampaignProductResponse> skuCampaignInfoMap =
         buildSkuInCampaignMap(campaignProductInfos);
     Map<Integer, CampainResponse> campaignInfoMap = buildCampaignMap(campaignInfos);
-
-    System.out.println("Check skucampain:" + skuCampaignInfoMap);
-    System.out.println("Check campaignInfoMap " + campaignInfoMap);
     BigDecimal shippingFeeMap = BigDecimal.valueOf(0); // TODO: Giả lập phí =0
     List<Order> orders = new ArrayList<>();
     Map<Integer, List<OrderItem>> orderItemMap = new HashMap<>();
@@ -308,14 +289,59 @@ public class BuyerOrderServiceImpl implements BuyerOrderService {
     List<Integer> orderIds = orders.stream().map(Order::getId).toList();
 
     List<OrderItem> orderItems = buildOrderItem(orders, orderItemMap);
-    // TODO: Cập nhật kho campain
-    // decreaseStock(orderRequests, orderItems, campaignProductInfos);
+    // Cập nhật kho campain khi mua sản phẩm
+    decreaseStock(orderRequests, orderItems, campaignProductInfos);
     orderItemRepository.saveAll(orderItems);
     OrderCreateResponse response = new OrderCreateResponse();
     response.setOrderId(orderIds);
     response.setTotal_payment(createorderRequest.getTotalAmount());
     response.setPayment_method(PaymentMethod.QR);
     return response;
+  }
+
+  // Trừ kho campain & campainproduct khi mua sản phẩm
+  private void decreaseStock(
+      List<OrderRequest> orderRequests,
+      List<OrderItem> orderItems,
+      List<CampaignProductResponse> campaignProductInfos) {
+
+    Map<Integer, Integer> skuToCampaignProduct =
+        campaignProductInfos.stream()
+            .collect(
+                Collectors.toMap(
+                    CampaignProductResponse::getSkuId, CampaignProductResponse::getId));
+
+    List<Integer> failedCampaignProducts = new ArrayList<>();
+    for (OrderItem item : orderItems) {
+      Integer campaignProductId = skuToCampaignProduct.get(item.getSku_id());
+      int updated = campaignPort.decreaseStock(campaignProductId, item.getQuantity());
+      if (updated == 0) {
+        failedCampaignProducts.add(campaignProductId);
+      }
+    }
+    if (!failedCampaignProducts.isEmpty()) {
+      throw new BusinessException(MessageCode.INSUFFICIENT_STOCK, failedCampaignProducts);
+    }
+    // Cộng lại campain (đã fix)
+    Map<Integer, Integer> campaignTotalQty =
+        orderRequests.stream()
+            .collect(
+                Collectors.groupingBy(
+                    OrderRequest::getCampaignId,
+                    Collectors.summingInt(order ->
+                        order.getItem().stream().mapToInt(OrderItemRequest::getQuantity).sum())));
+    campaignTotalQty.forEach((campaignId, totalQuantity) -> {
+      try {
+        System.out.println("campainID" + campaignId);
+        System.out.println("totalquantity" + totalQuantity);
+        campaignPort.decreaseTotalStock(campaignId, totalQuantity);
+      } catch (Exception e) {
+        System.out.println("Loi" + e.getMessage());
+        System.out.println("Loi" + e.getStackTrace());
+
+        throw new BusinessException(MessageCode.INSUFFICIENT_STOCK);
+      }
+    });
   }
 
   private List<OrderItem> buildOrderItem(

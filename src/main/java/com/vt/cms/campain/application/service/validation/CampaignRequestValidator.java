@@ -6,7 +6,6 @@ import com.vt.cms.campain.application.dto.request.CampainProductRequest;
 import com.vt.cms.campain.application.dto.request.CampainProductSku;
 import com.vt.cms.campain.application.dto.request.CreatedCampainRequest;
 import java.math.BigDecimal;
-import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.Set;
 import org.springframework.stereotype.Component;
@@ -38,13 +37,14 @@ public class CampaignRequestValidator {
           throw new BusinessException(MessageCode.DUPLICATE_SKU_ID);
       }
     }
-    // Check thời gian
-    if (!request.getStartTime().isBefore(request.getEndTime())
-        || request.getStartTime() == null
-        || request.getEndTime() == null
-        || request.getStartTime().isBefore(LocalDateTime.now())) {
-      throw new BusinessException(MessageCode.TIME_INVALID);
-    }
+    // TODO:Check thời gian
+
+    //    if (!request.getStartTime().isBefore(request.getEndTime())
+    //        || request.getStartTime() == null
+    //        || request.getEndTime() == null
+    //        || request.getStartTime().isBefore(LocalDateTime.now())) {
+    //      throw new BusinessException(MessageCode.TIME_INVALID);
+    //    }
   }
 
   /** Kiểm tra tính hợp lệ validate discount. Tham số và kết quả tuân theo chữ ký phương thức. */

@@ -113,4 +113,11 @@
         </if>
     </select>
 
+
+    <update id="decreaseTotalStock">
+        UPDATE campaign
+        SET total_stock = total_stock - #{quantity}
+        WHERE id = #{campaignId}
+          AND total_stock >= #{quantity};
+    </update>
 </mapper>
