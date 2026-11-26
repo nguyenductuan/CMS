@@ -322,7 +322,7 @@ public class BuyerOrderServiceImpl implements BuyerOrderService {
     if (!failedCampaignProducts.isEmpty()) {
       throw new BusinessException(MessageCode.INSUFFICIENT_STOCK, failedCampaignProducts);
     }
-    // Cộng lại campain (đã fix)
+    // Trừ stock bảng campain khi mua hàng (đã fix)
     Map<Integer, Integer> campaignTotalQty =
         orderRequests.stream()
             .collect(
