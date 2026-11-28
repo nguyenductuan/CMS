@@ -1,6 +1,7 @@
 package com.vt.cms.order.domain.entity;
 
-import com.vt.cms.order.domain.OrderStatus;
+import com.vt.cms.order.domain.enums.OrderStatus;
+import com.vt.cms.order.domain.enums.OrderSubStatus;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import java.math.BigDecimal;
@@ -20,7 +21,7 @@ public class Order {
   private LocalDateTime createdAt;
   private LocalDateTime deliveredAt;
   private LocalDateTime cancelAt;
-  private OrderStatus subOrderStatus;
+  private OrderSubStatus subOrderStatus;
   private LocalDateTime expected_delivery;
   private String warehouseCode;
   private String shippingProvider;
@@ -48,6 +49,8 @@ public class Order {
 
   @Enumerated(EnumType.STRING)
   private OrderStatus orderStatus;
+
+  private OrderSubStatus orderSubStatus;
 
   private LocalDateTime createAt;
   private LocalDateTime updatedAt;

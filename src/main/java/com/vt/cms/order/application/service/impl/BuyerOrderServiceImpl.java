@@ -2,25 +2,36 @@ package com.vt.cms.order.application.service.impl;
 
 import com.vt.cms.Exception.BusinessException;
 import com.vt.cms.base.enums.MessageCode;
+import com.vt.cms.base.request.Pagerequest;
+import com.vt.cms.base.response.BaseResponse;
 import com.vt.cms.campain.application.dto.response.CampaignProductResponse;
 import com.vt.cms.campain.application.dto.response.CampainResponse;
 import com.vt.cms.campain.application.service.port.CampaignProductPort;
 import com.vt.cms.campain.domain.enity.CampainProduct;
 import com.vt.cms.campain.domain.repository.CampainProductRepository;
+import com.vt.cms.model.dto.page.PageInfo;
+import com.vt.cms.model.dto.page.PagingResponse;
 import com.vt.cms.order.application.dto.request.*;
 import com.vt.cms.order.application.dto.response.*;
 import com.vt.cms.order.application.service.BuyerOrderService;
 import com.vt.cms.order.application.service.port.CampaignPort;
-import com.vt.cms.order.domain.OrderStatus;
 import com.vt.cms.order.domain.entity.Order;
+import com.vt.cms.order.domain.entity.OrderActionLog;
 import com.vt.cms.order.domain.entity.OrderItem;
+import com.vt.cms.order.domain.entity.OrderTracking;
+import com.vt.cms.order.domain.enums.OrderStatus;
+import com.vt.cms.order.domain.enums.OrderSubStatus;
+import com.vt.cms.order.domain.enums.OrderTrackingStatus;
+import com.vt.cms.order.domain.repository.OrderActionLogRepository;
 import com.vt.cms.order.domain.repository.OrderItemRepository;
 import com.vt.cms.order.domain.repository.OrderRepository;
+import com.vt.cms.order.domain.repository.OrderTrackingRepository;
 import com.vt.cms.payment.domain.enums.PaymentMethod;
 import com.vt.cms.product.application.dto.response.SkuResponse;
 import com.vt.cms.product.domain.entity.Product_Sku;
 import com.vt.cms.product.domain.repository.ProductRepository;
 import com.vt.cms.product.domain.repository.ProductSkuRepository;
+import com.vt.cms.tracking.application.service.TrackingService;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.*;
@@ -31,29 +42,103 @@ import org.springframework.stereotype.Service;
 @Service
 public class BuyerOrderServiceImpl implements BuyerOrderService {
 
+  final OrderTrackingRepository orderTrackingRepository;
   private final CampaignProductPort campaignProductPort;
   private final CampaignPort campaignPort;
   private final ProductSkuRepository productSkuRepository;
   private final CampainProductRepository campainProductRepository;
   private final ProductRepository productRepository;
+  private final OrderActionLogRepository orderActionLogRepository;
   private final OrderRepository orderRepository;
   private final OrderItemRepository orderItemRepository;
+  private final TrackingService trackingService;
 
   public BuyerOrderServiceImpl(
+      OrderTrackingRepository orderTrackingRepository,
       CampaignProductPort campaignProductPort,
       CampaignPort campaignPort,
       ProductSkuRepository productSkuRepository,
       CampainProductRepository campainProductRepository,
       ProductRepository productRepository,
+      OrderActionLogRepository orderActionLogRepository,
       OrderRepository orderRepository,
-      OrderItemRepository orderItemRepository) {
+      OrderItemRepository orderItemRepository,
+      TrackingService trackingService,
+      TrackingService trackingService1) {
+    this.orderTrackingRepository = orderTrackingRepository;
     this.campaignProductPort = campaignProductPort;
     this.campaignPort = campaignPort;
     this.productSkuRepository = productSkuRepository;
     this.campainProductRepository = campainProductRepository;
     this.productRepository = productRepository;
+    this.orderActionLogRepository = orderActionLogRepository;
     this.orderRepository = orderRepository;
     this.orderItemRepository = orderItemRepository;
+    this.trackingService = trackingService1;
+  }
+
+  @Override
+  public void uploadOrderStatus(
+      List<Integer> orderId, OrderStatus orderStatus, OrderSubStatus orderSubStatus) {
+
+    orderRepository.uploadstatus(orderId, orderStatus, orderSubStatus);
+  }
+
+  @Override
+  public BaseResponse<PagingResponse<List<OrderResponse>>> listOrder(Pagerequest pagerequest) {
+
+    int totalCount = 10;
+    long totalpage = 2;
+
+    // 1. Lấy danh sách đơn hàng
+    List<OrderResponse> order = orderRepository.listorder(pagerequest);
+    System.out.println("order" + order);
+    // 2. Kiểm tra đơn hàng rỗng
+
+    // 3. Lấy danh sách derid của đơn hàng duùng cho bớc sau
+    // Thay vì truy vấn từng đơn hàng một, ta lấy danh sách ID rồi truy vấn nhiều đơn hàng cùng lúc
+    // Tránh N+1 query
+    List<Integer> orderIds = order.stream().map(OrderResponse::getId).toList();
+    System.out.println("derIds" + orderIds);
+    // 4. Lấy danh sách sản phẩm trong đơn hàng
+    List<OrderItemDto> item = orderItemRepository.findorderitem(orderIds);
+    System.out.println("orderitem" + item);
+    // 5. Nhóm sp theo từng ơn hàng
+    Map<Integer, List<OrderItemDto>> itemMap = groupOrderItemsByOrderId(item);
+
+    System.out.println("itemMap" + itemMap);
+
+    // 6. Gán sản phẩm vào từng đơn hàng
+    order.forEach(o -> {
+      o.setOrderitems(itemMap.getOrDefault(o.getId(), new ArrayList<>()));
+    });
+
+    // page info
+    PageInfo pageInfo = new PageInfo();
+    pageInfo.setPageNo(pagerequest.getPageNo());
+    pageInfo.setPageSize(pagerequest.getPageSize());
+    pageInfo.setTotalCount(totalCount);
+    pageInfo.setTotalPage(totalpage);
+    // paging response
+    PagingResponse<List<OrderResponse>> pagingResponse = new PagingResponse<>();
+    pagingResponse.setPageInfo(pageInfo);
+    pagingResponse.setData(order);
+    // base response
+    BaseResponse<PagingResponse<List<OrderResponse>>> response = new BaseResponse<>();
+    response.setMessage("Successful!");
+    response.setData(pagingResponse);
+    return response;
+  }
+
+  // Map sp vào đơn hàng
+
+  private Map<Integer, List<OrderItemDto>> groupOrderItemsByOrderId(List<OrderItemDto> items) {
+
+    if (items == null || items.isEmpty()) {
+      return new HashMap<>();
+    }
+
+    return items.stream().collect(Collectors.groupingBy(OrderItemDto::getOrderId));
   }
 
   @Override
@@ -292,11 +377,55 @@ public class BuyerOrderServiceImpl implements BuyerOrderService {
     // Cập nhật kho campain khi mua sản phẩm
     decreaseStock(orderRequests, orderItems, campaignProductInfos);
     orderItemRepository.saveAll(orderItems);
+    // Ghi vào bảng order_action log
+    writeLogOrder(orders);
+    // Ghi vào hành trình đơn hàng với đơn chờ thanh toán
+    trackingService.createtracking(orderIds, OrderTrackingStatus.S001);
     OrderCreateResponse response = new OrderCreateResponse();
     response.setOrderId(orderIds);
     response.setTotal_payment(createorderRequest.getTotalAmount());
     response.setPayment_method(PaymentMethod.QR);
     return response;
+  }
+
+  // Hàm lấy thông tin order từ request payment gửi lên
+  @Override
+  public List<OrderResponse> getOrderByIds(List<Integer> orderIds) {
+    return orderRepository.getOrderByIds(orderIds);
+  }
+
+  // Hàm ghi vào lịch sử tác động đơn hàng khi đơn ch thanh toán
+  private void writeLogOrder(List<Order> orders) {
+    String role = "Buyer";
+    String action = "Đơn hàng đã được đặt";
+    String description = "Đơn hàng đã được đặt";
+    for (Order order : orders) {
+      OrderActionLog orderActionLog = new OrderActionLog();
+      orderActionLog.setOrder_id(order.getId());
+      orderActionLog.setAction(action);
+      orderActionLog.setRole_action(role);
+      orderActionLog.setDescription(description);
+      orderActionLogRepository.saveorder(orderActionLog);
+    }
+  }
+
+  //
+  //  // TODO Haàm ghi vào hành trình đơn hàng dơn chờ thanh toán
+  //  private void writeTracking(List<Integer> orderIds, OrderTrackingStatus orderTrackingStatus) {
+  //    if (CollectionUtils.isEmpty(orderIds)) {
+  //      return;
+  //    }
+  //    List<OrderTracking> orderTrackings =
+  //        orderIds.stream().map(id -> buildInitialTracking(id, orderTrackingStatus)).toList();
+  //    orderTrackingRepository.saveAll(orderTrackings);
+  //  }
+
+  private OrderTracking buildInitialTracking(Integer id, OrderTrackingStatus orderTrackingStatus) {
+    OrderTracking orderTracking = new OrderTracking();
+    orderTracking.setOrderId(id);
+    orderTracking.setOrderTrackingStatus(orderTrackingStatus);
+    orderTracking.setBuyerMsg(orderTrackingStatus.getBuyerMsg());
+    return orderTracking;
   }
 
   // Trừ kho campain & campainproduct khi mua sản phẩm

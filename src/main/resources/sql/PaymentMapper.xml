@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.vt.cms.payment.domain.repository.PaymentRepostitory">
+    <resultMap id="PaymentResultMap" type="com.vt.cms.payment.domain.entity.Payment">
+        <id column="id" property="id" jdbcType="INTEGER"/>
+        <result column="order_id" property="orderId" jdbcType="INTEGER"/>
+        <result column="status" property="status" jdbcType="VARCHAR"/>
+        <result column="transactionCode" property="transactionCode" jdbcType="VARCHAR"/>
+        <result column="amount" property="amount" jdbcType="DECIMAL"/>
+    </resultMap>
+
+    <insert id="savepayment"
+            parameterType="com.vt.cms.payment.domain.entity.Payment"
+            useGeneratedKeys="true"
+            keyProperty="id">
+
+        INSERT INTO payment
+        (gen_qr,
+         payment_method,
+         total_amount,
+         transaction_code,
+         expired_time,
+         status)
+        VALUES (#{genQr},
+                #{paymentMethod},
+                #{totalAmount},
+                #{transactionCode},
+                #{expiredTime},
+                #{status})
+
+    </insert>
+
+    <select id="getPaymentById" resultMap="PaymentResultMap">
+        SELECT *
+        FROM payment
+        WHERE transaction_code = #{transaction_code}
+    </select>
+
+    <!--    <select id="countPendingByOrderId" resultType="int">-->
+    <!--        SELECT COUNT(*)-->
+    <!--        FROM payment-->
+    <!--        WHERE order_id = #{orderId}-->
+    <!--          AND UPPER(status) = 'PENDING'-->
+    <!--    </select>-->
+
+    <!--    <select id="findByTransactionCodeForUpdate" resultMap="PaymentResultMap">-->
+    <!--        SELECT id, order_id, status, transactionCode, amount-->
+    <!--        FROM payment-->
+    <!--        WHERE transactionCode = #{transactionCode}-->
+    <!--        FOR UPDATE-->
+    <!--    </select>-->
+
+    <update id="updatepayment">
+        UPDATE payment
+        SET status           = #{paymentStatus},
+            time_transaction = #{timeTransaction}
+        WHERE id = #{paymentId}
+    </update>
+    <!--    <update id="markRefundPendingByOrderId">-->
+    <!--        UPDATE payment SET status = 'REFUND_PENDING'-->
+    <!--        WHERE order_id = #{orderId} AND UPPER(status) = 'SUCCESS'-->
+    <!--    </update>-->
+    <!--&lt;!&ndash;    <update id="markRefundPendingByOrderId">&ndash;&gt;-->
+    <!--&lt;!&ndash;        UPDATE payment SET status = 'REFUND_PENDING'&ndash;&gt;-->
+    <!--&lt;!&ndash;        WHERE order_id = #{orderId} AND UPPER(status) = 'SUCCESS'&ndash;&gt;-->
+    <!--&lt;!&ndash;    </update>&ndash;&gt;-->
+</mapper>

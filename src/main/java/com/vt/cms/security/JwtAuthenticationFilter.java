@@ -21,7 +21,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
   public static final String ROLE_ATTRIBUTE = "authenticatedRole";
 
   private static final Set<String> PROTECTED_PATHS =
-      Set.of("/v1/product/", "/v1/campain/", "/v1/b/order/");
+      Set.of(
+          "/v1/product/", "/v1/campain/", "/v1/b/order/", "v1/b/payment/", "/internal/webhooks/");
 
   private final JwtService jwtService;
 

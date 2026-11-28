@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.vt.cms.payment.domain.repository.PaymentOrderRepostitory">
+    <resultMap id="PaymentOrderResultMap" type="com.vt.cms.payment.domain.entity.Paymentorder">
+        <id column="id" property="id" jdbcType="INTEGER"/>
+        <result column="order_id" property="orderId" jdbcType="INTEGER"/>
+        <result column="status" property="status" jdbcType="VARCHAR"/>
+        <result column="transactionCode" property="transactionCode" jdbcType="VARCHAR"/>
+        <result column="amount" property="amount" jdbcType="DECIMAL"/>
+    </resultMap>
+
+    <insert id="savepaymentorder"
+            parameterType="com.vt.cms.payment.domain.entity.Paymentorder"
+            useGeneratedKeys="true"
+            keyProperty="id"
+            keyColumn="id">
+
+        INSERT INTO payment_order
+        (order_id,
+        amount,
+        payment_id)
+        VALUES
+        <foreach collection="paymentorder"
+                 item="item"
+                 separator=",">
+
+            (
+            #{item.orderId},
+            #{item.amount},
+            #{item.paymentId}
+            )
+
+        </foreach>
+
+    </insert>
+
+    <select id="getOrderByPayment">
+        SELECT *
+        FROM payment_order
+        where payment_id = #{paymentId}
+    </select>
+
+</mapper>

@@ -17,8 +17,10 @@ public enum MessageCode {
   TIME_INVALID("E11", "Thời gian không hợp lệ"),
   CAMPAIGN_INACTIVE("E12", "Chiến dịch bị xóa hoặc hết thời gian"),
   SKU_OUT_OF_STOCK("E13", "SKuID hết hàng"),
-
   INSUFFICIENT_STOCK("E14", "Không đủ hàng"),
+  ENTITY_NOT_FOUND("E15", "Khoong tìm thấy dữ liệu"),
+  INVALID_TOTAL_AMOUNT("E16", "Số tiền không hợp lệ"),
+
   SHIPPING_NOT_FOUND("SHIPPING_NOT_FOUND", "Phương thức vận chuyển không tồn tại"),
   INVALID_SHIPPING_FEE("INVALID_SHIPPING_FEE", "Phí vận chuyển không hợp lệ"),
   INVALID_ORDER("INVALID_ORDER", "Thông tin đơn hàng không hợp lệ"),

@@ -38,7 +38,44 @@
             )
         </foreach>
     </insert>
+    <select id="findorderitem"
+            resultType="com.vt.cms.order.application.dto.response.OrderItemDto">
+        SELECT DISTINCT
+        o.id AS orderId,
+        ps.id AS skuId,
+        ps.sku_code AS skuCode,
+        ot.quantity AS quantity,
+        ps. attribute AS attribute,
+        ps.status AS status,
+        ps.type_product AS typeProducts,
+        ps.height_cm AS heightCm,
+        ps.length_cm AS lengthCm,
+        ps.weight_gram AS weightGram,
+        ps. width_cm AS weightCm
+        FROM order_item ot 
+INNER JOIN orders o
+    ON ot.order_id = o.id
+INNER JOIN products p
+    ON o.product_id = p.id
+INNER JOIN product_sku ps
+    ON ot.sku_id = ps.id
+INNER JOIN campain_product cp
+    ON ps.id = cp.sku_id
 
+        WHERE o.is_deleted = 'false'
+        AND EXISTS (
+        SELECT 1
+        FROM campain_product cp
+        WHERE cp.sku_id = ps.id
+        )
+        AND o.id IN
+        <foreach collection="orderIds" item="item" open="("
+                 separator=","
+                 close=")">
+            #{item}
+        </foreach>
+
+    </select>
 
     <!--    <select id="getOrderItemsByOrderId"-->
     <!--            parameterType="long"-->

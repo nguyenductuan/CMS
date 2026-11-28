@@ -1,12 +1,27 @@
 package com.vt.cms.order.domain.repository;
 
+import com.vt.cms.base.request.Pagerequest;
+import com.vt.cms.order.application.dto.response.OrderResponse;
 import com.vt.cms.order.domain.entity.Order;
+import com.vt.cms.order.domain.enums.OrderStatus;
+import com.vt.cms.order.domain.enums.OrderSubStatus;
 import java.util.List;
 import org.apache.ibatis.annotations.Mapper;
+import org.apache.ibatis.annotations.Param;
 
 @Mapper
 public interface OrderRepository {
   int saveAll(List<Order> orders);
+
+  int uploadstatus(
+      @Param("orderIds") List<Integer> orderId,
+      @Param("orderStatus") OrderStatus orderStatus,
+      @Param("orderSubStatus") OrderSubStatus orderSubStatus);
+
+  List<OrderResponse> listorder(Pagerequest pagerequest);
+
+  List<OrderResponse> getOrderByIds(@Param("orderIds") List<Integer> orderIds);
+
   //  /** Thêm bản ghi insertorder. Các tham số và giá trị trả về được mô tả bởi chữ ký phương thức.
   // */
   //  int insertorder(Order order);

@@ -1,17 +1,13 @@
-//package com.vt.cms.order.domain.repository;
-//
-//import org.apache.ibatis.annotations.Mapper;
-//
-//
-//@Mapper
-//public interface OrderTrackingRepository {
-//
-//
-//    /**
-//     * Thêm bản ghi insertordertracking. Các tham số và giá trị trả về được mô tả bởi chữ ký phương thức.
-//     */
-//    void insertordertracking(OrderTracking tracking);
-//
-//    /** Lấy lịch sử thao tác theo thời gian tăng dần. */
-//    java.util.List<OrderTracking> findByOrderId(@org.apache.ibatis.annotations.Param("orderId") Integer orderId);
-//}
+package com.vt.cms.order.domain.repository;
+
+import com.vt.cms.order.domain.entity.OrderTracking;
+import java.util.List;
+import org.apache.ibatis.annotations.Mapper;
+import org.apache.ibatis.annotations.Param;
+
+@Mapper
+public interface OrderTrackingRepository {
+  void saveAll(@Param("list") List<OrderTracking> orderTracking);
+
+  int createtracking(@Param("orderIds") List<OrderTracking> orderTracking);
+}
